@@ -8,13 +8,15 @@ use Automattic\WooCommerce\Utilities\NumberUtil;
 if (!defined('ABSPATH')) { exit;}
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 
-add_filter('woocommerce_shipping_methods', 'add_modena_shipping_flat');
-add_action('woocommerce_shipping_init', 'initializeModenaShippingMethod');
 
-function add_modena_shipping_flat($methods) {
-    $methods['modena_mock_shipping_flat'] = 'Modena_Shipping_Self_Service';
-    return $methods;
-}
+    add_action('woocommerce_shipping_init', 'initializeModenaShippingMethod');
+    add_filter('woocommerce_shipping_methods', 'add_modena_shipping_flat');
+
+    function add_modena_shipping_flat($methods) {
+
+        $methods['modena_mock_shipping_flat'] = 'Modena_Shipping_Self_Service';
+        return $methods;
+    }
 
 function initializeModenaShippingMethod(): void {
     class Modena_Shipping_Self_Service extends WC_Shipping_Method {
@@ -22,23 +24,37 @@ function initializeModenaShippingMethod(): void {
             $this->instance_id          = absint($instance_id);
             $this->domain               = 'modena';
             $this->id                   = 'itella_self_service_by_modena';
-            $this->method_title         = __('Itella parcel terminals', $this->domain);
+            $this->method_title         = __('Itella parcel terminals by Modena', $this->domain);
             $this->method_description   = __('Itella Parcel Terminals by Modena', $this->domain);
             $this->title                = __('Itella Terminals by Modena', $this->domain);
             $this->supports             = array('shipping-zones', 'instance-settings', 'instance-settings-modal');
-
+            $this->packagemaxweight     = 35;
             $this->init();
     }
 
         public function init() {
             $this->init_form_fields();
-            $this->enabled                  = $this->get_option('enabled');
-            $this->title                    = $this->get_option( 'title' );
-            $this->cost                     = $this->get_option( 'cost' );
-            $this->type                     = $this->get_option( 'type', 'class' );
-
+            $this->enabled              = $this->get_option('enabled');
+            $this->title                = $this->get_option( 'title' );
+            $this->cost                 = $this->get_option( 'cost' );
+            $this->type                 = $this->get_option( 'type', 'class' );
+            $this->packagemaxweight     = $this->get_option('packagemaxweight');
         }
 
+        public function validatePackageWeight(): void {
+
+            // access created shipping method max weight. Try avoiding hardcode, since it is adjustable in the admin setting? Should it be adjustable?
+            // where do we go and initialize this code??
+
+            $shippingmethodmaxweight = 35;
+            $orderweight = WC()->cart->get_cart_contents_weight();
+
+            if($orderweight > $shippingmethodmaxweight) {
+                print_r("Total package weight: " . $orderweight);
+            } else {
+                print_r("Total package weight: " . $orderweight);
+            }
+        }
 
         /**
          * @var string $fee_cost
@@ -286,9 +302,12 @@ function initializeModenaShippingMethod(): void {
             return $value;
         }
         /**
-         * Initialize form fields.
+         * Initialize form fields. täiesti teistmoodi ju. allpool pole accessible aga slice objektil on accessible form fields, et manipulateda objekti dataga mootorit
+         * tee ümber
          */
         public function init_form_fields() {
+
+
             $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.', $this->domain ) . '<br/><br/>' . __( 'Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.', $this->domain );
 
             $this->instance_form_fields = array(
@@ -314,7 +333,25 @@ function initializeModenaShippingMethod(): void {
                     'desc_tip'          => true,
                     'sanitize_callback' => array( $this, 'sanitize_cost' ),
                 ),
+                'packagemaxweight'       => array(
+                    'title'             => __( 'Package max weight', $this->domain ),
+                    'type'              => 'number',
+                    'placeholder'       => '',
+                    'description'       => 'This controls the maximum weight that Itella package container holds.',
+                    'default'           => 35,
+                    'desc_tip'          => true,
+                    'sanitize_callback' => array( $this, 'sanitize_cost' ),
+                ),
             );
+
+            $this->instance_form_fields['shipping_method_max_weight'] = [
+                'title'       => __('Package max weight **', 'modena'),
+                'type'        => 'number',
+                'description' => 'Package max weight **',
+                'default'     => 35,
+            ];
+
+
         }
     }
 }

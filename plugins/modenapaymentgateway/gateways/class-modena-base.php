@@ -33,7 +33,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     protected $icon_alt_text;
     protected $icon_title_text;
 
-
     public function __construct()
     {
         require_once MODENA_PLUGIN_PATH . 'autoload.php';
@@ -91,19 +90,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         add_action('woocommerce_api_modena_cancel_' . $this->id, [$this, 'modena_cancel']);
 
         add_action('admin_enqueue_scripts', array($this, 'admin_scripts'));
-
-        add_filter('woocommerce_checkout_update_order_meta', array( $this, 'postShippingTerminal'));
-
-
-        //add_filter( 'woocommerce_checkout_update_order_meta', array( $this, 'findUserShipment' ));
     }
 
-
-    public function postShippingTerminal($shippingTerminalChoice): void
-    {
-
-        echo $shippingTerminalChoice;
-    }
 
     public function init_form_fields()
     {

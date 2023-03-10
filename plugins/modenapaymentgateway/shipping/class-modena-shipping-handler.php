@@ -24,6 +24,19 @@ class Modena_Shipping_Handler {
         'Modena_Shipping_Self_Service' => 'self-service',
     ];
 
+
+
+    /*
+     * private function is_slice_product_banner_enabled(): bool
+    {
+        $setting = get_option('woocommerce_modena_slice_settings')['product_page_banner_enabled'] ?? false;
+
+        return $setting === 'yes';
+    }
+     *
+     */
+
+
     /**
      *
      * @return array
@@ -42,6 +55,11 @@ class Modena_Shipping_Handler {
             if(!class_exists($className)) {
                 require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-' . $fileName . '.php');
             }
+        }
+        if($this->isMethodApplicable()) {
+            print_r("Hello!");
+            add_filter('woocommerce_shipping_methods', array($this, 'add_modena_shipping_modules'));
+
         }
         add_filter('woocommerce_shipping_methods', array($this, 'add_modena_shipping_modules'));
         add_filter( 'woocommerce_review_order_before_payment' , array( $this, 'renderCheckoutSelection' ) );
@@ -65,6 +83,19 @@ class Modena_Shipping_Handler {
         return $obj->{'item'};
     }
 
+    /**
+     * scope is to retrieve the parcel list
+     */
+
+    private function isMethodApplicable() {
+        //$setting = get_option(['shipping_method_max_weight']);
+        $maxweight =get_option('shipping_method_max_weight');
+        print_r($maxweight);
+
+        return False;
+    }
+
+
 
     /**
      * check if the shipping method is mdn to display list of terminals
@@ -72,16 +103,14 @@ class Modena_Shipping_Handler {
 
     public function getCurrentShippingMethod(): bool {
 
-
         $shipping_methods = wc_get_chosen_shipping_method_ids();
-
 
         //print_r($methods[0]);
         if($shipping_methods[0] === 'itella_self_service_by_modena') {
-            print_r("<br>Yep, is mdn-s: ". $shipping_methods[0]);
+            //print_r("<br>Yep, is mdn-s: ". $shipping_methods[0]);
             return true;
         } else {
-            print_r( "<br>Nope, is not mdn-s: ". $shipping_methods[0]);
+            //print_r( "<br>Nope, is not mdn-s: ". $shipping_methods[0]);
             return false;
         }
     }
@@ -90,9 +119,18 @@ class Modena_Shipping_Handler {
      * populate shipping terminal selection box field
      */
 
+
     public function renderCheckoutSelection() {
         $terminalList = $this->getItellaTerminals();
 
+        //illegal access -> not accessible object field
+        // we might need to access the object weight. But two objects talking each other - exchanging data is a complex topic
+        // tee ära
+        // Shipping handler object, Child object of shipping method. Make the selectable chobject accessible.
+        // How do we pinpoint the current object?
+
+//
+  //      print_r($maxweight =get_option('shipping_method_max_weight'));
         if($this->getCurrentShippingMethod()) {
             echo '
                 <select class="mdn-shipping-selection" name="userShippingSelection" id="userShippingSelectionChoice">
@@ -105,7 +143,6 @@ class Modena_Shipping_Handler {
         }
         return $terminalList;
     }
-
 
     public function findUserShipmentAndPostIt(): void {
         echo '
