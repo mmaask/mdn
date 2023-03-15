@@ -35,7 +35,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     public function __construct()
     {
-        require_once MODENA_PLUGIN_PATH . 'autoload.php';
+        require_once MODENA_PLUGIN_PATH . 'autoload.php'; // is not used?
         require ABSPATH . WPINC . '/version.php';
 
         $this->onboarding = new Modena_Onboarding_Handler();
@@ -63,7 +63,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $userAgent,
             $this->is_test_mode
         );
-
+        //initialized by form fields
 //        $this->button_text               = $this->get_option('payment_button_text');
         $this->description               = $this->get_option('description');
         $this->payment_button_max_height = 30;

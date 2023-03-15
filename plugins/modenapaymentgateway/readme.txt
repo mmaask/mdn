@@ -5,7 +5,7 @@ Donate link: https://modena.ee/
 Tags: online payment, payment, payment gateway, payment_gateway, woocommerce, sales, hire-purchase, järelmaks, financing, credit intermediary, krediidivahendaja, modena
 Requires at least: 4.7
 Tested up to: 6.1
-Stable tag: 2.7.0
+Stable tag: 3.0.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -62,8 +62,9 @@ Any questions? Just send us an email at info@modena.ee.
 = 2.6.1 =
 * Bugfixes
 
-= 2.7.0 =
+= 3.0.0 =
 * Added Business Credit option for merchants
+* Added Itella Parchel Machine support
 
 == Support ==
 More information about Modena products can be found on our website [website](https://www.modena.ee)

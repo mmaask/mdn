@@ -6,7 +6,6 @@ if (!defined('ABSPATH')) {
 
 require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-admin-handler.php');
 require_once(MODENA_PLUGIN_PATH . 'includes/class-home-url.php');
-require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-handler.php');
 
 class Modena_Init_Handler
 {
@@ -17,19 +16,18 @@ class Modena_Init_Handler
         'Modena_Business_Credit_Payment' => 'business-credit',
     ];
 
+    const SHIPPING_MODULES = [
+        'Modena_Shipping_Terminals' => 'terminals',
+    ];
+
     public function run()
     {
-
-        /**
-        *create a new object of a Shipping Handler that creates necessary shipping methods in Woocommerce and fields for the end user.
-        */
-        new Modena_Shipping_Handler();
         new Modena_Admin_Handler();
         add_action('plugins_loaded', [$this, 'maybe_init'], 99);
     }
     public function maybe_init(): void
     {
-        if (!$this->is_woocommerce_active() || !class_exists('WC_Payment_Gateway')) {
+        if (!$this->is_woocommerce_active() || !class_exists('WC_Payment_Gateway') || !class_exists('WC_Shipping_Method')) {
             return;
         }
 
@@ -46,6 +44,7 @@ class Modena_Init_Handler
         add_filter('plugin_action_links_modena/modena.php', array($this, 'modena_plugin_action_links'));
 
         $this->modena_gateways_init();
+        $this->modena_shipping_init();
 
         add_action('woocommerce_single_product_summary', [$this, 'display_product_installments'],
             apply_filters('modena_product_installments_priority', 15));
@@ -53,8 +52,12 @@ class Modena_Init_Handler
             apply_filters('modena_variation_installments_priority', 10));
 
 
+        //add_action( 'woocommerce_review_order_before_cart_contents', 'validate_shipping_method_for_cart' , 10 );
+        //add_action( 'woocommerce_after_checkout_validation', 'validate_shipping_method_for_cart' , 10 );
+
+
     }
-    function modena_gateways_init()
+    function modena_gateways_init(): void
     {
         if (!class_exists('Modena_Base_Payment')) {
             require_once(MODENA_PLUGIN_PATH . 'gateways/class-modena-base.php');
@@ -68,6 +71,31 @@ class Modena_Init_Handler
 
         add_filter('woocommerce_payment_gateways', array($this, 'add_modena_payment_gateways'));
 
+    }
+
+    function modena_shipping_init(): void
+    {
+        if (!class_exists('Modena_Shipping_Base')) {
+            require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-base.php');
+        }
+
+        foreach (self::SHIPPING_MODULES as $className => $fileName) {
+            if (!class_exists($className)) {
+                require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-' . $fileName . '.php');
+            }
+        }
+        add_filter('woocommerce_shipping_methods', array($this, 'add_modena_shipping_methods'));
+
+    }
+
+    function add_modena_payment_gateways($methods): array
+    {
+        return array_merge($methods, array_keys(self::PAYMENT_GATEWAYS));
+    }
+
+    function add_modena_shipping_methods($methods): array
+    {
+        return array_merge($methods, array_keys(self::SHIPPING_MODULES));
     }
 
     function modena_plugin_action_links($links)
@@ -232,8 +260,43 @@ class Modena_Init_Handler
         return $variation_data;
     }
 
-    function add_modena_payment_gateways($methods)
+
+
+    public function validate_shipping_method_for_cart()
     {
-        return array_merge($methods, array_keys(self::PAYMENT_GATEWAYS));
+
+        add_filter('woocommerce_review_order_before_payment', array($this, 'renderCheckoutSelection'));
+
+        $modena_shipping_terminals = new Modena_Shipping_Terminals();
     }
+
+    public function renderCheckoutSelection(): void
+    {
+        $terminalList = $this->getItellaTerminals();
+        echo '
+                <select class="mdn-shipping-selection" name="userShippingSelection" id="userShippingSelectionChoice">
+                <option disabled value="110" selected="selected">-- Palun vali pakiautomaat --</option>';
+        for($x=0; $x<=count($terminalList)-1; $x++) {
+            $terminalID = $terminalList[$x]->{'place_id'};
+            print_r( "<option value=$terminalID>" . $terminalList[$x]->{'name'} . " - " . $terminalList[$x]->{'address'}  . " - " . $terminalList[$x]->{'place_id'}  . "<br></option>");
+        }
+        echo '</select>';
+    }
+    public function getItellaTerminals() {
+        $json = file_get_contents('https://monte360.com/itella/index.php?action=displayParcelsList');
+        $obj = json_decode($json);
+        return $obj->{'item'};
+    }
+
+    function checkPackageWeight(): bool {
+        $orderweight = WC()->cart->get_cart_contents_weight();
+        $staticvariableMaxWeight = 35;
+
+        if(intval($orderweight) <= $staticvariableMaxWeight) {
+            return True;
+        } else {
+            return False;
+        }
+    }
+
 }

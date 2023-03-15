@@ -5,7 +5,7 @@
  * Description: WooCommerce checkout solution from Modena.
  * Author: Modena Estonia OÜ
  * Author URI: https://modena.ee/
- * Version: 2.7.0
+ * Version: 3.0.0
  *
  * @package Modena
  */
@@ -24,7 +24,7 @@ if (!defined('MODENA_PLUGIN_PATH')) {
 
 add_action('plugins_loaded', 'modena_init');
 
-function modena_init()
+function modena_init(): void
 {
     static $modena_plugin;
 
