@@ -31,6 +31,9 @@ function modena_init(): void
     if (!isset($modena_plugin)) {
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-init-handler.php');
         $modena_plugin = new Modena_Init_Handler();
+
+        require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-itella-terminals.php');
+        modena_shipping_init();
     }
     $modena_plugin->run();
 }

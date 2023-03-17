@@ -436,6 +436,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $applicationStatus = $this->modena->getPaymentApplicationStatus($modenaResponse->getApplicationId(),
                 $this->id);
 
+
             if ($applicationStatus !== 'FAILED' && $applicationStatus !== 'REJECTED') {
                 $this->logger->error('Invalid application status, expected: FAILED or REJECTED | received: ' . $applicationStatus);
                 wp_redirect($this->site_url);
