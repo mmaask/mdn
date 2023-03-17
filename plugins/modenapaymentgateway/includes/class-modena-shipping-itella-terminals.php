@@ -291,9 +291,7 @@ function add_modena_shipping_modules($methods): array
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
     function modena_shipping_init(): void {
         foreach (SHIPPING_MODULES as $className => $fileName) {
-            if (!class_exists($className)) {
-                require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-itella-' . $fileName . '.php');
-            }
+            require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-itella-' . $fileName . '.php');
         }
         add_filter('woocommerce_shipping_methods', 'add_modena_shipping_modules');
     }
