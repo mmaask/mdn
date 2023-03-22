@@ -1,12 +1,8 @@
 <?php
 
-// exit if accessed directly
-
 if (!defined('ABSPATH')) {
     exit;
 }
-
-use Automattic\WooCommerce\Utilities\NumberUtil;
 
 function run_shipping(): void {
     require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-log-handler.php');
@@ -17,7 +13,7 @@ function run_shipping(): void {
 function add_modena_shipping_flat($methods) {
     $methods['modena_mock_shipping_flat'] = 'Modena_Shipping_Self_Service';
     return $methods;
-    }
+}
 
 function initializeModenaShippingMethod(): void {
     class Modena_Shipping_Self_Service extends WC_Shipping_Method {
@@ -37,7 +33,6 @@ function initializeModenaShippingMethod(): void {
         protected   mixed               $cost;
         private     string              $domain;
         private     WC_Logger           $shipping_logger;
-        private $type;
 
         public function __construct($instance_id = 0) {
             parent::__construct();
@@ -50,15 +45,15 @@ function initializeModenaShippingMethod(): void {
             $this->title                  = __('Itella Terminals by Modena', $this->domain);
             $this->supports               = array('shipping-zones', 'instance-settings', 'instance-settings-modal');
 
-            $this->title                  = $this->get_option( 'title' );
             $this->modena_id              = $this->get_option( 'client-id' );
             $this->modena_secret          = $this->get_option( 'client-secret' );
             $this->cost                   = $this->get_option( 'cost' );
+            $this->free_shipping_treshold = $this->get_option( 'free-shipping-treshold' );
             $this->sender_name            = $this->get_option( 'sender_name' );
             $this->sender_email           = $this->get_option( 'sender_email' );
             $this->sender_phone           = $this->get_option( 'sender_phone' );
-            $this->cost                   = $this->get_option( 'cost' );
-            $this->free_shipping_treshold = $this->get_option( 'free-shipping-treshold' );
+            $this->itella_api_key        = $this->get_option( 'itella_api_key' );
+            $this->itella_api_secret     = $this->get_option( 'itella_api_secret' );
 
             $this->shipping_label_url     = $this->get_shipping_label_url();
             $this->order_weight           = $this->get_total_order_weight();
@@ -67,41 +62,47 @@ function initializeModenaShippingMethod(): void {
             $this->shipping_logger        = new WC_Logger(array(new Modena_Log_Handler()));
 
             $this->init_form_fields();
-            add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+            $this->init_settings();
 
-            //$this->shipping_logger->debug('OK. New Modena Shipping Method has been constructed.' );
-
-            //$this->init_settings();
-
-
-            //add_filter( 'woocommerce_shipping_' . $this->id . '_is_available', array( $this, 'check_if_allowed_zone_for_shipping' ), 10, 2 );
-    }
-
-        /*public function is_available( $package = array()) {
-            if ( $this->check_if_allowed_zone_for_shipping( $package ) === false ) {
+            add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
+            add_filter('woocommerce_shipping_' . $this->id . '_is_available', array($this, 'check_if_allowed_zone_for_shipping'));
+        }
+        public function is_available($package): bool
+        {
+            if ($this->check_if_allowed_zone_for_shipping($package) === false) {
                 return false;
             }
+            return parent::is_available($package);
+        }
 
-            return parent::is_available( $package );
-        }*/
-
-        protected function check_if_allowed_zone_for_shipping($is_available, $package) {
+        public function check_if_allowed_zone_for_shipping($package): bool
+        {
             if (isset($package['destination']['country']) && $package['destination']['country'] === 'EE') {
                 return true;
             } else {
                 return false;
             }
         }
-        /**
-         * @var string $fee_cost
-         */
 
-    protected $fee_cost = '';
+
+        protected function get_cart_total_weight(): int {
+            try {
+                if(is_checkout()) {
+                    $order_weight = WC()->cart->get_cart_contents_weight();
+                    $this->shipping_logger->error('OK: Is checkout page and total order weight is ' . $order_weight);
+                    $this->set_total__order_weight($order_weight);
+                    return $order_weight;
+                }
+            } catch(Exception $e) {
+                $this->shipping_logger->error('Error: Function is called upon outside of checkout page. ' . $e->getMessage());
+            }
+            return 'something';
+        }
 
         protected function check_package_weight(): bool {
             $orderweight = $this->get_cart_total_weight();
             if($orderweight) {
-                if (intval($orderweight) <= $this->get_shipping_method_max_weight()) {
+                if ($orderweight <= $this->get_shipping_method_max_weight()) {
                     $this->shipping_logger->error('OK. Order weight under max limit' . $orderweight);
                     return True;
                 } else {
@@ -178,8 +179,6 @@ function initializeModenaShippingMethod(): void {
 
         }
 
-        // need to be improved upon to add the shipping label url to the order meta data to access it later and add it to woocommerce orders page.
-
         public function add_shipping_method_column_in_woocommerce_orders($columns)
         {
             add_filter('manage_edit-shop_order_columns', [$this, 'add_shipping_method_column_in_woocommerce_orders']);
@@ -208,18 +207,7 @@ function initializeModenaShippingMethod(): void {
             return $this->terminal_max_weight;
         }
 
-        protected function get_cart_total_weight(): int {
-            try {
-                if(is_checkout()) {
-                    $order_weight = WC()->cart->get_cart_contents_weight();
-                    $this->shipping_logger->error('OK: Is checkout page and total order weight is ' . $order_weight);
-                    $this->set_total__order_weight($order_weight);
-                    return $order_weight;
-                }
-            } catch(Exception $e) {
-                $this->shipping_logger->error('Error: Function is called upon outside of checkout page. ' . $e->getMessage());
-            }
-        }
+
 
         protected function set_total__order_weight($order_weight) {
             $this->order_weight = $order_weight;
@@ -242,6 +230,12 @@ function initializeModenaShippingMethod(): void {
         protected function get_terminal_max_weight(): int {
             return 35;
         }
+
+        /**
+         * @var string $fee_cost
+         */
+
+        protected $fee_cost = '';
 
         /**
          * Evaluate a cost from a sum/string.
@@ -331,6 +325,22 @@ function initializeModenaShippingMethod(): void {
         }
 
         /**
+         * Get items in package.
+         *
+         * @param  array $package Package of items from cart.
+         * @return int
+         */
+        public function get_package_item_qty( $package ) {
+            $total_quantity = 0;
+            foreach ( $package['contents'] as $item_id => $values ) {
+                if ( $values['quantity'] > 0 && $values['data']->needs_shipping() ) {
+                    $total_quantity += $values['quantity'];
+                }
+            }
+            return $total_quantity;
+        }
+
+        /**
          * Calculate the shipping costs.
          *
          * @param array $package Package of items from cart.
@@ -386,7 +396,7 @@ function initializeModenaShippingMethod(): void {
                     if ( 'class' === $this->type ) {
                         $rate['cost'] += $class_cost;
                     } else {
-                        $highest_class_cost = $class_cost > $highest_class_cost ? $class_cost : $highest_class_cost;
+                        $highest_class_cost = max($class_cost, $highest_class_cost);
                     }
                 }
 
@@ -406,22 +416,6 @@ function initializeModenaShippingMethod(): void {
              * friendly and goes against what Flat Rate Shipping was originally intended for.
              */
             do_action( 'woocommerce_' . $this->id . '_shipping_add_rate', $this, $rate );
-        }
-
-        /**
-         * Get items in package.
-         *
-         * @param  array $package Package of items from cart.
-         * @return int
-         */
-        public function get_package_item_qty( $package ) {
-            $total_quantity = 0;
-            foreach ( $package['contents'] as $item_id => $values ) {
-                if ( $values['quantity'] > 0 && $values['data']->needs_shipping() ) {
-                    $total_quantity += $values['quantity'];
-                }
-            }
-            return $total_quantity;
         }
 
         /**
@@ -456,27 +450,24 @@ function initializeModenaShippingMethod(): void {
          * @throws Exception Last error triggered.
          * @return string
          */
-        public function sanitize_cost( $value ) {
-            $value = is_null( $value ) ? '' : $value;
-            $value = wp_kses_post( trim( wp_unslash( $value ) ) );
-            $value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
+        public function sanitize_cost( $value )
+        {
+            $value = is_null($value) ? '' : $value;
+            $value = wp_kses_post(trim(wp_unslash($value)));
+            $value = str_replace(array(get_woocommerce_currency_symbol(), html_entity_decode(get_woocommerce_currency_symbol())), '', $value);
             // Thrown an error on the front end if the evaluate_cost will fail.
             $dummy_cost = $this->evaluate_cost(
                 $value,
                 array(
                     'cost' => 1,
-                    'qty'  => 1,
+                    'qty' => 1,
                 )
             );
-            if ( false === $dummy_cost ) {
-                throw new Exception( WC_Eval_Math::$last_error );
+            if (false === $dummy_cost) {
+                throw new Exception(WC_Eval_Math::$last_error);
             }
             return $value;
         }
-        /**
-         * Initialize form fields. täiesti teistmoodi ju. allpool pole accessible aga slice objektil on accessible form fields, et manipulateda objekti dataga mootorit
-         * tee ümber
-         */
         public function init_form_fields() {
 
             $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.', $this->domain ) . '<br/><br/>' . __( 'Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.', $this->domain );
