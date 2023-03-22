@@ -1,14 +1,10 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 if (!defined('ABSPATH')) {
     exit;
 }
 
 function run_shipping(): void {
-    require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-log-handler.php');
     add_action('woocommerce_shipping_init', 'initializeModenaShippingMethod');
     add_filter('woocommerce_shipping_methods', 'add_modena_shipping_flat');
 }
@@ -19,6 +15,8 @@ function add_modena_shipping_flat($methods) {
 }
 
 function initializeModenaShippingMethod(): void {
+    require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-log-handler.php');
+
     class Modena_Shipping_Self_Service extends WC_Shipping_Method {
 
         protected   string              $modena_id;
@@ -67,17 +65,22 @@ function initializeModenaShippingMethod(): void {
             $this->init_form_fields();
             $this->init_settings();
 
-            add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
+            add_action('woocommerce_update_options_shipping_methods', array($this, 'process_admin_options'));
+
+
             add_filter('woocommerce_shipping_' . $this->id . '_is_available', array($this, 'check_if_allowed_zone_for_shipping'));
 
             $this->shipping_logger->debug('method constructed.');
         }
         public function is_available($package): bool
         {
+
+            $this->shipping_logger->debug('return is_available().');
             if ($this->check_if_allowed_zone_for_shipping($package) === false) {
                 return false;
             }
             return parent::is_available($package);
+
         }
 
         public function check_if_allowed_zone_for_shipping($package): bool

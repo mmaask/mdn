@@ -32,7 +32,7 @@ function modena_init(): void
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-init-handler.php');
         $modena_plugin = new Modena_Init_Handler();
 
-        require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-self-service.php');
+        include_once('includes/class-modena-shipping-self-service.php');
         run_shipping();
     }
     $modena_plugin->run();
