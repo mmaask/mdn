@@ -1,5 +1,8 @@
 <?php
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -66,6 +69,8 @@ function initializeModenaShippingMethod(): void {
 
             add_action('woocommerce_update_options_shipping_methods', array(&$this, 'process_admin_options'));
             add_filter('woocommerce_shipping_' . $this->id . '_is_available', array($this, 'check_if_allowed_zone_for_shipping'));
+
+            $this->shipping_logger->debug('method constructed.');
         }
         public function is_available($package): bool
         {
