@@ -10,7 +10,7 @@ function run_shipping(): void {
 }
 
 function add_modena_shipping_flat($methods) {
-    $methods['modena_mock_shipping_flat'] = 'Modena_Shipping_Self_Service';
+    $methods['itella_self_service_by_modena'] = 'Modena_Shipping_Self_Service';
     return $methods;
 }
 
@@ -74,9 +74,10 @@ function initializeModenaShippingMethod(): void {
         }
         public function is_available($package): bool
         {
+            //return True;
 
-            $this->shipping_logger->debug('return is_available().');
             if ($this->check_if_allowed_zone_for_shipping($package) === false) {
+                $this->shipping_logger->debug('return is not available().');
                 return false;
             }
             return parent::is_available($package);
