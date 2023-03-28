@@ -4,16 +4,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-function run_shipping(): void {
-    add_action('woocommerce_shipping_init', 'initializeModenaShippingMethod');
-    add_filter('woocommerce_shipping_methods', 'add_modena_shipping_flat');
-}
-
-function add_modena_shipping_flat($methods) {
-    $methods['itella_self_service_by_modena'] = 'Modena_Shipping_Self_Service';
-    return $methods;
-}
-
 function initializeModenaShippingMethod(): void {
     require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-log-handler.php');
 
@@ -53,8 +43,8 @@ function initializeModenaShippingMethod(): void {
             $this->sender_name            = $this->get_option( 'sender_name' );
             $this->sender_email           = $this->get_option( 'sender_email' );
             $this->sender_phone           = $this->get_option( 'sender_phone' );
-            $this->itella_api_key        = $this->get_option( 'itella_api_key' );
-            $this->itella_api_secret     = $this->get_option( 'itella_api_secret' );
+            $this->itella_api_key         = $this->get_option( 'itella_api_key' );
+            $this->itella_api_secret      = $this->get_option( 'itella_api_secret' );
 
             $this->shipping_label_url     = $this->get_shipping_label_url();
             $this->order_weight           = $this->get_total_order_weight();
@@ -70,18 +60,20 @@ function initializeModenaShippingMethod(): void {
 
             add_filter('woocommerce_shipping_' . $this->id . '_is_available', array($this, 'check_if_allowed_zone_for_shipping'));
 
-            $this->shipping_logger->debug('method constructed.');
+           // $this->shipping_logger->debug('method constructed.');
         }
+
         public function is_available($package): bool
         {
-            //return True;
+            $this->shipping_logger->debug('return is WTF???.');
 
-            if ($this->check_if_allowed_zone_for_shipping($package) === false) {
+            return True;
+            /*if ($this->check_if_allowed_zone_for_shipping($package) === false) {
                 $this->shipping_logger->debug('return is not available().');
                 return false;
             }
             return parent::is_available($package);
-
+            */
         }
 
         public function check_if_allowed_zone_for_shipping($package): bool
@@ -555,7 +547,6 @@ function initializeModenaShippingMethod(): void {
                     'desc_tip'    => true,
                 )
             );
-
         }
     }
 }
