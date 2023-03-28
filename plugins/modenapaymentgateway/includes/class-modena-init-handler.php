@@ -46,7 +46,7 @@ class Modena_Init_Handler
         add_filter('woocommerce_available_variation', [$this, 'display_variation_installments'],
             apply_filters('modena_variation_installments_priority', 10));
 
-
+        require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-ai.php');
     }
 
     function modena_gateways_init(): void
@@ -61,7 +61,6 @@ class Modena_Init_Handler
             }
         }
         add_filter('woocommerce_payment_gateways', array($this, 'add_modena_payment_gateways'));
-
     }
 
     function add_modena_payment_gateways($methods): array
