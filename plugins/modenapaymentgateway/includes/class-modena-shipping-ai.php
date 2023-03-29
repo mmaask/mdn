@@ -2,17 +2,12 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
-/*
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL); */
 
 run_shipping();
 
 function init_WC_estonia(): void {
     class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         protected   int  $max_capacity;
-        private     WC_Logger           $shipping_logger;
 
         public function __construct($instance_id = 0) {
             parent::__construct($instance_id);
@@ -23,14 +18,10 @@ function init_WC_estonia(): void {
             $this->max_capacity    = 35;
             $this->method_description = __('Custom shipping method for Estonia', 'woocommerce');
 
-            require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-log-handler.php');
-            $this->shipping_logger        = new WC_Logger(array(new Modena_Log_Handler()));
-
             $this->supports = array(
                 'shipping-zones',
                 'instance-settings',
             );
-
 
             $this->init();
         }
@@ -57,15 +48,17 @@ function init_WC_estonia(): void {
             $this->title = $this->get_option('title');
             $this->cost = $this->get_option('cost');
 
+            add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
+
             $this->register_hooks();
         }
 
         public function register_hooks() {
             try {
+                add_action('woocommerce_checkout_update_order_review', array($this, 'filter_available_shipping'), 10, 2);
 
-                add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options')); // this hook is working
-                add_filter('woocommerce_package_rates', array($this, 'filter_package_rates'), 10, 2);
-                add_action('woocommerce_review_order_after_shipping', array($this, 'render_checkout_select_box'), 10);
+                add_action('woocommerce_after_shipping_rate', array($this, 'update_checkout_assets'));
+                add_action('woocommerce_after_checkout_form', array($this, 'update_checkout_assets'));
 
                 add_action('woocommerce_checkout_process', array($this, 'save_terminal_in_session'));
                 add_action('woocommerce_checkout_update_order_meta', array($this, 'save_terminal_to_order_meta'));
@@ -77,46 +70,9 @@ function init_WC_estonia(): void {
             }
         }
 
-        public function render_checkout_select_box() {
-            $chosen_methods = WC()->session->get('chosen_shipping_methods');
-            $chosen_method = $chosen_methods[0] ?? '';
-
-            if ($chosen_method === $this->id) {
-                $this->shipping_logger->debug('trying to render checkout_select_box... ' . $chosen_method);
-
-                $terminalList = $this->get_terminal_list(); ?>
-
-                    // does this return the list? why select box is not shown? hook is working fine.
-
-                <tr class="mdn-shipping-selection-wrapper">
-                    <th><?php _e('Pakiautomaat', 'woocommerce'); ?></th>
-                    <td>
-                        <label for="userShippingSelectionChoice"></label><select class="mdn-shipping-selection" name="userShippingSelection" id="userShippingSelectionChoice">
-                            <option disabled value="110" selected="selected"><?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?></option>
-                            <?php
-                            for ($x = 0; $x <= count($terminalList) - 1; $x++) {
-                                $terminalID = $terminalList[$x]->{'place_id'};
-                                echo "<option value=$terminalID>" . $terminalList[$x]->{'name'} . " - " . $terminalList[$x]->{'address'} . " - " . $terminalList[$x]->{'place_id'} . "</option>";
-                            }
-                            ?>
-                        </select>
-                    </td>
-                </tr>
-                <script type="text/javascript">
-                    jQuery(document).ready(function($) {
-                        function showHideSelectBox() {
-                            let shipping_method = $('input[name="shipping_method[0]"]:checked').val();
-                            if (shipping_method === 'estonia_shipping') {
-                                $('.mdn-shipping-selection-wrapper').show();
-                            } else {
-                                $('.mdn-shipping-selection-wrapper').hide();
-                            }
-                        }
-                        showHideSelectBox();
-                        $(document.body).on('change', 'input[name="shipping_method[0]"]', showHideSelectBox);
-                    });
-                </script><?php
-            }
+        public function update_checkout_assets() {
+            error_log('loading_checkout_assets');
+            add_action('woocommerce_review_order_before_order_total', array($this, 'render_checkout_select_box'));
         }
 
         public function save_terminal_in_session() {
@@ -130,6 +86,26 @@ function init_WC_estonia(): void {
                 update_post_meta($order_id, 'selected_terminal', WC()->session->get('selected_terminal'));
                 WC()->session->__unset('selected_terminal');
             }
+        }
+
+        public function render_checkout_select_box() {
+                ?>
+                <tr class="woocommerce-table__line-item mdn-shipping-selection-wrapper">
+                <td class="woocommerce-table__product-name">
+                    <label for="userShippingSelectionChoice"><?php _e('Vali pakiautomaat:', 'woocommerce'); ?></label>
+                    <select class="mdn-shipping-selection" name="userShippingSelection" id="userShippingSelectionChoice">
+                        <option disabled selected="selected"><?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?></option>
+                        <?php
+                        $terminalList = $this->get_terminal_list();
+                        foreach ($terminalList as $terminal) {
+                            $terminalID = $terminal->{'place_id'};
+                            echo "<option value='$terminalID'>" . $terminal->{'name'} . " - " . $terminal->{'address'} . " - " . $terminal->{'place_id'} . "</option>";
+                        }
+                        ?>
+                    </select>
+                </td>
+                </tr>
+                <?php
         }
 
         public function display_selected_terminal($order_id)
@@ -149,11 +125,11 @@ function init_WC_estonia(): void {
             }
         }
 
-        public function filter_package_rates($rates, $package) {
+        public function filter_available_shipping($rates, $package) {
             if (!$this->is_available($package)) {
-                $this->shipping_logger->debug('shipping not avail' . $this->id);
                 unset($rates[$this->id]);
             }
+            $this->update_checkout_assets();
             return $rates;
         }
 
@@ -175,7 +151,7 @@ function init_WC_estonia(): void {
             $rate = array(
                 'id' => $this->id,
                 'label' => $this->title,
-                'cost' => $this->cost,
+                'cost' => $this->cost
             );
 
             $this->add_rate($rate);
@@ -184,23 +160,9 @@ function init_WC_estonia(): void {
 }
 
 /**
- * Initializes the Modena Shipping Self Service method if it doesn't already exist and
- * WooCommerce Shipping Method class exists.
  *
- * This function checks for the existence of the Modena_Shipping_Self_Service class and
- * the WC_Shipping_Method class. If the Modena_Shipping_Self_Service class does not exist
- * and the WC_Shipping_Method class exists, it hooks the 'woocommerce_shipping_init'
- * action to the 'initializeModenaShippingMethod' function and the 'woocommerce_shipping_methods'
- * filter to the 'add_modena_shipping_flat' function.
- *
- * Checks for the existence of the required classes and initializes the Modena Shipping Self Service method.
+ * Checks for the existence of the required classes and initializes
  * Handles errors if the required classes do not exist.
- *
- * Define a custom error message.
- * Check if the 'Modena_Shipping_Self_Service' class exists.
- * Check if the 'WC_Shipping_Method' class exists.
- * Log the error message.
- * Optionally, display an admin notice if you'd like to notify the site administrator.
  *
  * @return void
  */
@@ -208,7 +170,6 @@ function init_WC_estonia(): void {
 
 function run_shipping(): void {
 
-    //clear_debug_log();
 
     if (!class_exists('WC_Estonia_Shipping_Method') && class_exists('WC_Shipping_Method')) {
         add_filter('woocommerce_shipping_methods', 'load_modena_shipping_methods');
@@ -227,11 +188,6 @@ function run_shipping(): void {
     }
 }
 /**
- * Adds the Modena Shipping Self Service method to the list of available WooCommerce shipping methods.
- *
- * This function adds the 'itella_self_service_by_modena' method to the array of available shipping
- * methods in WooCommerce. The method is an instance of the 'Modena_Shipping_Self_Service' class.
- *
  * @param array $methods Array of existing WooCommerce shipping methods.
  * @return array Updated array of WooCommerce shipping methods, including the Modena Shipping Self Service method.
  */
@@ -241,12 +197,7 @@ function load_modena_shipping_methods(array $methods): array {
 }
 /**
  * Displays an admin notice with an error message.
- *
- * This function outputs an error message to the WordPress admin dashboard
- * when the required classes for the Modena Shipping plugin are not found.
- * It informs the user to ensure the necessary dependencies are installed
- * and active.
- *
+
  * @return void
  */
 function modena_shipping_error_notice(): void {
@@ -256,21 +207,6 @@ function modena_shipping_error_notice(): void {
  * Call the function to clear the debug.log file
  *
 **/
-function clear_debug_log(): void
-{
-    $log_path = WP_CONTENT_DIR . '/debug.log';
 
-    if (file_exists($log_path)) {
-        $file_handle = fopen($log_path, 'w');
-        if ($file_handle) {
-            fclose($file_handle);
-            echo 'The debug.log file has been cleared.';
-        } else {
-            echo 'Unable to open the debug.log file.';
-        }
-    } else {
-        echo 'The debug.log file does not exist.';
-    }
-}
 
 
