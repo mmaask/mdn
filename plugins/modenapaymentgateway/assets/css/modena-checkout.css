@@ -54,5 +54,7 @@
 .payment_method_modena_credit label img {
     margin-left: 0 !important;
 }
-.mdn-shipping-selection {
+.mdn-shipping-selection, .mdn-shipping-selection-wrapper{
+    max-width: inherit;
+    width: inherit;
 }
