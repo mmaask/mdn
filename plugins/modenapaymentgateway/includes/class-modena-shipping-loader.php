@@ -39,7 +39,7 @@ class Shipping_Loader {
      */
 
     public function load_modena_shipping_methods(array $methods): array {
-        $methods['estonia_shipping'] = 'WC_Estonia_Shipping_Method';
+        $methods['modena-shipping-itella-terminals'] = 'WC_Estonia_Shipping_Method';
         return $methods;
     }
 
@@ -53,7 +53,17 @@ class Shipping_Loader {
     }
 
     public function init_WC_estonia(): void {
+        $this->clear_debug_log();
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-ai.php');
         $shipping_ai_object = new WC_Estonia_Shipping_Method();
+    }
+
+    public function clear_debug_log(): void
+    {
+        $debug_log_file = WP_CONTENT_DIR . '/debug.log';
+        if (file_exists($debug_log_file) && is_writable($debug_log_file)) {
+            $file_handle = fopen($debug_log_file, 'w');
+            fclose($file_handle);
+        }
     }
 }

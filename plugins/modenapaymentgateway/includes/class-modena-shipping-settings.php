@@ -2,7 +2,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
-$cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.', $this->domain ) . '<br/><br/>' . __( 'Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.', $this->domain );
+
+$domain = 'modena';
+$cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.', $domain ) . '<br/><br/>' . __( 'Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.', $domain );
 
 $settings = array(
     'title'            => array(
@@ -13,7 +15,7 @@ $settings = array(
     'desc_tip'    => true,
     ),
     'cost'       => array(
-    'title'             => __( 'Cost', $this->domain ),
+    'title'             => __( 'Cost', $domain ),
     'type'              => 'text',
     'placeholder'       => '',
     'description'       => $cost_desc,
