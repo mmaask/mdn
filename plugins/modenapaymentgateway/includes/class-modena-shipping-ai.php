@@ -26,7 +26,9 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
         $this->id = 'modena-shipping-itella-terminals';
         $this->method_title = __('Itella pakiterminalid', 'woocommerce');
         $this->method_description = __('Itella pakiterminalide lahendus Modenalt', 'woocommerce');
-        
+        $this->cost = 5;
+
+
         $this->init_form_fields();
         $this->register_settings();
         $this->register_hooks();
