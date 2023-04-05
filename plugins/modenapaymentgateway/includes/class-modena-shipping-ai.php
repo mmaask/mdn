@@ -11,10 +11,6 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
     private $sender_name;
     private $sender_email;
     private $sender_phone;
-    private $itella_api_key;
-    private $itella_api_secret;
-    private $client_id;
-    private $client_secret;
 
     private $user_shipping_selection;
 
@@ -27,7 +23,6 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
         $this->method_title = __('Itella pakiterminalid', 'woocommerce');
         $this->method_description = __('Itella pakiterminalide lahendus Modenalt', 'woocommerce');
         $this->cost = 5;
-
 
         $this->init_form_fields();
         $this->register_settings();
@@ -42,10 +37,6 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
         $this->sender_name = $this->get_option('sender_name');
         $this->sender_email = $this->get_option('sender_email');
         $this->sender_phone = $this->get_option('sender_phone');
-        $this->itella_api_key = $this->get_option('itella_api_key');
-        $this->itella_api_secret = $this->get_option('itella_api_secret');
-        $this->client_id = $this->get_option('client_id');
-        $this->client_secret = $this->get_option('client_secret');
     }
     public function init_form_fields(): void
     {
@@ -96,34 +87,6 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
                 'default' => __(''),
                 'desc_tip' => true,
             ),
-            'itella_api_key' => array(
-                'title' => __('Itella API Key'),
-                'type' => 'text',
-                'description' => __('This controls the API key Secret from Modena'),
-                'default' => __('thisistheitellaapikeyfor1444221!'),
-                'desc_tip' => true,
-            ),
-            'itella_api_secret' => array(
-                'title' => __('Itella API Secret'),
-                'type' => 'text',
-                'description' => __('This controls the API key Secret from Itella'),
-                'default' => __('secretcustomerapisecretfromparterportal112.xxxa4!'),
-                'desc_tip' => true,
-            ),
-            'client_id' => array(
-                'title' => __('Modena API ID'),
-                'type' => 'text',
-                'description' => __('This controls the API key ID from Modena'),
-                'default' => __('idofcustomersecretkeyfromparterportal112.yyyy66!'),
-                'desc_tip' => true,
-            ),
-            'client_secret' => array(
-                'title' => __('Modena API Secret'),
-                'type' => 'text',
-                'description' => __('This controls the API key Secret from Modena'),
-                'default' => __('secretcustomerapisecretfromparterportal112.xxxa4!'),
-                'desc_tip' => true,
-            )
         );
     }
 
@@ -145,6 +108,7 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
             add_action('woocommerce_order_details_after_order_table_items', array($this, 'display_selected_terminal_in_orders'));
             add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_selected_terminal_in_orders'));
             add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'render_label_orders'));
+            
 
         } catch (Exception $e) {
             $errorMessage = "Error registering hooks: " . $e->getMessage();
@@ -153,80 +117,9 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
         }
     }
 
-    public function post_shipping_selection($order_id)
-    {
+    
 
-        static $rendered = false;
-
-        if (!$rendered) {
-            $contactEmail = $this->sender_email;
-            $order = wc_get_order($order_id);
-            $orderReference = $order->get_order_number();
-            $packageContent = '';
-            $total_weight = 0;
-
-            $recipientName = WC()->customer->get_billing_first_name() . ' ' . WC()->customer->get_billing_last_name();
-            $recipientPhone = WC()->customer->get_shipping_phone();
-            $recipientEmail = WC()->customer->get_billing_email();
-
-            $itellaKey = $this->itella_api_key;
-            $itellaSecret = $this->itella_api_secret;
-
-            $placeId = $this->get_selected_shipping_terminal_id();
-            //$placeId = $order->get_shipping_location_id();
-
-
-            foreach ($order->get_items() as $item_id => $item) {
-                $product_name = $item->get_name();
-                $quantity = $item->get_quantity();
-                $packageContent .= $quantity . ' x ' . $product_name . "\n";
-
-                $product = $item->get_product();
-                $product_weight = $product->get_weight();
-                $total_weight += $product_weight * $quantity;
-            }
-            $weight = $total_weight;
-
-            $data = array(
-                '$contactEmail' => $contactEmail,
-                'orderReference' => $orderReference,
-                'packageContent' => $packageContent,
-                'weight' => $weight,
-                'recipient_name' => $recipientName,
-                'recipient_phone' => $recipientPhone,
-                'recipientEmail' => $recipientEmail,
-                'placeId' => $placeId,
-                'itellaKey' => $itellaKey,
-                'itellaSecret' => $itellaSecret,
-
-            );
-
-            error_log('Preparing to Post...');
-            $data_string = print_r($data, true);
-            error_log($data_string);
-
-            $response = wp_remote_post(
-                'https://webhook.site/d2977714-e0c8-4023-ac8c-35b3cf7bd1ba',
-                array(
-                    'method' => 'POST',
-                    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
-                    'body' => http_build_query($data)
-                )
-            );
-
-            $result = wp_remote_retrieve_body($response);
-
-            $this->render_error_log($result);
-        }
-    }
-
-    public function render_error_log($result): void
-    {
-        ob_start();
-        var_dump($result);
-        $output = ob_get_clean();
-        error_log($output);
-    }
+    
 
     public function save_free_shipping_to_product_meta($post_id)
     {
@@ -518,5 +411,105 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
         return 110;
     }
 
+    public function post_shipping_selection($order_id)
+    {
 
+        static $rendered = false;
+
+        if (!$rendered) {
+            $order = wc_get_order($order_id);
+            $orderReference = $order->get_order_number();
+            $packageContent = '';
+            $total_weight = 0;
+
+            $recipientName = WC()->customer->get_billing_first_name() . ' ' . WC()->customer->get_billing_last_name();
+            $recipientPhone = WC()->customer->get_shipping_phone();
+            $recipientEmail = WC()->customer->get_billing_email();
+
+
+            $placeId = $this->get_selected_shipping_terminal_id();
+            //$placeId = $order->get_shipping_location_id();
+
+
+            foreach ($order->get_items() as $item_id => $item) {
+                $product_name = $item->get_name();
+                $quantity = $item->get_quantity();
+                $packageContent .= $quantity . ' x ' . $product_name . "\n";
+
+                $product = $item->get_product();
+                $product_weight = $product->get_weight();
+                $total_weight += $product_weight * $quantity;
+            }
+            $weight = $total_weight;
+
+            $data = array(
+                'orderReference' => $orderReference,
+                'packageContent' => $packageContent,
+                'weight' => $weight,
+                'recipient_name' => $recipientName,
+                'recipient_phone' => $recipientPhone,
+                'recipientEmail' => $recipientEmail,
+                'placeId' => $placeId,
+
+            );
+
+            $response = wp_remote_post(
+                'https://monte360.com/itella/index.php?action=createShipment',
+                array(
+                    'method' => 'POST',
+                    'timeout' => 5, // Add a 5-second wait time for the response
+                    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+                    'body' => http_build_query($data)
+                )
+            );
+
+            $this->get_label_request(wp_remote_retrieve_body($response));
+        }
+        $rendered = True;
+    }
+
+    public function get_label_request($response) {
+
+        if (is_null($response)) {
+            error_log('Response is NULL. Exiting get_label function.');
+            return;
+        }
+
+        $response = trim($response, '"');
+        $array = json_decode($response, true);
+
+        if (is_null($array) || !isset($array['item']['barcode'])) {
+            error_log('Cannot access barcode_id. Invalid JSON or missing key in array.');
+            return;
+        }
+
+        $barcode_id = $array['item']['barcode'];
+
+        $url = 'https://monte360.com/itella/index.php?action=getLabel&barcode=' . $barcode_id;
+        $get_response = wp_remote_get($url);
+
+        if (is_wp_error($get_response)) {
+            error_log('Error in GET response: ' . $get_response->get_error_message());
+            return;
+        }
+
+        $this->save_label_pdf($get_response, $barcode_id);
+}
+
+    public function save_label_pdf($response, $barcode_id) {
+
+        $upload_dir = wp_upload_dir();
+        $pdf_folder_path = $upload_dir['basedir'] . '/shipping_labels_mdn_pdfs';
+
+        if (!file_exists($pdf_folder_path)) {
+            wp_mkdir_p($pdf_folder_path);
+        }
+
+        $pdf_file_path = $pdf_folder_path . '/' . $barcode_id . '.pdf';
+
+        if (!file_exists($pdf_file_path)) {
+            $pdf_content = wp_remote_retrieve_body($response);
+            file_put_contents($pdf_file_path, $pdf_content);
+        }
+    }
 }
