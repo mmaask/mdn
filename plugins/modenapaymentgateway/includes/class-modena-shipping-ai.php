@@ -1,27 +1,132 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
+class WC_Estonia_Shipping_Method extends WC_Shipping_Method
+{
 
     private $cost;
+    private $free_shipping_treshold;
+    private $sender_name;
+    private $sender_email;
+    private $sender_phone;
+    private $itella_api_key;
+    private $itella_api_secret;
+    private $client_id;
+    private $client_secret;
 
-    public function __construct($instance_id = 0) {
+    private $user_shipping_selection;
+
+    public function __construct($instance_id = 0)
+    {
         parent::__construct($instance_id);
-
-        $this->instance_id          = absint($instance_id);
-        $this->id                   = 'modena-shipping-itella-terminals';
-        $this->method_title         = __('Itella pakiterminalid', 'woocommerce');
-        $this->method_description   = __('Itella pakiterminalide lahendus Modenalt', 'woocommerce');
-        $this->title                = __('Itella pakiterminalid', 'woocommerce');
-        $this->supports             = array('shipping-zones', 'instance-settings',);
-
+        $this->instance_id = absint($instance_id);
+        $this->supports = array('shipping-zones', 'instance-settings', );
+        $this->id = 'modena-shipping-itella-terminals';
+        $this->method_title = __('Itella pakiterminalid', 'woocommerce');
+        $this->method_description = __('Itella pakiterminalide lahendus Modenalt', 'woocommerce');
+        
         $this->init_form_fields();
+        $this->register_settings();
         $this->register_hooks();
 
     }
-    public function register_hooks() {
+    public function register_settings()
+    {
+        $this->title = $this->get_option('title');
+        $this->cost = $this->get_option('cost');
+        $this->free_shipping_treshold = $this->get_option('free-shipping-treshold');
+        $this->sender_name = $this->get_option('sender_name');
+        $this->sender_email = $this->get_option('sender_email');
+        $this->sender_phone = $this->get_option('sender_phone');
+        $this->itella_api_key = $this->get_option('itella_api_key');
+        $this->itella_api_secret = $this->get_option('itella_api_secret');
+        $this->client_id = $this->get_option('client_id');
+        $this->client_secret = $this->get_option('client_secret');
+    }
+    public function init_form_fields(): void
+    {
+        $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
+
+        $this->instance_form_fields = array(
+            'title' => array(
+                'title' => __('Title', 'woocommerce'),
+                'type' => 'text',
+                'description' => __('This controls the title which the user sees during checkout.', 'woocommerce'),
+                'default' => $this->method_title,
+                'desc_tip' => true,
+            ),
+            'cost' => array(
+                'title' => __('Cost'),
+                'type' => 'text',
+                'placeholder' => '',
+                'description' => $cost_desc,
+                'default' => '0',
+                'desc_tip' => true,
+                'sanitize_callback' => array($this, 'sanitize_cost'),
+            ),
+            'free_shipping_treshold' => array(
+                'title' => __('Free shipping over sum of'),
+                'type' => 'text',
+                'description' => __('This controls the amount needed for free shipping.'),
+                'default' => __(0),
+                'desc_tip' => true,
+            ),
+            'sender_name' => array(
+                'title' => __('Sender name'),
+                'type' => 'text',
+                'description' => __('This controls the parcel sender name that is required and sent to Itella.'),
+                'default' => __(''),
+                'desc_tip' => true,
+            ),
+            'sender_email' => array(
+                'title' => __('Sender email'),
+                'type' => 'text',
+                'description' => __('This controls the parcel sender email that is required and sent to Itella.'),
+                'default' => __(''),
+                'desc_tip' => true,
+            ),
+            'sender_phone' => array(
+                'title' => __('Sender phone'),
+                'type' => 'number',
+                'description' => __('This controls the parcel sender phone number that is required and sent to Itella.'),
+                'default' => __(''),
+                'desc_tip' => true,
+            ),
+            'itella_api_key' => array(
+                'title' => __('Itella API Key'),
+                'type' => 'text',
+                'description' => __('This controls the API key Secret from Modena'),
+                'default' => __('thisistheitellaapikeyfor1444221!'),
+                'desc_tip' => true,
+            ),
+            'itella_api_secret' => array(
+                'title' => __('Itella API Secret'),
+                'type' => 'text',
+                'description' => __('This controls the API key Secret from Itella'),
+                'default' => __('secretcustomerapisecretfromparterportal112.xxxa4!'),
+                'desc_tip' => true,
+            ),
+            'client_id' => array(
+                'title' => __('Modena API ID'),
+                'type' => 'text',
+                'description' => __('This controls the API key ID from Modena'),
+                'default' => __('idofcustomersecretkeyfromparterportal112.yyyy66!'),
+                'desc_tip' => true,
+            ),
+            'client_secret' => array(
+                'title' => __('Modena API Secret'),
+                'type' => 'text',
+                'description' => __('This controls the API key Secret from Modena'),
+                'default' => __('secretcustomerapisecretfromparterportal112.xxxa4!'),
+                'desc_tip' => true,
+            )
+        );
+    }
+
+    public function register_hooks()
+    {
         try {
             add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
             add_action('woocommerce_after_shipping_rate', array($this, 'update_checkout_assets'));
@@ -39,23 +144,35 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
             add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_selected_terminal_in_orders'));
             add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'render_label_orders'));
 
-        }  catch (Exception $e) {
+        } catch (Exception $e) {
             $errorMessage = "Error registering hooks: " . $e->getMessage();
             error_log($errorMessage);
             add_action('admin_notices', 'modena_shipping_error_notice');
         }
     }
 
-    public function post_shipping_selection($order_id) {
+    public function post_shipping_selection($order_id)
+    {
 
         static $rendered = false;
 
         if (!$rendered) {
-            $contactEmail   = $this->get_option('sender_email');
-            $order          = wc_get_order($order_id);
+            $contactEmail = $this->sender_email;
+            $order = wc_get_order($order_id);
             $orderReference = $order->get_order_number();
             $packageContent = '';
-            $total_weight   = 0;
+            $total_weight = 0;
+
+            $recipientName = WC()->customer->get_billing_first_name() . ' ' . WC()->customer->get_billing_last_name();
+            $recipientPhone = WC()->customer->get_shipping_phone();
+            $recipientEmail = WC()->customer->get_billing_email();
+
+            $itellaKey = $this->itella_api_key;
+            $itellaSecret = $this->itella_api_secret;
+
+            $placeId = $this->get_selected_shipping_terminal_id();
+            //$placeId = $order->get_shipping_location_id();
+
 
             foreach ($order->get_items() as $item_id => $item) {
                 $product_name = $item->get_name();
@@ -68,13 +185,6 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
             }
             $weight = $total_weight;
 
-            $recipientName = WC()->customer->get_billing_first_name() . ' ' . WC()->customer->get_billing_last_name();
-            $recipientPhone = WC()->customer->get_shipping_phone();
-            $recipientEmail = WC()->customer->get_billing_email();
-
-            $placeId = $this->get_selected_shipping_terminal_id();
-            //$placeId = $order->get_shipping_location_id();
-
             $data = array(
                 '$contactEmail' => $contactEmail,
                 'orderReference' => $orderReference,
@@ -84,6 +194,8 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
                 'recipient_phone' => $recipientPhone,
                 'recipientEmail' => $recipientEmail,
                 'placeId' => $placeId,
+                'itellaKey' => $itellaKey,
+                'itellaSecret' => $itellaSecret,
 
             );
 
@@ -91,11 +203,14 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
             $data_string = print_r($data, true);
             error_log($data_string);
 
-            $response = wp_remote_post('https://webhook.site/d2977714-e0c8-4023-ac8c-35b3cf7bd1ba', array(
-                'method' => 'POST',
-                'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
-                'body' => http_build_query($data)
-            ));
+            $response = wp_remote_post(
+                'https://webhook.site/d2977714-e0c8-4023-ac8c-35b3cf7bd1ba',
+                array(
+                    'method' => 'POST',
+                    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+                    'body' => http_build_query($data)
+                )
+            );
 
             $result = wp_remote_retrieve_body($response);
 
@@ -103,16 +218,16 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         }
     }
 
-    public function render_error_log($result): void {
+    public function render_error_log($result): void
+    {
         ob_start();
         var_dump($result);
         $output = ob_get_clean();
-
-        error_log('POST response...');
         error_log($output);
     }
 
-    public function save_free_shipping_to_product_meta($post_id) {
+    public function save_free_shipping_to_product_meta($post_id)
+    {
         // Check if the request is a product update or creation
         if (isset($_POST['action']) && $_POST['action'] == 'editpost' && isset($_POST['post_type']) && $_POST['post_type'] == 'product') {
             // Verify nonce for security
@@ -126,7 +241,8 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
     }
 
 
-    public function add_free_shipping_to_product() {
+    public function add_free_shipping_to_product()
+    {
         static $rendered = false;
 
         if (!$rendered) {
@@ -176,7 +292,8 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
     }
 
 
-    public function save_terminal_in_session() {
+    public function save_terminal_in_session()
+    {
         if (isset($_POST['userShippingSelection'])) {
             $userShippingSelection = intval($_POST['userShippingSelection']);
             error_log("User Shipping Selection: " . $userShippingSelection);
@@ -186,7 +303,8 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         }
     }
 
-    public function save_terminal_to_order_meta($order_id) {
+    public function save_terminal_to_order_meta($order_id)
+    {
         if (WC()->session->__isset('selected_terminal')) {
             update_post_meta($order_id, 'selected_terminal', WC()->session->get('selected_terminal'));
             WC()->session->__unset('selected_terminal');
@@ -194,7 +312,8 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
     }
 
 
-    public function save_user_shipping_selection() {
+    public function save_user_shipping_selection()
+    {
         check_ajax_referer('save_user_shipping_selection', 'security');
 
         if (isset($_POST['userShippingSelection'])) {
@@ -204,18 +323,21 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         wp_die();
     }
 
-    public function render_checkout_select_box() {
+    public function render_checkout_select_box()
+    {
 
         static $rendered = false;
 
-            if (!$rendered) {
+        if (!$rendered) {
             $selected_user_shipping_selection = $this->get_user_shipping_selection_from_session();
             ?>
-                <tr class="woocommerce-table__line-item mdn-shipping-selection-wrapper custom-width">
+            <tr class="woocommerce-table__line-item mdn-shipping-selection-wrapper custom-width">
                 <td class="woocommerce-table__product-name">
                     <label for="userShippingSelectionChoice"></label>
                     <select class="mdn-shipping-selection" name="userShippingSelection" id="userShippingSelectionChoice">
-                        <option disabled selected="selected"><?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?></option>
+                        <option disabled selected="selected">
+                            <?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?>
+                        </option>
                         <?php
                         $terminalList = $this->get_terminal_list();
                         foreach ($terminalList as $terminal) {
@@ -229,8 +351,8 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
             </tr>
 
             <script>
-                jQuery(document).ready(function($) {
-                    $('form.checkout').on('submit', function() {
+                jQuery(document).ready(function ($) {
+                    $('form.checkout').on('submit', function () {
                         let userShippingSelection = $('#userShippingSelectionChoice').val();
 
                         // Save userShippingSelection to the session using AJAX
@@ -250,10 +372,11 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
             <?php
 
             $rendered = true;
-            }
+        }
     }
 
-    public function display_selected_terminal_in_orders($order_id) {
+    public function display_selected_terminal_in_orders($order_id)
+    {
 
         static $rendered = false;
 
@@ -270,18 +393,34 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
 
                 if (!empty($selected_terminal)) {
                     $selected_terminal = array_shift($selected_terminal);
-                    if ( function_exists( 'is_order_received_page' ) && is_order_received_page() ) {
+                    if (function_exists('is_order_received_page') && is_order_received_page()) {
                         ?>
                         <tr class="selected-terminal">
-                            <th><p><?php _e('Valitud pakiterminal', 'woocommerce'); ?></p></th>
-                            <td><p><?php echo $selected_terminal->{'name'}; ?></p></td>
+                            <th>
+                                <p>
+                                    <?php _e('Valitud pakiterminal', 'woocommerce'); ?>
+                                </p>
+                            </th>
+                            <td>
+                                <p>
+                                    <?php echo $selected_terminal->{'name'}; ?>
+                                </p>
+                            </td>
                         </tr>
                         <?php
                     } else {
-                    ?>
+                        ?>
                         <tr class="selected-terminal">
-                            <th><h3><?php _e('Valitud pakiterminal', 'woocommerce'); ?></h3></th>
-                            <td><p><?php echo $selected_terminal->{'name'}; ?></p></td>
+                            <th>
+                                <h3>
+                                    <?php _e('Valitud pakiterminal', 'woocommerce'); ?>
+                                </h3>
+                            </th>
+                            <td>
+                                <p>
+                                    <?php echo $selected_terminal->{'name'}; ?>
+                                </p>
+                            </td>
                         </tr>
                         <?php
                     }
@@ -294,14 +433,15 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
     public function get_user_shipping_selection_from_session(): int|array|string
     {
         if (WC()->session->get('user_shipping_selection')) {
-            $this->userShippingSelection = WC()->session->get('user_shipping_selection');
-            return $this->userShippingSelection;
+            $this->user_shipping_selection = WC()->session->get('user_shipping_selection');
+            return $this->user_shipping_selection;
         } else {
             return 0;
         }
     }
 
-    public function get_terminal_list() {
+    public function get_terminal_list()
+    {
         return json_decode(file_get_contents('https://monte360.com/itella/index.php?action=displayParcelsList'))->item;
     }
 
@@ -314,9 +454,10 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         }, $dimensions);
     }
 
-    public function is_available($package): bool {
+    public function is_available($package): bool
+    {
         $max_capacity = 35;
-        $min_dimensions1 = [1,15,15];
+        $min_dimensions1 = [1, 15, 15];
         $max_dimensions1 = [60, 36, 60];
 
         $cart_weight = WC()->cart->get_cart_contents_weight();
@@ -352,14 +493,16 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         return true;
     }
 
-    public function filter_available_shipping($rates, $package) {
+    public function filter_available_shipping($rates, $package)
+    {
         if (!$this->is_available($package)) {
             unset($rates[$this->id]);
         }
         return $rates;
     }
 
-    public function update_checkout_assets() {
+    public function update_checkout_assets()
+    {
         add_action('woocommerce_checkout_update_order_review', array($this, 'filter_available_shipping'));
         add_action('woocommerce_review_order_before_order_total', function () {
             $chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
@@ -373,83 +516,5 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         return 110;
     }
 
-    public function init_form_fields(): void
-    {
-        $cost_desc = __( 'Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __( 'Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
 
-        $this->instance_form_fields = array(
-            'title'            => array(
-                'title'       => __( 'Title', 'woocommerce' ),
-                'type'        => 'text',
-                'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
-                'default'     => $this->method_title,
-                'desc_tip'    => true,
-            ),
-            'cost'       => array(
-                'title'             => __( 'Cost'),
-                'type'              => 'text',
-                'placeholder'       => '',
-                'description'       => $cost_desc,
-                'default'           => '0',
-                'desc_tip'          => true,
-                'sanitize_callback' => array( $this, 'sanitize_cost' ),
-            ),
-            'free-shipping-treshold'      => array(
-                'title'       => __( 'Free shipping over sum of' ),
-                'type'        => 'text',
-                'description' => __( 'This controls the amount needed for free shipping.'),
-                'default'     => __(0 ),
-                'desc_tip'    => true,
-            ),
-            'sender-name'       => array(
-                'title'       => __( 'Sender name' ),
-                'type'        => 'text',
-                'description' => __( 'This controls the parcel sender name that is required and sent to Itella.'),
-                'default'     => __( ''),
-                'desc_tip'    => true,
-            ),
-            'sender-email'       => array(
-                'title'       => __( 'Sender email' ),
-                'type'        => 'text',
-                'description' => __( 'This controls the parcel sender email that is required and sent to Itella.'),
-                'default'     => __( ''),
-                'desc_tip'    => true,
-            ),
-            'sender-phone'       => array(
-                'title'       => __( 'Sender phone' ),
-                'type'        => 'number',
-                'description' => __( 'This controls the parcel sender phone number that is required and sent to Itella.'),
-                'default'     => __('' ),
-                'desc_tip'    => true,
-            ),
-            'itella_api_key'      => array(
-                'title'       => __( 'Itella API Key' ),
-                'type'        => 'text',
-                'description' => __( 'This controls the API key Secret from Modena'),
-                'default'     => __( 'thisistheitellaapikeyfor1444221!'),
-                'desc_tip'    => true,
-            ),
-            'itella_api_secret'      => array(
-                'title'       => __( 'Itella API Secret' ),
-                'type'        => 'text',
-                'description' => __( 'This controls the API key Secret from Itella'),
-                'default'     => __( 'secretcustomerapisecretfromparterportal112.xxxa4!'),
-                'desc_tip'    => true,
-            ),
-            'client-id'      => array(
-                'title'       => __( 'Modena API ID' ),
-                'type'        => 'text',
-                'description' => __( 'This controls the API key ID from Modena'),
-                'default'     => __( 'idofcustomersecretkeyfromparterportal112.yyyy66!'),
-                'desc_tip'    => true,
-            ),
-            'client-secret'      => array(
-                'title'       => __( 'Modena API Secret' ),
-                'type'        => 'text',
-                'description' => __( 'This controls the API key Secret from Modena'),
-                'default'     => __( 'secretcustomerapisecretfromparterportal112.xxxa4!'),
-                'desc_tip'    => true,
-            )
-        );
-    }
 }
