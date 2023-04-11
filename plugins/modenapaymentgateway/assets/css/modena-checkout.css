@@ -58,3 +58,13 @@
     max-width: inherit;
     width: inherit;
 }
+
+#mdn-shipping-select-box {
+    max-width: 100%;
+
+}
+
+/*.mdn-shipping-select-box-container {
+    display: flex;
+    justify-content: left;
+}*/

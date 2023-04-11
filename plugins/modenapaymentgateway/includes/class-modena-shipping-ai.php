@@ -3,19 +3,10 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-class WC_Estonia_Shipping_Method extends WC_Shipping_Method
-{
-
+class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
     private $cost;
-    private $free_shipping_treshold;
-    private $sender_name;
-    private $sender_email;
-    private $sender_phone;
 
-    private $user_shipping_selection;
-
-    public function __construct($instance_id = 0)
-    {
+    public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
         $this->instance_id = absint($instance_id);
         $this->supports = array('shipping-zones', 'instance-settings', );
@@ -29,17 +20,7 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
         $this->register_hooks();
 
     }
-    public function register_settings()
-    {
-        $this->title = $this->get_option('title');
-        $this->cost = $this->get_option('cost');
-        $this->free_shipping_treshold = $this->get_option('free-shipping-treshold');
-        $this->sender_name = $this->get_option('sender_name');
-        $this->sender_email = $this->get_option('sender_email');
-        $this->sender_phone = $this->get_option('sender_phone');
-    }
-    public function init_form_fields(): void
-    {
+    public function init_form_fields(): void {
         $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
 
         $this->instance_form_fields = array(
@@ -52,305 +33,22 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
             ),
             'cost' => array(
                 'title' => __('Cost'),
-                'type' => 'text',
+                'type' => 'int',
                 'placeholder' => '',
                 'description' => $cost_desc,
                 'default' => '0',
                 'desc_tip' => true,
                 'sanitize_callback' => array($this, 'sanitize_cost'),
             ),
-            'free_shipping_treshold' => array(
-                'title' => __('Free shipping over sum of'),
-                'type' => 'text',
-                'description' => __('This controls the amount needed for free shipping.'),
-                'default' => __(0),
-                'desc_tip' => true,
-            ),
-            'sender_name' => array(
-                'title' => __('Sender name'),
-                'type' => 'text',
-                'description' => __('This controls the parcel sender name that is required and sent to Itella.'),
-                'default' => __(''),
-                'desc_tip' => true,
-            ),
-            'sender_email' => array(
-                'title' => __('Sender email'),
-                'type' => 'text',
-                'description' => __('This controls the parcel sender email that is required and sent to Itella.'),
-                'default' => __(''),
-                'desc_tip' => true,
-            ),
-            'sender_phone' => array(
-                'title' => __('Sender phone'),
-                'type' => 'number',
-                'description' => __('This controls the parcel sender phone number that is required and sent to Itella.'),
-                'default' => __(''),
-                'desc_tip' => true,
-            ),
         );
     }
 
-    public function register_hooks()
-    {
-        try {
-            add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
-            add_action('woocommerce_after_shipping_rate', array($this, 'update_checkout_assets'));
-            add_action('woocommerce_checkout_process', array($this, 'save_terminal_in_session'));
-
-            add_action('woocommerce_product_options_general_product_data', array($this, 'add_free_shipping_to_product'));
-            add_action('woocommerce_process_product_meta', array($this, 'save_free_shipping_to_product_meta'));
-
-            add_action('wp_ajax_save_user_shipping_selection', array($this, 'save_user_shipping_selection'));
-            add_action('wp_ajax_nopriv_save_user_shipping_selection', array($this, 'save_user_shipping_selection'));
-            add_action('woocommerce_checkout_update_order_meta', array($this, 'save_terminal_to_order_meta'));
-
-            add_action('woocommerce_thankyou', array($this, 'post_shipping_selection'));
-            add_action('woocommerce_order_details_after_order_table_items', array($this, 'display_selected_terminal_in_orders'));
-            add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_selected_terminal_in_orders'));
-            add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'render_label_orders'));
-            
-
-        } catch (Exception $e) {
-            $errorMessage = "Error registering hooks: " . $e->getMessage();
-            error_log($errorMessage);
-            add_action('admin_notices', 'modena_shipping_error_notice');
-        }
+    public function register_settings() {
+        $this->title = $this->get_option('title');
+        $this->cost = $this->get_option('cost');
     }
 
-    
-
-    
-
-    public function save_free_shipping_to_product_meta($post_id)
-    {
-        // Check if the request is a product update or creation
-        if (isset($_POST['action']) && $_POST['action'] == 'editpost' && isset($_POST['post_type']) && $_POST['post_type'] == 'product') {
-            // Verify nonce for security
-            if (!isset($_POST['_free_shipping_nonce']) || !wp_verify_nonce($_POST['_free_shipping_nonce'], '_free_shipping_action')) {
-                return;
-            }
-
-            $free_shipping = isset($_POST['_free_shipping']) ? 'yes' : 'no';
-            update_post_meta($post_id, '_free_shipping', $free_shipping);
-        }
-    }
-
-
-    public function add_free_shipping_to_product()
-    {
-        static $rendered = false;
-
-        if (!$rendered) {
-            global $post;
-
-            if ($post->post_type !== 'product') {
-                return;
-            }
-
-            $product_id = $post->ID;
-            $free_shipping = get_post_meta($product_id, '_free_shipping', true);
-
-            // Add nonce for security
-            echo '<input type="hidden" name="_free_shipping_nonce" id="_free_shipping_nonce" value="' . wp_create_nonce('_free_shipping_action') . '" />';
-
-            woocommerce_wp_checkbox(
-                array(
-                    'id' => '_free_shipping',
-                    'label' => __('Tasuta saatmine', 'woocommerce'),
-                    'description' => __('Luba selle toote ostukorvi lisamisel tasuta saatmine kogu ostukorvi sisule Itella pakiterminalipunkti.', 'woocommerce'),
-                    'value' => $free_shipping,
-                )
-            );
-        }
-        $rendered = true;
-    }
-
-    public function calculate_shipping($package = array())
-    {
-        $free_shipping = false;
-        foreach (WC()->cart->get_cart_contents() as $item) {
-            $product_id = $item['product_id'];
-            $free_shipping_meta = get_post_meta($product_id, '_free_shipping', true);
-            if ($free_shipping_meta === 'yes') {
-                $free_shipping = true;
-                break;
-            }
-        }
-
-        $rate = array(
-            'id' => $this->id,
-            'label' => $this->title,
-            'cost' => $free_shipping ? 0 : $this->cost
-        );
-
-        $this->add_rate($rate);
-    }
-
-
-    public function save_terminal_in_session()
-    {
-        if (isset($_POST['userShippingSelection'])) {
-            $userShippingSelection = intval($_POST['userShippingSelection']);
-            error_log("User Shipping Selection: " . $userShippingSelection);
-            WC()->session->set('selected_terminal', $userShippingSelection);
-            WC()->session->set('user_shipping_selection', $userShippingSelection); // Save the value to the session
-
-        }
-    }
-
-    public function save_terminal_to_order_meta($order_id)
-    {
-        if (WC()->session->__isset('selected_terminal')) {
-            update_post_meta($order_id, 'selected_terminal', WC()->session->get('selected_terminal'));
-            WC()->session->__unset('selected_terminal');
-        }
-    }
-
-
-    public function save_user_shipping_selection()
-    {
-        check_ajax_referer('save_user_shipping_selection', 'security');
-
-        if (isset($_POST['userShippingSelection'])) {
-            WC()->session->set('user_shipping_selection', sanitize_text_field($_POST['userShippingSelection']));
-        }
-
-        wp_die();
-    }
-
-    public function render_checkout_select_box()
-    {
-
-        static $rendered = false;
-
-        if (!$rendered) {
-            $selected_user_shipping_selection = $this->get_user_shipping_selection_from_session();
-            ?>
-            <tr class="woocommerce-table__line-item mdn-shipping-selection-wrapper custom-width">
-                <td class="woocommerce-table__product-name">
-                    <label for="userShippingSelectionChoice"></label>
-                    <select class="mdn-shipping-selection" name="userShippingSelection" id="userShippingSelectionChoice">
-                        <option disabled selected="selected">
-                            <?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?>
-                        </option>
-                        <?php
-                        $terminalList = $this->get_terminal_list();
-                        foreach ($terminalList as $terminal) {
-                            $terminalID = $terminal->{'place_id'};
-                            $selected = ($selected_user_shipping_selection == $terminalID) ? 'selected' : '';
-                            echo "<option value='$terminalID' $selected>" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
-                        }
-                        ?>
-                    </select>
-                </td>
-            </tr>
-
-            <script>
-                jQuery(document).ready(function ($) {
-                    $('form.checkout').on('submit', function () {
-                        let userShippingSelection = $('#userShippingSelectionChoice').val();
-
-                        // Save userShippingSelection to the session using AJAX
-                        $.ajax({
-                            type: 'POST',
-                            url: '<?php echo admin_url("admin-ajax.php"); ?>',
-                            data: {
-                                action: 'save_user_shipping_selection',
-                                userShippingSelection: userShippingSelection,
-                                security: '<?php echo wp_create_nonce("save_user_shipping_selection"); ?>'
-                            },
-                            async: false
-                        });
-                    });
-                });
-            </script>
-            <?php
-
-            $rendered = true;
-        }
-    }
-
-    public function display_selected_terminal_in_orders($order_id)
-    {
-
-        static $rendered = false;
-
-        if (!$rendered) {
-
-            //$terminal_id = get_post_meta($order_id, 'selected_terminal', true); // Get the selected terminal id from the order meta
-            $terminal_id = 110;
-
-            if (!empty($terminal_id)) {
-                $terminalList = $this->get_terminal_list();
-                $selected_terminal = array_filter($terminalList, function ($terminal) use ($terminal_id) {
-                    return $terminal->{'place_id'} == $terminal_id;
-                });
-
-                if (!empty($selected_terminal)) {
-                    $selected_terminal = array_shift($selected_terminal);
-                    if (function_exists('is_order_received_page') && is_order_received_page()) {
-                        ?>
-                        <tr class="selected-terminal">
-                            <th>
-                                <p>
-                                    <?php _e('Valitud pakiterminal', 'woocommerce'); ?>
-                                </p>
-                            </th>
-                            <td>
-                                <p>
-                                    <?php echo $selected_terminal->{'name'}; ?>
-                                </p>
-                            </td>
-                        </tr>
-                        <?php
-                    } else {
-                        ?>
-                        <tr class="selected-terminal">
-                            <th>
-                                <h3>
-                                    <?php _e('Valitud pakiterminal', 'woocommerce'); ?>
-                                </h3>
-                            </th>
-                            <td>
-                                <p>
-                                    <?php echo $selected_terminal->{'name'}; ?>
-                                </p>
-                            </td>
-                        </tr>
-                        <?php
-                    }
-                }
-            }
-        }
-        $rendered = true;
-    }
-
-    public function get_user_shipping_selection_from_session(): int|array|string
-    {
-        if (WC()->session->get('user_shipping_selection')) {
-            $this->user_shipping_selection = WC()->session->get('user_shipping_selection');
-            return $this->user_shipping_selection;
-        } else {
-            return 0;
-        }
-    }
-
-    public function get_terminal_list()
-    {
-        return json_decode(file_get_contents('https://monte360.com/itella/index.php?action=displayParcelsList'))->item;
-    }
-
-
-
-    private function sanitize_dimensions($dimensions): array
-    {
-        return array_map(function ($dimension) {
-            return max(0, (float) $dimension);
-        }, $dimensions);
-    }
-
-    public function is_available($package): bool
-    {
+    public function is_available($package): bool {
         $max_capacity = 35;
         $min_dimensions1 = [1, 15, 15];
         $max_dimensions1 = [60, 36, 60];
@@ -384,8 +82,30 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
                 return false;
             }
         }
-
         return true;
+    }
+
+    public function calculate_shipping($package = array()) {
+
+        $rate = array(
+            'id' => $this->id,
+            'label' => $this->title,
+            'cost' => $this->cost,
+        );
+
+        $this->add_rate($rate);
+    }
+
+    public function get_terminal_list()
+    {
+        return json_decode(file_get_contents('https://monte360.com/itella/index.php?action=displayParcelsList'))->item;
+    }
+
+    private function sanitize_dimensions($dimensions): array
+    {
+        return array_map(function ($dimension) {
+            return max(0, (float) $dimension);
+        }, $dimensions);
     }
 
     public function filter_available_shipping($rates, $package)
@@ -396,23 +116,11 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
         return $rates;
     }
 
-    public function update_checkout_assets()
-    {
-        add_action('woocommerce_checkout_update_order_review', array($this, 'filter_available_shipping'));
-        add_action('woocommerce_review_order_before_order_total', function () {
-            $chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
-            if (is_array($chosen_shipping_methods) && in_array($this->id, $chosen_shipping_methods)) {
-                add_action('woocommerce_review_order_after_order_total', array($this, 'render_checkout_select_box'));
-            }
-        });
-    }
-    public function get_selected_shipping_terminal_id(): int
-    {
-        return 110;
-    }
 
-    public function post_shipping_selection($order_id)
-    {
+    /**
+     * @throws Exception
+     */
+    public function prepare_shipping_selection_post($order_id) {
 
         static $rendered = false;
 
@@ -427,18 +135,19 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
             $recipientEmail = WC()->customer->get_billing_email();
 
 
-            $placeId = $this->get_selected_shipping_terminal_id();
+            $placeId = 110;
             //$placeId = $order->get_shipping_location_id();
 
-
             foreach ($order->get_items() as $item_id => $item) {
-                $product_name = $item->get_name();
-                $quantity = $item->get_quantity();
-                $packageContent .= $quantity . ' x ' . $product_name . "\n";
+                if ($item instanceof WC_Order_Item_Product) {
+                    $product_name = $item->get_name();
+                    $quantity = $item->get_quantity();
+                    $packageContent .= $quantity . ' x ' . $product_name . "\n";
 
-                $product = $item->get_product();
-                $product_weight = $product->get_weight();
-                $total_weight += $product_weight * $quantity;
+                    $product = $item->get_product();
+                    $product_weight = $product->get_weight();
+                    $total_weight += $product_weight * $quantity;
+                }
             }
             $weight = $total_weight;
 
@@ -452,23 +161,40 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
                 'placeId' => $placeId,
 
             );
-
-            $response = wp_remote_post(
-                'https://monte360.com/itella/index.php?action=createShipment',
-                array(
-                    'method' => 'POST',
-                    'timeout' => 5, // Add a 5-second wait time for the response
-                    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
-                    'body' => http_build_query($data)
-                )
-            );
-
-            $this->get_label_request(wp_remote_retrieve_body($response));
+            $this->post_shipping_selection($data, $order);
         }
         $rendered = True;
     }
 
-    public function get_label_request($response) {
+    /**
+     * @throws Exception
+     */
+    public function post_shipping_selection($data, $order) {
+        $curl = curl_init('https://monte360.com/itella/index.php?action=createShipment');
+
+        curl_setopt($curl, CURLOPT_POST, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 5); // Add a 5-second wait time for the response
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+
+        $response = curl_exec($curl);
+
+        if (curl_errno($curl)) {
+            error_log('Error in POST response: ' . curl_error($curl));
+        } else {
+            $this->parse_barcode_json($response, $order);
+        }
+        curl_close($curl);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function parse_barcode_json($response, $order) {
 
         if (is_null($response)) {
             error_log('Response is NULL. Exiting get_label function.');
@@ -480,36 +206,140 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method
 
         if (is_null($array) || !isset($array['item']['barcode'])) {
             error_log('Cannot access barcode_id. Invalid JSON or missing key in array.');
-            return;
+            return Null;
         }
 
         $barcode_id = $array['item']['barcode'];
+        $this->save_barcode_to_order($barcode_id, $order);
+    }
 
-        $url = 'https://monte360.com/itella/index.php?action=getLabel&barcode=' . $barcode_id;
-        $get_response = wp_remote_get($url);
-
-        if (is_wp_error($get_response)) {
-            error_log('Error in GET response: ' . $get_response->get_error_message());
-            return;
+    /**
+     * @throws Exception
+     */
+    public function save_barcode_to_order($barcode_id, $order) {
+        if (!$order instanceof WC_Order) {
+            $order = wc_get_order($order);
         }
-
-        $this->save_label_pdf($get_response, $barcode_id);
-}
-
-    public function save_label_pdf($response, $barcode_id) {
-
-        $upload_dir = wp_upload_dir();
-        $pdf_folder_path = $upload_dir['basedir'] . '/shipping_labels_mdn_pdfs';
-
-        if (!file_exists($pdf_folder_path)) {
-            wp_mkdir_p($pdf_folder_path);
+        if ($order instanceof WC_Order) {
+            $order->add_meta_data('_barcode_id', $barcode_id, true);
+            $order->save();
+        } else {
+            error_log('Could not fetch the order with the provided order ID.');
+            throw new Exception("Could not fetch the order with the provided order ID.");
         }
+    }
 
-        $pdf_file_path = $pdf_folder_path . '/' . $barcode_id . '.pdf';
+    public function display_selected_terminal_in_orders($order_id) {
 
-        if (!file_exists($pdf_file_path)) {
-            $pdf_content = wp_remote_retrieve_body($response);
-            file_put_contents($pdf_file_path, $pdf_content);
+        static $is_rendered = False;
+
+        //$terminal_id = get_post_meta($order_id, 'selected_terminal', true); // Get the selected terminal id from the order meta
+        $terminal_id = 110;
+
+        if(!$is_rendered) {
+            if (!empty($terminal_id)) {
+                $terminalList = $this->get_terminal_list();
+                $selected_terminal = array_filter($terminalList, function ($terminal) use ($terminal_id) {
+                    return $terminal->{'place_id'} == $terminal_id;
+                });
+
+                if (!empty($selected_terminal)) {
+                    $selected_terminal = array_shift($selected_terminal);
+                    if (function_exists('is_order_received_page') && is_order_received_page()) {
+                        ?>
+                        <tr class="selected-terminal">
+                            <th>
+                                <p>
+                                    <?php _e('Valitud pakiterminal', 'woocommerce'); ?>
+                                </p>
+                            </th>
+                            <td>
+                                <p>
+                                    <?php echo $selected_terminal->{'name'}; ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <?php
+                    } else {
+                        ?>
+                        <tr class="selected-terminal">
+                            <th>
+                                <h3>
+                                    <?php _e('Saadetise pakiterminal', 'woocommerce'); ?>
+                                </h3>
+                            </th>
+                            <td>
+                                <p>
+                                    <?php echo $selected_terminal->{'name'}; ?>
+                                </p>
+                                <p>
+                                    <b><a href="#" onclick="event.preventDefault(); <?php echo 'getLabel(' . $order_id . ')'; ?>">Prindi pakikaart</a></b>
+
+                                </p>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                }
+            }
         }
+        $is_rendered = True;
+    }
+
+    public function get_label($barcode_id) {
+        $curl = curl_init('https://monte360.com/itella/index.php?action=getLabel&barcode=' . $barcode_id);
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+
+        $response = curl_exec($curl);
+
+        if (curl_errno($curl)) {
+            error_log('Error in GET response: ' . curl_error($curl));
+        } else {
+            return $response;
+        }
+        curl_close($curl);
+    }
+
+    public function register_hooks() {
+        add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
+        add_action('woocommerce_checkout_update_order_review', array($this, 'filter_available_shipping'));
+        add_action('woocommerce_after_shipping_rate', array($this, 'update_checkout_assets'));
+        add_action('woocommerce_thankyou', array($this, 'prepare_shipping_selection_post'));
+        add_action('woocommerce_order_details_after_order_table_items', array($this, 'display_selected_terminal_in_orders'));
+        add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_selected_terminal_in_orders'));
+
+        // TODO save terminal_id from user selection
+
+    }
+
+    public function update_checkout_assets() {
+        $chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
+        if (is_array($chosen_shipping_methods) && in_array($this->id, $chosen_shipping_methods)) {
+            add_action('woocommerce_review_order_after_shipping', array($this, 'render_checkout_select_box'));
+        }
+    }
+
+    public function render_checkout_select_box() {
+
+        error_log('Rendered times - x +1');
+        ?>
+        <label for="mdn-shipping-select-box"></label>
+        <select name="userShippingSelection" id="mdn-shipping-select-box">
+            <option disabled selected="selected">
+                <?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?>
+            </option>
+            <?php
+            $terminalList = $this->get_terminal_list();
+            foreach ($terminalList as $terminal) {
+                $terminalID = $terminal->{'place_id'};
+                echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
+            }
+            ?>
+        </select>
+        <?php
     }
 }

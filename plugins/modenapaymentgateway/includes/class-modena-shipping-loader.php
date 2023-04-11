@@ -55,7 +55,9 @@ class Shipping_Loader {
     public function init_WC_estonia(): void {
         $this->clear_debug_log();
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-ai.php');
+
         $shipping_ai_object = new WC_Estonia_Shipping_Method();
+
     }
 
     public function clear_debug_log(): void
