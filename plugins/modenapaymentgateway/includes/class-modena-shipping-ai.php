@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 }
 
 class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
-    private $cost;
+    private mixed $cost;
 
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
@@ -15,12 +15,21 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         $this->method_description = __('Itella pakiterminalide lahendus Modenalt', 'woocommerce');
         $this->cost = 5;
 
-        $this->init_form_fields();
-        $this->register_settings();
-        $this->register_hooks();
+        $this->populateShippingSettings();
+
+        $this->title = $this->get_option('title');
+        $this->cost = $this->get_option('cost');
+
+        add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
+        add_action('woocommerce_checkout_update_order_review', array($this, 'ShippingMethodAvailabilityController'));
+        add_action('woocommerce_after_shipping_rate', array($this, 'update_checkout_assets'));
+        add_action('woocommerce_thankyou', array($this, 'preparePOSTrequestForBarcodeID'));
+        add_action('woocommerce_order_details_after_order_table_items', array($this, 'display_selected_terminal_in_orders'));
+        add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_selected_terminal_in_orders'));
+
 
     }
-    public function init_form_fields(): void {
+    public function populateShippingSettings(): void {
         $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
 
         $this->instance_form_fields = array(
@@ -43,48 +52,6 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         );
     }
 
-    public function register_settings() {
-        $this->title = $this->get_option('title');
-        $this->cost = $this->get_option('cost');
-    }
-
-    public function is_available($package): bool {
-        $max_capacity = 35;
-        $min_dimensions1 = [1, 15, 15];
-        $max_dimensions1 = [60, 36, 60];
-
-        $cart_weight = WC()->cart->get_cart_contents_weight();
-        $destination_country = $package['destination']['country'] ?? '';
-        if ($destination_country !== 'EE') {
-            return false;
-        }
-
-        if ($cart_weight > $max_capacity) {
-            return false;
-        }
-
-        $min_dimensions = $this->sanitize_dimensions($min_dimensions1);
-        $max_dimensions = $this->sanitize_dimensions($max_dimensions1);
-
-        foreach ($package['contents'] as $item_id => $values) {
-            $_product = $values['data'];
-            $dimensions = $_product->get_dimensions(false);
-
-            if (empty($dimensions['length']) || empty($dimensions['width']) || empty($dimensions['height'])) {
-                return true;
-            }
-
-            if ($dimensions['length'] < $min_dimensions[0] || $dimensions['width'] < $min_dimensions[1] || $dimensions['height'] < $min_dimensions[2]) {
-                return false;
-            }
-
-            if ($dimensions['length'] > $max_dimensions[0] || $dimensions['width'] > $max_dimensions[1] || $dimensions['height'] > $max_dimensions[2]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public function calculate_shipping($package = array()) {
 
         $rate = array(
@@ -96,31 +63,126 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         $this->add_rate($rate);
     }
 
-    public function get_terminal_list()
-    {
-        return json_decode(file_get_contents('https://monte360.com/itella/index.php?action=displayParcelsList'))->item;
+    private function sanitizeOrderProductDimensions($ProductDimensions): array {
+        return array_map(function ($ProductDimensions) {
+            return max(0, (float) $ProductDimensions);
+        }, $ProductDimensions);
     }
 
-    private function sanitize_dimensions($dimensions): array
+    public function ShippingMethodAvailabilityController($rates, $package)
     {
-        return array_map(function ($dimension) {
-            return max(0, (float) $dimension);
-        }, $dimensions);
-    }
-
-    public function filter_available_shipping($rates, $package)
-    {
-        if (!$this->is_available($package)) {
+        if (!$this->isOrderSuitableForShipping($package)) {
             unset($rates[$this->id]);
         }
         return $rates;
+    }
+
+    public function isOrderSuitableForShipping($package): bool {
+        $packageMaxCapacityKG = 35;
+        $toSanitizePackageMinDimensionsCM = [1, 15, 15];
+        $toSanitizePackageMaxDimensionsCM = [60, 36, 60];
+
+        $wooCommerceTotalCartWeight = WC()->cart->get_cart_contents_weight();
+        $shippingDestinationCountry = $package['destination']['country'] ?? '';
+        if ($shippingDestinationCountry !== 'EE') {
+            return false;
+        }
+
+        if ($wooCommerceTotalCartWeight > $packageMaxCapacityKG) {
+            return false;
+        }
+
+        $sanitizedPackageMinDimensions = $this->sanitizeOrderProductDimensions($toSanitizePackageMinDimensionsCM);
+        $sanitizedPackageMaxDimensions = $this->sanitizeOrderProductDimensions($toSanitizePackageMaxDimensionsCM);
+
+        foreach ($package['contents'] as $item_id => $values) {
+            $this->OrderProductDimensionValidator($values, $sanitizedPackageMinDimensions, $sanitizedPackageMaxDimensions);
+        }
+        return true;
+    }
+
+    public function OrderProductDimensionValidator($values, $sanitizedPackageMinDimensions, $sanitizedPackageMaxDimensions): bool {
+        $_product = $values['data'];
+        $wooCommerceOrderProductDimensions = $_product->get_dimensions(false);
+
+        if (empty($wooCommerceOrderProductDimensions['length']) || empty($wooCommerceOrderProductDimensions['width']) || empty($wooCommerceOrderProductDimensions['height'])) {
+            return true;
+        }
+
+        if ($wooCommerceOrderProductDimensions['length'] < $sanitizedPackageMinDimensions[0] || $wooCommerceOrderProductDimensions['width'] < $sanitizedPackageMinDimensions[1] || $wooCommerceOrderProductDimensions['height'] < $sanitizedPackageMinDimensions[2]) {
+            return false;
+        }
+
+        if ($wooCommerceOrderProductDimensions['length'] > $sanitizedPackageMaxDimensions[0] || $wooCommerceOrderProductDimensions['width'] > $sanitizedPackageMaxDimensions[1] || $wooCommerceOrderProductDimensions['height'] > $sanitizedPackageMaxDimensions[2]) {
+            return false;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function ParserForParcelTerminalsJSON() {
+        $parcelTerminalsJSON = $this->HTTPGetRequestForPackageTerminals('https://monte360.com/itella/index.php?action=displayParcelsList');
+        return json_decode($parcelTerminalsJSON)->item;
+    }
+
+    /**
+     * @throws Exception
+     */
+    function HTTPGetRequestForPackageTerminals($url): bool|string
+    {
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Set to true if you want to verify SSL certificate
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // Set to 2 to check that common name exists and matches the hostname provided
+
+        $POSTrequestResponse = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            error_log('Something went wrong with curling the terminals list. Sorry. ');
+            throw new Exception('Error: ' . curl_error($ch));
+        }
+        curl_close($ch);
+        return $POSTrequestResponse;
+    }
+
+    public function update_checkout_assets() {
+        $chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
+        if (is_array($chosen_shipping_methods) && in_array($this->id, $chosen_shipping_methods)) {
+            add_action('woocommerce_review_order_after_shipping', array($this, 'render_checkout_select_box'));
+        }
+    }
+    /**
+     * @throws Exception
+     */
+    public function render_checkout_select_box() {
+
+        error_log('Rendered times - x +1');
+        ?>
+        <label for="mdn-shipping-select-box"></label>
+        <select name="userShippingSelection" id="mdn-shipping-select-box">
+            <option disabled selected="selected">
+                <?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?>
+            </option>
+            <?php
+            $terminalList = $this->ParserForParcelTerminalsJSON();
+            foreach ($terminalList as $terminal) {
+                $terminalID = $terminal->{'place_id'};
+                echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
+            }
+            ?>
+        </select>
+        <?php
     }
 
 
     /**
      * @throws Exception
      */
-    public function prepare_shipping_selection_post($order_id) {
+    public function preparePOSTrequestForBarcodeID($order_id) {
 
         static $rendered = false;
 
@@ -161,7 +223,7 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
                 'placeId' => $placeId,
 
             );
-            $this->post_shipping_selection($data, $order);
+            $this->barcodePOSTrequest($data, $order);
         }
         $rendered = True;
     }
@@ -169,7 +231,7 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
     /**
      * @throws Exception
      */
-    public function post_shipping_selection($data, $order) {
+    public function barcodePOSTrequest($data, $order) {
         $curl = curl_init('https://monte360.com/itella/index.php?action=createShipment');
 
         curl_setopt($curl, CURLOPT_POST, true);
@@ -186,7 +248,7 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         if (curl_errno($curl)) {
             error_log('Error in POST response: ' . curl_error($curl));
         } else {
-            $this->parse_barcode_json($response, $order);
+            $this->barcodeJSONparser($response, $order);
         }
         curl_close($curl);
     }
@@ -194,7 +256,7 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
     /**
      * @throws Exception
      */
-    public function parse_barcode_json($response, $order) {
+    public function barcodeJSONparser($response, $order) {
 
         if (is_null($response)) {
             error_log('Response is NULL. Exiting get_label function.');
@@ -229,6 +291,31 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         }
     }
 
+
+
+    public function get_label($barcode_id) {
+        $curl = curl_init('https://monte360.com/itella/index.php?action=getLabel&barcode=' . $barcode_id);
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+
+        $response = curl_exec($curl);
+
+        if (curl_errno($curl)) {
+            error_log('Error in GET response: ' . curl_error($curl));
+        } else {
+            return $response;
+        }
+        curl_close($curl);
+    }
+
+
+
+    /**
+     * @throws Exception
+     */
     public function display_selected_terminal_in_orders($order_id) {
 
         static $is_rendered = False;
@@ -238,7 +325,7 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
 
         if(!$is_rendered) {
             if (!empty($terminal_id)) {
-                $terminalList = $this->get_terminal_list();
+                $terminalList = $this->ParserForParcelTerminalsJSON();
                 $selected_terminal = array_filter($terminalList, function ($terminal) use ($terminal_id) {
                     return $terminal->{'place_id'} == $terminal_id;
                 });
@@ -284,62 +371,5 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
             }
         }
         $is_rendered = True;
-    }
-
-    public function get_label($barcode_id) {
-        $curl = curl_init('https://monte360.com/itella/index.php?action=getLabel&barcode=' . $barcode_id);
-
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-
-        $response = curl_exec($curl);
-
-        if (curl_errno($curl)) {
-            error_log('Error in GET response: ' . curl_error($curl));
-        } else {
-            return $response;
-        }
-        curl_close($curl);
-    }
-
-    public function register_hooks() {
-        add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
-        add_action('woocommerce_checkout_update_order_review', array($this, 'filter_available_shipping'));
-        add_action('woocommerce_after_shipping_rate', array($this, 'update_checkout_assets'));
-        add_action('woocommerce_thankyou', array($this, 'prepare_shipping_selection_post'));
-        add_action('woocommerce_order_details_after_order_table_items', array($this, 'display_selected_terminal_in_orders'));
-        add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'display_selected_terminal_in_orders'));
-
-        // TODO save terminal_id from user selection
-
-    }
-
-    public function update_checkout_assets() {
-        $chosen_shipping_methods = WC()->session->get('chosen_shipping_methods');
-        if (is_array($chosen_shipping_methods) && in_array($this->id, $chosen_shipping_methods)) {
-            add_action('woocommerce_review_order_after_shipping', array($this, 'render_checkout_select_box'));
-        }
-    }
-
-    public function render_checkout_select_box() {
-
-        error_log('Rendered times - x +1');
-        ?>
-        <label for="mdn-shipping-select-box"></label>
-        <select name="userShippingSelection" id="mdn-shipping-select-box">
-            <option disabled selected="selected">
-                <?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?>
-            </option>
-            <?php
-            $terminalList = $this->get_terminal_list();
-            foreach ($terminalList as $terminal) {
-                $terminalID = $terminal->{'place_id'};
-                echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
-            }
-            ?>
-        </select>
-        <?php
     }
 }
