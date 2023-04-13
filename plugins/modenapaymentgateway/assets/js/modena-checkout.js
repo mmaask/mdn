@@ -14,3 +14,4 @@ function unselectAllModenaBanklinks() {
 function unselectModenaBanklink(banklink) {
   banklink.classList.remove('mdn_checked');
 }
+

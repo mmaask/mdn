@@ -23,6 +23,7 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
         add_action('woocommerce_after_shipping_rate', array($this, 'selectBoxRenderValidator'));
+
         add_action('woocommerce_review_meta', array($this, 'createOrderParcelMetaData'));
         add_action('woocommerce_thankyou', array($this, 'preparePOSTrequestForBarcodeID'));
         add_action('woocommerce_order_details_after_order_table_items', array($this, 'renderParcelTerminalLocationInAdminOrder'));
@@ -153,8 +154,18 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
 
     public function selectBoxRenderValidator() {
         $currentActiveShippingMethod = WC()->session->get('chosen_shipping_methods');
+        error_log($currentActiveShippingMethod[0]);
+
         if (is_array($currentActiveShippingMethod) && in_array($this->id, $currentActiveShippingMethod)) {
-            add_action('woocommerce_review_order_after_shipping', array($this, 'renderParcelTerminalSelectBox'));
+            add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
+        } else if (is_array($currentActiveShippingMethod) && $currentActiveShippingMethod[0] != $this->id) {
+            $script = "document.addEventListener('DOMContentLoaded', function() {
+            var selectBox = document.getElementById('mdn-shipping-select-box');
+            if (selectBox) {
+                selectBox.style.display = 'none';
+            }
+        });";
+            wp_add_inline_script('modena_frontend_script', $script, 'after');
         }
     }
 
