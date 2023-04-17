@@ -67,7 +67,6 @@ class Modena {
         $this->pluginUserAgentData = $pluginUserAgentData;
         $this->apiUrl              = $isTestMode ? self::DEV_API_URL : self::LIVE_API_URL;
         $this->tokenUrl            = $isTestMode ? self::DEV_TOKEN_URL : self::LIVE_TOKEN_URL;
-        //$this->shippingMethods =
     }
 
     /**

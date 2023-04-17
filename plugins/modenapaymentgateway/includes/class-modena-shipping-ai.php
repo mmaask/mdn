@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
+class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
     private mixed $cost;
 
     public function __construct($instance_id = 0) {
@@ -22,12 +22,13 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
 
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
-        add_action('woocommerce_after_shipping_rate', array($this, 'selectBoxRenderValidator'));
+        add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
+        add_action('woocommerce_order_item_meta_end', array($this, 'display_selected_parcel_terminal'), 10, 3);
 
         add_action('woocommerce_review_meta', array($this, 'createOrderParcelMetaData'));
         add_action('woocommerce_thankyou', array($this, 'preparePOSTrequestForBarcodeID'));
-        add_action('woocommerce_order_details_after_order_table_items', array($this, 'renderParcelTerminalLocationInAdminOrder'));
-        add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'renderParcelTerminalInThankYou'));
+        add_action('woocommerce_order_details_after_order_table_items', array($this, 'renderParcelTerminalLocationInThankYou'));
+        add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'renderParcelTerminalInAdminOrder'));
 
 
     }
@@ -152,79 +153,93 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
         return $terminalList = $this->parseParcelTerminalsJSON();
     }
 
-    public function selectBoxRenderValidator() {
-        $currentActiveShippingMethod = WC()->session->get('chosen_shipping_methods');
-        error_log($currentActiveShippingMethod[0]);
-
-        if (is_array($currentActiveShippingMethod) && in_array($this->id, $currentActiveShippingMethod)) {
-            add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
-        } else if (is_array($currentActiveShippingMethod) && $currentActiveShippingMethod[0] != $this->id) {
-            $script = "document.addEventListener('DOMContentLoaded', function() {
-            var selectBox = document.getElementById('mdn-shipping-select-box');
-            if (selectBox) {
-                selectBox.style.display = 'none';
-            }
-        });";
-            wp_add_inline_script('modena_frontend_script', $script, 'after');
-        }
-    }
 
     /**
      * @throws Exception
      */
     public function renderParcelTerminalSelectBox() {
-    ?>
-        <label for="mdn-shipping-select-box"></label>
-        <select name="userShippingSelection" id="mdn-shipping-select-box">
-            <option disabled selected="selected">
-                <?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?>
-            </option>
-            <?php
-            $terminalList = $this->getParcelTerminals();
-            foreach ($terminalList as $terminal) {
-                $terminalID = $terminal->{'place_id'};
-                echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
-            }
-            ?>
-        </select>
-    <?php
-    }
-
-    private function createOrderParcelMetaData($orderParcelTerminal, $order) {
-        if (!$order instanceof WC_Order) {
-            $order = wc_get_order($order);
-        }
-        if ($order instanceof WC_Order) {
-            $order->add_meta_data('_orderParcelTerminal', $orderParcelTerminal, true);
-            $order->save();
-        } else {
-            error_log('Could not fetch the order with the provided order ID.');
-            throw new Exception("Could not fetch the order with the provided order ID.");
-        }
+        ?>
+            <div class="mdn-shipping-select-wrapper">
+                <label for="mdn-shipping-select-box"></label>
+                <select name="userShippingSelection" id="mdn-shipping-select-box" data-method-id="<?php echo $this->id; ?>" style="margin-bottom: 10px">
+                    <option disabled selected="selected">
+                        <?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?>
+                    </option>
+                    <?php
+                        $terminalList = $this->getParcelTerminals();
+                        foreach ($terminalList as $terminal) {
+                            $terminalID = $terminal->{'place_id'};
+                            echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
+                        }
+                    ?>
+                </select>
+            </div>
+        <?php
     }
 
     /**
      * @throws Exception
      */
-    public function renderParcelTerminalInThankYou($order_id) {
-        ?>
-        <tr class="selected-terminal">
-            <th>
-                <h3>
-                    <?php _e('Saadetise pakiterminal', 'woocommerce'); ?>
-                </h3>
-            </th>
-            <td>
-                <p>
-                    <?php echo $this->getParcelTerminalInformationMock($order_id); ?>
-                </p>
-                <p>
-                    <b><a href="#" >Prindi pakikaart</a></b>
-                </p>
-            </td>
-        </tr>
-        <?php
+    public function createOrderParcelMetaData($order_id) {
+        error_log('createOrderParcelMetaData called with order_id: ' . $order_id);
+
+        $order = wc_get_order($order_id);
+        if ($order instanceof WC_Order) {
+            $selected_parcel_terminal = sanitize_text_field($_POST['userShippingSelection']);
+            error_log('Selected parcel terminal: ' . $selected_parcel_terminal);
+
+            $order->add_meta_data('_selected_parcel_terminal', $selected_parcel_terminal, true);
+            $order->save();
+            error_log('Selected parcel terminal metadata saved for order_id: ' . $order_id);
+        } else {
+            error_log('Could not fetch the order with the provided order ID: ' . $order_id);
+            throw new Exception("Could not fetch the order with the provided order ID.");
+        }
     }
+
+
+    /**
+     * @throws Exception
+     */
+    public function renderParcelTerminalLocationInThankYou($order_id) {
+        if (function_exists('is_order_received_page') && is_order_received_page()) {
+            ?>
+            <tr class="selected-terminal">
+                <th>
+                    <p>
+                        <?php _e('Valitud pakiterminal', 'woocommerce'); ?>
+                    </p>
+                </th>
+                <td>
+                    <p>
+                        <?php echo $this->getOrderParcelTerminal($order_id); ?>
+                    </p>
+                </td>
+            </tr>
+            <?php
+        }
+    }
+
+    public function display_selected_parcel_terminal($item_id, $item, $order) {
+        error_log('display_selected_parcel_terminal called with item_id: ' . $item_id);
+
+        // Check if the shipping method of the order is the current shipping method
+        $order_shipping_method = $order->get_shipping_method();
+        error_log('Order shipping method: ' . $order_shipping_method);
+
+        // Get the selected parcel terminal metadata from the order
+        $selected_parcel_terminal = $order->get_meta('_selected_parcel_terminal');
+        error_log('Selected parcel terminal: ' . $selected_parcel_terminal);
+
+        // Display the selected parcel terminal
+        if (!empty($selected_parcel_terminal)) {
+            echo '<p><strong>' . __('Valitud pakiterminal', 'woocommerce') . ':</strong> ' . $selected_parcel_terminal . '</p>';
+            error_log('Selected parcel terminal displayed');
+        } else {
+            error_log('Selected parcel terminal is empty');
+        }
+    }
+
 
     /**
      * @throws Exception
@@ -378,24 +393,25 @@ class WC_Estonia_Shipping_Method extends WC_Shipping_Method {
     /**
      * @throws Exception
      */
-    public function renderParcelTerminalLocationInAdminOrder($order_id) {
-        if (function_exists('is_order_received_page') && is_order_received_page()) {
-            ?>
-                <tr class="selected-terminal">
-                <th>
+    public function renderParcelTerminalInAdminOrder($order_id) {
+        ?>
+        <tr class="selected-terminal">
+            <th>
+                <h3>
+                    <?php _e('Saadetise pakiterminal', 'woocommerce'); ?>
+                </h3>
+            </th>
+            <td>
                 <p>
-                    <?php _e('Valitud pakiterminal', 'woocommerce'); ?>
+                    <?php echo $this->getParcelTerminalInformationMock($order_id); ?>
                 </p>
-                </th>
-                <td>
                 <p>
-                <?php echo $this->getOrderParcelTerminal($order_id); ?>
+                    <b><a href="#" >Prindi pakikaart</a></b>
                 </p>
-                </td>
-                </tr>
-            <?php
-            }
-        }
+            </td>
+        </tr>
+        <?php
+    }
 
     /**
      * @throws Exception

@@ -6,7 +6,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Shipping_Loader {
     public function init(): void {
-        $this->run_shipping();
+        if ($this->is_woocommerce_active()) {
+            $this->run_shipping();
+        }
+    }
+
+
+    public function is_woocommerce_active(): bool {
+        return in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) ||
+        (is_multisite() && in_array('woocommerce/woocommerce.php', array_keys(get_site_option('active_sitewide_plugins'))));
     }
 
     /**
@@ -18,12 +26,12 @@ class Shipping_Loader {
      */
 
     public function run_shipping(): void {
-        if (!class_exists('WC_Estonia_Shipping_Method') && class_exists('WC_Shipping_Method')) {
+        if (!class_exists('Modena_Shipping_Itella_Terminals') && class_exists('WC_Shipping_Method')) {
             add_filter('woocommerce_shipping_methods', array($this, 'load_modena_shipping_methods'));
             add_action('woocommerce_shipping_init', array($this, 'init_WC_estonia'));
         } else {
             $errorMessage = "Error: ";
-            if (!class_exists('WC_Estonia_Shipping_Method')) {
+            if (!class_exists('Modena_Shipping_Itella_Terminals')) {
                 $errorMessage .= "The 'WC_Estonia_Shipping_Method' class does not exist. ";
             }
             if (!class_exists('WC_Shipping_Method')) {
@@ -39,7 +47,7 @@ class Shipping_Loader {
      */
 
     public function load_modena_shipping_methods(array $methods): array {
-        $methods['modena-shipping-itella-terminals'] = 'WC_Estonia_Shipping_Method';
+        $methods['modena-shipping-itella-terminals'] = 'Modena_Shipping_Itella_Terminals';
         return $methods;
     }
 
@@ -56,7 +64,7 @@ class Shipping_Loader {
         $this->clear_debug_log();
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-ai.php');
 
-        $shipping_ai_object = new WC_Estonia_Shipping_Method();
+        $shipping_ai_object = new Modena_Shipping_Itella_Terminals();
 
     }
 

@@ -45,10 +45,6 @@ class Modena_Init_Handler
             apply_filters('modena_product_installments_priority', 15));
         add_filter('woocommerce_available_variation', [$this, 'display_variation_installments'],
             apply_filters('modena_variation_installments_priority', 10));
-
-        require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-loader.php');
-        $shipping_loader = new Shipping_Loader();
-        $shipping_loader->init();
     }
 
     function modena_gateways_init(): void

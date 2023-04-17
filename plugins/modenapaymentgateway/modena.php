@@ -27,12 +27,18 @@ add_action('plugins_loaded', 'modena_init');
 function modena_init(): void
 {
     static $modena_plugin;
+    static $shipping_loader;
 
     if (!isset($modena_plugin)) {
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-init-handler.php');
         $modena_plugin = new Modena_Init_Handler();
+
+        require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-loader.php');
+        $shipping_loader = new Shipping_Loader();
+
     }
     $modena_plugin->run();
+    $shipping_loader->init();
 }
 
 
