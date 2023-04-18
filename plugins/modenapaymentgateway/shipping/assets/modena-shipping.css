@@ -1,0 +1,13 @@
+
+.mdn-shipping-selection, .mdn-shipping-selection-wrapper{
+    max-width: inherit;
+    width: inherit;
+}
+
+#mdn-shipping-select-box {
+    max-width: 100%;
+
+}
+.select2-container--default .select2-results>.select2-results__options {
+    max-height: 400px !important;
+}

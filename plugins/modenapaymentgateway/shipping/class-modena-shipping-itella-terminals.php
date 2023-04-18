@@ -3,67 +3,24 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
-    private mixed $cost;
+class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Itella {
 
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
-        $this->instance_id = absint($instance_id);
-        $this->supports = array('shipping-zones', 'instance-settings', );
         $this->id = 'modena-shipping-itella-terminals';
-        $this->method_title = __('Itella pakiterminalid', 'woocommerce');
+        $this->title = __('Itella pakiterminal', 'woocommerce');
+        $this->method_title = __('Itella pakiterminal', 'woocommerce');
         $this->method_description = __('Itella pakiterminalide lahendus Modenalt', 'woocommerce');
         $this->cost = 5;
 
-        $this->populateShippingSettings();
-
-        $this->title = $this->get_option('title');
-        $this->cost = $this->get_option('cost');
-
-        add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueueParcelTerminalSearchBoxAssets'));
+
         add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
-        add_action('woocommerce_order_item_meta_end', array($this, 'display_selected_parcel_terminal'), 10, 3);
-
         add_action('woocommerce_review_meta', array($this, 'createOrderParcelMetaData'));
+        add_action('woocommerce_get_order_item_totals', array($this, 'addParcelTerminalToCheckoutDetails'), 10, 2);
         add_action('woocommerce_thankyou', array($this, 'preparePOSTrequestForBarcodeID'));
-        add_action('woocommerce_order_details_after_order_table_items', array($this, 'renderParcelTerminalLocationInThankYou'));
         add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'renderParcelTerminalInAdminOrder'));
-
-
-    }
-    public function populateShippingSettings(): void {
-        $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
-
-        $this->instance_form_fields = array(
-            'title' => array(
-                'title' => __('Title', 'woocommerce'),
-                'type' => 'text',
-                'description' => __('This controls the title which the user sees during checkout.', 'woocommerce'),
-                'default' => $this->method_title,
-                'desc_tip' => true,
-            ),
-            'cost' => array(
-                'title' => __('Cost'),
-                'type' => 'int',
-                'placeholder' => '',
-                'description' => $cost_desc,
-                'default' => '0',
-                'desc_tip' => true,
-                'sanitize_callback' => array($this, 'sanitize_cost'),
-            ),
-        );
-    }
-
-    public function calculate_shipping($package = array()) {
-
-        $rate = array(
-            'id' => $this->id,
-            'label' => $this->title,
-            'cost' => $this->cost,
-        );
-
-        $this->add_rate($rate);
     }
 
     public function isShippingMethodAvailable($rates, $package) {
@@ -110,12 +67,6 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
         return true;
     }
 
-    public function sanitizeOrderProductDimensions($ProductDimensions): array {
-        return array_map(function ($ProductDimensions) {
-            return max(0, (float) $ProductDimensions);
-        }, $ProductDimensions);
-    }
-
     /**
      * @throws Exception
      */
@@ -153,28 +104,45 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
         return $terminalList = $this->parseParcelTerminalsJSON();
     }
 
+    function enqueueParcelTerminalSearchBoxAssets() {
+        wp_register_style('select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css');
+        wp_enqueue_style('select2');
+        wp_register_script('select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js', array('jquery'), '4.1.0-rc.0', true);
+        wp_enqueue_script('select2');
+    }
 
     /**
      * @throws Exception
      */
     public function renderParcelTerminalSelectBox() {
+        static $showOnce = false;
+
         ?>
-            <div class="mdn-shipping-select-wrapper">
-                <label for="mdn-shipping-select-box"></label>
-                <select name="userShippingSelection" id="mdn-shipping-select-box" data-method-id="<?php echo $this->id; ?>" style="margin-bottom: 10px">
-                    <option disabled selected="selected">
-                        <?php _e('-- Palun vali pakiautomaat --', 'woocommerce'); ?>
-                    </option>
-                    <?php
-                        $terminalList = $this->getParcelTerminals();
-                        foreach ($terminalList as $terminal) {
-                            $terminalID = $terminal->{'place_id'};
-                            echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
-                        }
-                    ?>
-                </select>
-            </div>
+        <div class="mdn-shipping-select-wrapper" style="margin-bottom: 15px">
+            <label for="mdn-shipping-select-box"></label>
+            <select name="userShippingSelection" id="mdn-shipping-select-box" data-method-id="<?php echo $this->id; ?>" style="width: 100%; height: 400px;">
+                <option disabled selected="selected"></option>
+                <?php
+                $terminalList = $this->getParcelTerminals();
+
+                $cities = array();
+                foreach ($terminalList as $terminal) {
+                    $cities[$terminal->{'city'}][] = $terminal;
+                }
+
+                foreach ($cities as $city => $terminals) {
+                    echo "<optgroup label='$city'>";
+                    foreach ($terminals as $terminal) {
+                        $terminalID = $terminal->{'place_id'};
+                        echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
+                    }
+                    echo "</optgroup>";
+                }
+                ?>
+            </select>
+        </div>
         <?php
+        $showOnce = true;
     }
 
     /**
@@ -188,7 +156,7 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
             $selected_parcel_terminal = sanitize_text_field($_POST['userShippingSelection']);
             error_log('Selected parcel terminal: ' . $selected_parcel_terminal);
 
-            $order->add_meta_data('_selected_parcel_terminal', $selected_parcel_terminal, true);
+            $order->add_meta_data('_selected_parcel_terminal_id', $selected_parcel_terminal, true);
             $order->save();
             error_log('Selected parcel terminal metadata saved for order_id: ' . $order_id);
         } else {
@@ -201,45 +169,29 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
     /**
      * @throws Exception
      */
-    public function renderParcelTerminalLocationInThankYou($order_id) {
-        if (function_exists('is_order_received_page') && is_order_received_page()) {
-            ?>
-            <tr class="selected-terminal">
-                <th>
-                    <p>
-                        <?php _e('Valitud pakiterminal', 'woocommerce'); ?>
-                    </p>
-                </th>
-                <td>
-                    <p>
-                        <?php echo $this->getOrderParcelTerminal($order_id); ?>
-                    </p>
-                </td>
-            </tr>
-            <?php
+    public function addParcelTerminalToCheckoutDetails($totals, $order) {
+        $order_id = $order->get_id();
+        $parcel_terminal = $this->getOrderParcelTerminalID($order_id);
+
+        if ($parcel_terminal) {
+            $new_totals = [];
+
+            foreach ($totals as $key => $total) {
+                $new_totals[$key] = $total;
+
+                if ($key === 'shipping') {
+                    $new_totals['parcel_terminal'] = [
+                        'label' => __('Valitud pakiterminal:', 'woocommerce'),
+                        'value' => $parcel_terminal,
+                    ];
+                }
+            }
+
+            $totals = $new_totals;
         }
+
+        return $totals;
     }
-
-    public function display_selected_parcel_terminal($item_id, $item, $order) {
-        error_log('display_selected_parcel_terminal called with item_id: ' . $item_id);
-
-        // Check if the shipping method of the order is the current shipping method
-        $order_shipping_method = $order->get_shipping_method();
-        error_log('Order shipping method: ' . $order_shipping_method);
-
-        // Get the selected parcel terminal metadata from the order
-        $selected_parcel_terminal = $order->get_meta('_selected_parcel_terminal');
-        error_log('Selected parcel terminal: ' . $selected_parcel_terminal);
-
-        // Display the selected parcel terminal
-        if (!empty($selected_parcel_terminal)) {
-            echo '<p><strong>' . __('Valitud pakiterminal', 'woocommerce') . ':</strong> ' . $selected_parcel_terminal . '</p>';
-            error_log('Selected parcel terminal displayed');
-        } else {
-            error_log('Selected parcel terminal is empty');
-        }
-    }
-
 
     /**
      * @throws Exception
@@ -249,13 +201,10 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
         $order = wc_get_order($order_id);
         $orderReference = $order->get_order_number();
 
-        $recipientName = WC()->customer->get_billing_first_name() . ' ' . WC()->customer->get_billing_last_name();
+        $recipientName = WC()->customer->get_billing_first_name() . ' class-modena-shipping-itella-terminals.php' . WC()->customer->get_billing_last_name();
         $recipientPhone = WC()->customer->get_shipping_phone();
         $recipientEmail = WC()->customer->get_billing_email();
-
         $placeId = $this->getOrderParcelTerminalID($orderReference);
-        //$placeId = $order->get_shipping_location_id();
-
         $result = $this->getOrderTotalWeightAndContents($order);
         $weight = $result['total_weight'];
         $packageContent = $result['packageContent'];
@@ -272,27 +221,6 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
             );
         $this->barcodePOSTrequest($data, $order);
 
-    }
-
-    private function getOrderTotalWeightAndContents($order): array {
-        $packageContent = '';
-        $total_weight = 0;
-
-        foreach ($order->get_items() as $item_id => $item) {
-            if ($item instanceof WC_Order_Item_Product) {
-                $product_name = $item->get_name();
-                $quantity = $item->get_quantity();
-                $packageContent .= $quantity . ' x ' . $product_name . "\n";
-
-                $product = $item->get_product();
-                $product_weight = $product->get_weight();
-                $total_weight += $product_weight * $quantity;
-            }
-        }
-        return array(
-            'total_weight' => $total_weight,
-            'packageContent' => $packageContent,
-        );
     }
 
     /**
@@ -394,6 +322,8 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
      * @throws Exception
      */
     public function renderParcelTerminalInAdminOrder($order_id) {
+        static $showOnce = false;
+
         ?>
         <tr class="selected-terminal">
             <th>
@@ -403,7 +333,7 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
             </th>
             <td>
                 <p>
-                    <?php echo $this->getParcelTerminalInformationMock($order_id); ?>
+                    <?php echo $this->getOrderParcelTerminalID($order_id); ?>
                 </p>
                 <p>
                     <b><a href="#" >Prindi pakikaart</a></b>
@@ -411,40 +341,41 @@ class Modena_Shipping_Itella_Terminals extends WC_Shipping_Method {
             </td>
         </tr>
         <?php
+        $showOnce = true;
     }
 
     /**
      * @throws Exception
      */
-    public function getOrderParcelTerminal($order_id): string
+    public function getOrderParcelTerminalID($order_id): ?string
     {
-        $terminal_id = 110;
+        $order = wc_get_order($order_id);
+        if ($order instanceof WC_Order) {
 
-        return $this->getParcelTerminalInformationMock($terminal_id);
+            $selected_parcel_terminal_id = $order->get_meta('_selected_parcel_terminal_id', true);
+            error_log("is empty? : " . $selected_parcel_terminal_id);
 
+            if(!$selected_parcel_terminal_id) {
+                $parcelTerminalText = $this->getOrderParcelTerminalText(110);
+            } else {
+                $parcelTerminalText = $this->getOrderParcelTerminalText($selected_parcel_terminal_id);
+            }
+            return $parcelTerminalText;
+        }
+        return '';
     }
 
     /**
      * @throws Exception
      */
-    public function getOrderParcelTerminalID($order_id): int
-    {
-        return $terminal_id = 110;
-
+    public function getOrderParcelTerminalText($selectedParcelTerminalID) {
+        $parcelTerminals = $this->getParcelTerminals();
+        foreach ($parcelTerminals as $parcelTerminal) {
+            $parcelTerminalID = $parcelTerminal->{'place_id'};
+            if ($selectedParcelTerminalID = $parcelTerminalID) {
+                return $parcelTerminal->{'name'} . " - " . $parcelTerminal->{'address'};
+            }
+            return 'Veateade - pakiterminalide listile ei pääsetud ligi.';
+        }
     }
-
-    public function getParcelTerminalInformationMock($order_id): string {
-        return 'Kroonikeskus';
-    }
-
-    public function getParcelTerminalInformation($order_id): int {
-        return 110;
-
-        // do some work here and render the like in select box. {'name'};
-
-        //$terminal_id = get_post_meta($order_id, 'selected_terminal', true); // Get the selected terminal id from the order meta
-
-    }
-
-
 }

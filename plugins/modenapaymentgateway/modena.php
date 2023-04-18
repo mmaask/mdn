@@ -33,12 +33,12 @@ function modena_init(): void
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-init-handler.php');
         $modena_plugin = new Modena_Init_Handler();
 
-        require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-loader.php');
-        $shipping_loader = new Shipping_Loader();
+        require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping.php');
+        $shipping_method = new Modena_Shipping();
 
     }
     $modena_plugin->run();
-    $shipping_loader->init();
+    $shipping_method->init();
 }
 
 

@@ -13,7 +13,7 @@ class Modena_Load_Checkout_Assets
     {
         wp_enqueue_style('modena_frontend_style', MODENA_PLUGIN_URL . '/assets/css/modena-checkout.css');
         wp_enqueue_script('modena_frontend_script', MODENA_PLUGIN_URL . '/assets/js/modena-checkout.js');
-        wp_enqueue_script('modena_backend_script', MODENA_PLUGIN_URL . '/assets/js/modena-shipping.js');
+
     }
 
     public static function getInstance(): Modena_Load_Checkout_Assets

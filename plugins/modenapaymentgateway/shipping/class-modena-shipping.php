@@ -4,10 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
 
-class Shipping_Loader {
+class Modena_Shipping {
     public function init(): void {
         if ($this->is_woocommerce_active()) {
             $this->run_shipping();
+
         }
     }
 
@@ -27,6 +28,7 @@ class Shipping_Loader {
 
     public function run_shipping(): void {
         if (!class_exists('Modena_Shipping_Itella_Terminals') && class_exists('WC_Shipping_Method')) {
+            $this->loadAssets();
             add_filter('woocommerce_shipping_methods', array($this, 'load_modena_shipping_methods'));
             add_action('woocommerce_shipping_init', array($this, 'init_WC_estonia'));
         } else {
@@ -62,7 +64,8 @@ class Shipping_Loader {
 
     public function init_WC_estonia(): void {
         $this->clear_debug_log();
-        require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-shipping-ai.php');
+        require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-itella.php');
+        require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-itella-terminals.php');
 
         $shipping_ai_object = new Modena_Shipping_Itella_Terminals();
 
@@ -75,5 +78,11 @@ class Shipping_Loader {
             $file_handle = fopen($debug_log_file, 'w');
             fclose($file_handle);
         }
+    }
+
+    public function loadAssets(): void {
+        wp_enqueue_style('modena_shipping_style', MODENA_PLUGIN_URL . '/shipping/assets/modena-shipping.css');
+        wp_enqueue_script('modena_shipping_script', MODENA_PLUGIN_URL . 'shipping/assets/modena-shipping.js', array('jquery'), '6.2', true);
+
     }
 }
