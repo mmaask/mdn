@@ -3,22 +3,31 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-abstract class Modena_Shipping_Itella extends WC_Shipping_Method {
+abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
     private mixed $cost;
 
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
-        $this->instance_id = absint($instance_id);
-        $this->supports = array('shipping-zones', 'instance-settings', );
 
+
+        $this->instance_id = absint($instance_id);
+        $this->supports           = array(
+            'shipping-zones',
+            'instance-settings',
+            'instance-settings-modal',
+        );
+
+        $this->init();
+    }
+
+    public function init() {
         $this->init_form_fields();
 
         $this->title = $this->get_option('title');
         $this->cost = $this->get_option('cost');
 
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
-
     }
 
     public function init_form_fields(): void {
@@ -29,7 +38,7 @@ abstract class Modena_Shipping_Itella extends WC_Shipping_Method {
                 'title' => __('Title', 'woocommerce'),
                 'type' => 'text',
                 'description' => __('This controls the title which the user sees during checkout.', 'woocommerce'),
-                'default' => $this->method_title,
+                'default' => 'Itella',
                 'desc_tip' => true,
             ),
             'cost' => array(
@@ -37,7 +46,7 @@ abstract class Modena_Shipping_Itella extends WC_Shipping_Method {
                 'type' => 'int',
                 'placeholder' => '',
                 'description' => $cost_desc,
-                'default' => '0',
+                'default' => '9.99',
                 'desc_tip' => true,
                 'sanitize_callback' => array($this, 'sanitize_cost'),
             ),

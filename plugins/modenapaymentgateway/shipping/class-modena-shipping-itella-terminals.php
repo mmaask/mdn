@@ -3,19 +3,24 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Itella {
+class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
         $this->id = 'modena-shipping-itella-terminals';
-        $this->title = __('Itella pakiterminal', 'woocommerce');
+        //$this->title = __('pakiterminal', 'woocommerce');
         $this->method_title = __('Itella pakiterminal', 'woocommerce');
         $this->method_description = __('Itella pakiterminalide lahendus Modenalt', 'woocommerce');
-        $this->cost = 5;
 
+        $this->title = ('Itella pakiterminal');
+
+        $this->init_hooks();
+
+    }
+
+    public function init_hooks() {
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
         add_action('wp_enqueue_scripts', array($this, 'enqueueParcelTerminalSearchBoxAssets'));
-
         add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
         add_action('woocommerce_review_meta', array($this, 'createOrderParcelMetaData'));
         add_action('woocommerce_get_order_item_totals', array($this, 'addParcelTerminalToCheckoutDetails'), 10, 2);
@@ -105,9 +110,9 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Itella {
     }
 
     function enqueueParcelTerminalSearchBoxAssets() {
-        wp_register_style('select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css');
+        wp_register_style('select2', 'assets/select2/select2.min.css');
         wp_enqueue_style('select2');
-        wp_register_script('select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js', array('jquery'), '4.1.0-rc.0', true);
+        wp_register_script('select2', 'assets/select2/select2.min.js', array('jquery'), true);
         wp_enqueue_script('select2');
     }
 
