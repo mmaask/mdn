@@ -13,12 +13,10 @@
 
 label[for="shipping_method_0_modena-shipping-itella-terminals"]::after {
     content: url("logos/itella-logo.png");
-    display: block;
     vertical-align: middle;
     max-width: 40px;
     height: auto;
-    float:right;
-    right: 30px;
+    padding-left: 5px;
 
 
 }

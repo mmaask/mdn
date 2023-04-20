@@ -5,18 +5,38 @@ if (!defined('ABSPATH')) {
 
 class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
+    public $cost;
+
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
         $this->id = 'modena-shipping-itella-terminals';
-        //$this->title = __('pakiterminal', 'woocommerce');
-        $this->method_title = __('Itella pakiterminal', 'woocommerce');
-        $this->method_description = __('Itella pakiterminalide lahendus Modenalt', 'woocommerce');
+        $this->method_title = __('Itella Smartpost', 'woocommerce');
+        $this->method_description = __('Itella Smartpost lahendus Modenalt', 'woocommerce');
+        $this->title = ('Smartpost');
 
-        $this->title = ('Itella pakiterminal');
-
+        $this->init_form_fields();
+        $this->cost = floatval($this->get_option('cost'));
         $this->init_hooks();
 
     }
+
+    public function init_form_fields(): void {
+        $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
+
+        $this->instance_form_fields = array(
+
+            'cost' => array(
+                'title' => __('Cost'),
+                'type' => 'float',
+                'placeholder' => '',
+                'description' => $cost_desc,
+                'default' => 4.99,
+                'desc_tip' => true,
+                'sanitize_callback' => array($this, 'sanitizeshippingMethodCost'),
+            ),
+        );
+    }
+
 
     public function init_hooks() {
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
@@ -75,7 +95,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     /**
      * @throws Exception
      */
-    public function getParcelTerminalsHTTPrequest(): bool|string {
+    public function getParcelTerminalsHTTPrequest(): string {
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL, 'https://monte360.com/itella/index.php?action=displayParcelsList');
@@ -109,10 +129,11 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         return $terminalList = $this->parseParcelTerminalsJSON();
     }
 
-    function enqueueParcelTerminalSearchBoxAssets() {
+    public function enqueueParcelTerminalSearchBoxAssets() {
         wp_register_style('select2', 'assets/select2/select2.min.css');
-        wp_enqueue_style('select2');
         wp_register_script('select2', 'assets/select2/select2.min.js', array('jquery'), true);
+
+        wp_enqueue_style('select2');
         wp_enqueue_script('select2');
     }
 
@@ -122,31 +143,34 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     public function renderParcelTerminalSelectBox() {
         static $showOnce = false;
 
-        ?>
-        <div class="mdn-shipping-select-wrapper" style="margin-bottom: 15px">
-            <label for="mdn-shipping-select-box"></label>
-            <select name="userShippingSelection" id="mdn-shipping-select-box" data-method-id="<?php echo $this->id; ?>" style="width: 100%; height: 400px;">
-                <option disabled selected="selected"></option>
-                <?php
-                $terminalList = $this->getParcelTerminals();
+        if(!$showOnce) {
+            ?>
+            <div class="mdn-shipping-select-wrapper" style="margin-bottom: 15px">
+                <label for="mdn-shipping-select-box"></label>
+                <select name="userShippingSelection" id="mdn-shipping-select-box" data-method-id="<?php echo $this->id; ?>" style="width: 100%; height: 400px;">
+                    <option disabled selected="selected"></option>
+                    <?php
+                    $terminalList = $this->getParcelTerminals();
 
-                $cities = array();
-                foreach ($terminalList as $terminal) {
-                    $cities[$terminal->{'city'}][] = $terminal;
-                }
-
-                foreach ($cities as $city => $terminals) {
-                    echo "<optgroup label='$city'>";
-                    foreach ($terminals as $terminal) {
-                        $terminalID = $terminal->{'place_id'};
-                        echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
+                    $cities = array();
+                    foreach ($terminalList as $terminal) {
+                        $cities[$terminal->{'city'}][] = $terminal;
                     }
-                    echo "</optgroup>";
-                }
-                ?>
-            </select>
-        </div>
-        <?php
+
+                    foreach ($cities as $city => $terminals) {
+                        echo "<optgroup label='$city'>";
+                        foreach ($terminals as $terminal) {
+                            $terminalID = $terminal->{'place_id'};
+                            echo "<option value='$terminalID' >" . $terminal->{'name'} . " - " . $terminal->{'address'} . "</option>";
+                        }
+                        echo "</optgroup>";
+                    }
+                    ?>
+                </select>
+            </div>
+            <?php
+        }
+
         $showOnce = true;
     }
 
@@ -328,24 +352,25 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
      */
     public function renderParcelTerminalInAdminOrder($order_id) {
         static $showOnce = false;
-
-        ?>
-        <tr class="selected-terminal">
-            <th>
-                <h3>
-                    <?php _e('Saadetise pakiterminal', 'woocommerce'); ?>
-                </h3>
-            </th>
-            <td>
-                <p>
-                    <?php echo $this->getOrderParcelTerminalID($order_id); ?>
-                </p>
-                <p>
-                    <b><a href="#" >Prindi pakikaart</a></b>
-                </p>
-            </td>
-        </tr>
-        <?php
+            if(!$showOnce) {
+                ?>
+                <tr class="selected-terminal">
+                    <th>
+                        <h3>
+                            <?php _e('Saadetise pakiterminal', 'woocommerce'); ?>
+                        </h3>
+                    </th>
+                    <td>
+                        <p>
+                            <?php echo $this->getOrderParcelTerminalID($order_id); ?>
+                        </p>
+                        <p>
+                            <b><a href="#" >Prindi pakikaart</a></b>
+                        </p>
+                    </td>
+                </tr>
+                <?php
+            }
         $showOnce = true;
     }
 
@@ -382,5 +407,12 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             }
             return 'Veateade - pakiterminalide listile ei pääsetud ligi.';
         }
+    }
+
+    /**
+     * @return float
+     */
+    public function getCost(): float {
+        return (float) $this->cost;
     }
 }
