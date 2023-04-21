@@ -81,8 +81,15 @@ class Modena_Shipping {
     }
 
     public function loadAssets(): void {
+
+
         wp_enqueue_style('modena_shipping_style', MODENA_PLUGIN_URL . '/shipping/assets/modena-shipping.css');
         wp_enqueue_script('modena_shipping_script', MODENA_PLUGIN_URL . 'shipping/assets/modena-shipping.js', array('jquery'), '6.2', true);
 
+        $translations = array(
+            'please_choose_parcel_terminal' => apply_filters('gettext', 'Vali sobiv pakipunkt', 'chooseParcelTerminalDefaultText', 'mdn-translations')
+        );
+
+        wp_localize_script('modena_shipping_script', 'mdnTranslations', $translations);
     }
 }

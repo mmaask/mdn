@@ -30,7 +30,4 @@ class Modena_Admin_Handler
 
         echo get_post_meta($postId, Modena_Base_Payment::MODENA_SELECTED_METHOD_KEY, true);
     }
-
-
-
 }

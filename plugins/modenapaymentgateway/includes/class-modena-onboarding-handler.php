@@ -65,7 +65,7 @@ class Modena_Onboarding_Handler
         );
 
         // Save credentials to settings API
-        $gateways = ['slice', 'credit', 'direct', 'business-credit'];
+        $gateways = ['slice', 'credit', 'direct', 'businessleasing'];
 
         foreach ($gateways as $gateway) {
             $settings_array = (array) get_option('woocommerce_modena_' . $gateway . '_settings', array());
@@ -114,7 +114,6 @@ class Modena_Onboarding_Handler
         return admin_url('admin.php?page=wc-settings&tab=checkout&section=' . $gateway_id);
     }
 
-
     /**
      * @param $gateway_id
      * @param  bool  $is_test_mode
@@ -122,15 +121,11 @@ class Modena_Onboarding_Handler
      */
     public function get_autoconfig_url($gateway_id, $is_test_mode = true)
     {
-
-
         $query_args = array(
             'redirect'   => urlencode($this->get_redirect_url($gateway_id, $is_test_mode)),
             /* phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode */
             'merchantId' => md5(site_url('/') . time()),
         );
-
-
 
         return add_query_arg($query_args, $this->get_partner_portal_url($is_test_mode));
     }

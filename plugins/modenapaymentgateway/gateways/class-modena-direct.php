@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
     public function __construct()
     {
         $this->id      = 'modena_direct';
-        $this->title   = __('Panga- ja kaardimaksed', 'modena');
+        $this->title = apply_filters('gettext', 'Panga- ja kaardimaksed', 'mdn-direct-title-text', 'mdn-translations');
         $this->enabled = $this->get_option('enabled');
 
         $this->method_title       = 'Modena Direct';

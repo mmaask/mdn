@@ -26,10 +26,12 @@ class Modena {
     const SCOPE_CREDIT                  = 'creditpayment';
     const CREDIT_PAYMENT_ORDER_URL      = 'modena/api/merchant/credit-payment-order';
     const CREDIT_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
-    # BUSINESS CREDIT PAYMENT
-    const SCOPE_BUSINESS_CREDIT                  = 'businesscreditpayment';
-    const BUSINESS_CREDIT_PAYMENT_ORDER_URL      = 'modena/api/merchant/business-credit-payment-order';
-    const BUSINESS_CREDIT_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
+
+    # BUSINESS LEASING PAYMENT
+    const SCOPE_BUSINESS_LEASING                  = 'businessleasing';
+    const BUSINESS_LEASING_PAYMENT_ORDER_URL      = 'modena/api/merchant/business-leasing-payment-order';
+    const BUSINESS_LEASING_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
+
     # DIRECT PAYMENT
     const SCOPE_DIRECT                  = 'directpayment';
     const DIRECT_PAYMENT_ORDER_URL      = 'direct/api/partner-direct-payments/payment-order';
@@ -90,9 +92,6 @@ class Modena {
         return $response->getBodyValue('access_token');
     }
 
-
-
-
     /**
      * @param  string               $requestUrl
      * @param  array|string|null    $body
@@ -103,8 +102,6 @@ class Modena {
      */
     private function sendRequest($requestUrl, $body, $headers, $requestType = 'GET')
     {
-
-
         $defaultArgs                = self::DEFAULT_ARGS;
         $defaultArgs['user-agent']  = sprintf(
             'Modena-Library/%s %s',
@@ -192,7 +189,6 @@ class Modena {
      * @throws Exception
      */
     private function sendPaymentOrderRequest($serviceUrl, $request, $scope) {
-
         $token = $this->getToken($scope);
 
         $headers = array(
@@ -241,8 +237,8 @@ class Modena {
      * @return ModenaOrderResponse
      * @throws Exception
      */
-    public function postBusinessCreditPaymentOrder($request) {
-        return $response = $this->sendPaymentOrderRequest(self::BUSINESS_CREDIT_PAYMENT_ORDER_URL, $request, self::SCOPE_BUSINESS_CREDIT);
+    public function postBusinessLeasingPaymentOrder($request) {
+        return $response = $this->sendPaymentOrderRequest(self::BUSINESS_LEASING_PAYMENT_ORDER_URL, $request, self::SCOPE_BUSINESS_LEASING);
     }
 
     /**
@@ -262,8 +258,8 @@ class Modena {
             $response = $this->getSlicePaymentApplicationStatus($applicationId);
         } else if (stripos($scope, 'credit') !== false) {
             $response = $this->getCreditPaymentApplicationStatus($applicationId);
-        } else if (stripos($scope, 'business-credit') !== false) {
-            $response = $this->getBusinessCreditPaymentApplicationStatus($applicationId);
+        } else if (stripos($scope, 'leasing') !== false) {
+            $response = $this->getBusinessLeasingPaymentApplicationStatus($applicationId);
         }
         return $response;
     }
@@ -303,9 +299,9 @@ class Modena {
      * @return string
      * @throws Exception
      */
-    public function getBusinessCreditPaymentApplicationStatus($applicationId) {
-        return $this->sendApplicationStatusRequest(self::BUSINESS_CREDIT_APPLICATION_STATUS_URL, $applicationId,
-            self::SCOPE_BUSINESS_CREDIT);
+    public function getBusinessLeasingPaymentApplicationStatus($applicationId) {
+        return $this->sendApplicationStatusRequest(self::BUSINESS_LEASING_APPLICATION_STATUS_URL, $applicationId,
+            self::SCOPE_BUSINESS_LEASING);
     }
 
     /**
@@ -313,8 +309,6 @@ class Modena {
      * @return ModenaOrderResponse
      */
     public function getOrderResponseFromRequest($postOrRequestData) {
-
-
         return new ModenaOrderResponse(
             isset($postOrRequestData['id']) ? sanitize_text_field($postOrRequestData['id']) : null,
             isset($postOrRequestData['orderId']) ? sanitize_text_field($postOrRequestData['orderId']) : null,

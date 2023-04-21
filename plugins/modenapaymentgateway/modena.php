@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Modena Payments
+ * Plugin Name: Modena Payment Gateway
  * Plugin URI: https://developer.modena.ee/en/developer-integration-woocommerce
- * Description: WooCommerce checkout solution from Modena.
+ * Description: WooCommerce cards, banks and credit payment solution from Modena.
  * Author: Modena Estonia OÜ
  * Author URI: https://modena.ee/
- * Version: 3.0.0
+ * Version: 2.7.0
  *
  * @package Modena
  */
@@ -24,10 +24,9 @@ if (!defined('MODENA_PLUGIN_PATH')) {
 
 add_action('plugins_loaded', 'modena_init');
 
-function modena_init(): void
+function modena_init()
 {
     static $modena_plugin;
-    static $shipping_loader;
 
     if (!isset($modena_plugin)) {
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-init-handler.php');
@@ -36,9 +35,9 @@ function modena_init(): void
         require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping.php');
         $shipping_method = new Modena_Shipping();
 
+        load_plugin_textdomain( 'mdn-translations', false, basename( dirname( __FILE__ ) ) . '/languages' );
     }
+
     $modena_plugin->run();
     $shipping_method->init();
 }
-
-

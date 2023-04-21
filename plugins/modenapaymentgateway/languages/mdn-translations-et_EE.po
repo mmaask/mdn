@@ -1,0 +1,11 @@
+msgid "selectedParcelTerminal"
+msgstr "Smartpost pakipunkt"
+
+msgid "ordersPrintLabelUrlText"
+msgstr "Prindi pakikaart"
+
+msgid "chooseParcelTerminalDefaultText"
+msgstr "Vali pakipunkt"
+
+msgid "mdn-direct-title-text"
+msgstr "Panga- ja kaardimaksed"

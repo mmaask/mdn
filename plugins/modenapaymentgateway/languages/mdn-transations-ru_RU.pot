@@ -1,0 +1,11 @@
+msgid "selectedParcelTerminal"
+msgstr "Почтовый терминал"
+
+msgid "ordersPrintLabelUrlText"
+msgstr "Ярлык"
+
+msgid "chooseParcelTerminalDefaultText"
+msgstr "Список почтовых терминалов"
+
+msgid "mdn-direct-title-text"
+msgstr "Оплатить через интернет банк или кредитной картой"

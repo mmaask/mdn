@@ -29,7 +29,7 @@ jQuery(document).ready(function($) {
 
     // Initialize Select2 for the select box
     shippingSelectBox.select2({
-        placeholder: 'Palun vali pakiautomaat',
+        placeholder: mdnTranslations.please_choose_parcel_terminal,
         allowClear: true
     });
 

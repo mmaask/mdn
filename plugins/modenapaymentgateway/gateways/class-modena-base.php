@@ -35,7 +35,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     public function __construct()
     {
-        require_once MODENA_PLUGIN_PATH . 'autoload.php'; // is not used?
+        require_once MODENA_PLUGIN_PATH . 'autoload.php';
         require ABSPATH . WPINC . '/version.php';
 
         $this->onboarding = new Modena_Onboarding_Handler();
@@ -63,7 +63,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $userAgent,
             $this->is_test_mode
         );
-        //initialized by form fields
+
 //        $this->button_text               = $this->get_option('payment_button_text');
         $this->description               = $this->get_option('description');
         $this->payment_button_max_height = 30;
@@ -71,6 +71,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         $this->button_text               = $this->get_option('payment_button_text');
         $this->icon_alt_text             = $this->get_option('payment_button_alt_text');
         $this->icon_title_text           = $this->get_option('payment_button_title_text');
+
         $this->init_form_fields();
 
         $this->init_settings();
@@ -91,7 +92,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
         add_action('admin_enqueue_scripts', array($this, 'admin_scripts'));
     }
-
 
     public function init_form_fields()
     {
@@ -190,7 +190,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 'default'     => $this->icon_title_text,
                 'css'         => 'width:25em',
                 'desc_tip'    => true,
-            ]
+            ],
         ];
     }
 
@@ -249,7 +249,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     public function redirect_to_modena()
     {
-
         $orderItems = [];
 
         $order = wc_get_order(sanitize_text_field($_GET['id']));
@@ -321,7 +320,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             return __('Maksa 3 osas', 'modena');
         }
 
-        if ($this instanceof Modena_Business_Credit_Payment) {
+        if ($this instanceof Modena_Leasing) {
             return __('Äri järelmaks', 'modena');
         }
 
@@ -435,7 +434,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         try {
             $applicationStatus = $this->modena->getPaymentApplicationStatus($modenaResponse->getApplicationId(),
                 $this->id);
-
 
             if ($applicationStatus !== 'FAILED' && $applicationStatus !== 'REJECTED') {
                 $this->logger->error('Invalid application status, expected: FAILED or REJECTED | received: ' . $applicationStatus);

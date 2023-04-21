@@ -1,0 +1,11 @@
+msgid "selectedParcelTerminal"
+msgstr "Parcel terminal"
+
+msgid "ordersPrintLabelUrlText"
+msgstr "Print parcel label"
+
+msgid "chooseParcelTerminalDefaultText"
+msgstr "Select parcel terminal"
+
+msgid "mdn-direct-title-text"
+msgstr "Bank & Card payments"

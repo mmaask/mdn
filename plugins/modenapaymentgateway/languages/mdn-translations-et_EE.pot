@@ -1,0 +1,11 @@
+msgid "selectedParcelTerminal"
+msgstr "Pakiautomaat"
+
+msgid "ordersPrintLabelUrlText"
+msgstr "Prindi pakisilt"
+
+msgid "chooseParcelTerminalDefaultText"
+msgstr "Vali pakiautomaat"
+
+msgid "mdn-direct-title-text"
+msgstr "Panga- ja kaardimaksed"

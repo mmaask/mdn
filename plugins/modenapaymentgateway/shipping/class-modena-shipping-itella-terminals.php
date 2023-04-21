@@ -12,7 +12,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $this->id = 'modena-shipping-itella-terminals';
         $this->method_title = __('Itella Smartpost', 'woocommerce');
         $this->method_description = __('Itella Smartpost lahendus Modenalt', 'woocommerce');
-        $this->title = ('Smartpost');
+        $this->title = ('Smartpost Eesti');
 
         $this->init_form_fields();
         $this->cost = floatval($this->get_option('cost'));
@@ -40,7 +40,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
     public function init_hooks() {
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueueParcelTerminalSearchBoxAssets'));
         add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
         add_action('woocommerce_review_meta', array($this, 'createOrderParcelMetaData'));
         add_action('woocommerce_get_order_item_totals', array($this, 'addParcelTerminalToCheckoutDetails'), 10, 2);
@@ -129,13 +128,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         return $terminalList = $this->parseParcelTerminalsJSON();
     }
 
-    public function enqueueParcelTerminalSearchBoxAssets() {
-        wp_register_style('select2', 'assets/select2/select2.min.css');
-        wp_register_script('select2', 'assets/select2/select2.min.js', array('jquery'), true);
 
-        wp_enqueue_style('select2');
-        wp_enqueue_script('select2');
-    }
 
     /**
      * @throws Exception
@@ -210,7 +203,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
                 if ($key === 'shipping') {
                     $new_totals['parcel_terminal'] = [
-                        'label' => __('Valitud pakiterminal:', 'woocommerce'),
+                        'label' => apply_filters('gettext', 'Smartpost pakipunkt', 'selectedParcelTerminal', 'mdn-translations'),
                         'value' => $parcel_terminal,
                     ];
                 }
@@ -357,7 +350,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 <tr class="selected-terminal">
                     <th>
                         <h3>
-                            <?php _e('Saadetise pakiterminal', 'woocommerce'); ?>
+                            <?php _e(apply_filters('gettext', 'Smartpost pakipunkt', 'selectedParcelTerminal', 'mdn-translations')); ?>
                         </h3>
                     </th>
                     <td>
@@ -365,7 +358,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                             <?php echo $this->getOrderParcelTerminalID($order_id); ?>
                         </p>
                         <p>
-                            <b><a href="#" >Prindi pakikaart</a></b>
+                            <b><a href="#"><?php echo esc_html(__( 'ordersPrintLabelUrlText', 'mdn-translations' )); ?></a></b>
                         </p>
                     </td>
                 </tr>
@@ -383,7 +376,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         if ($order instanceof WC_Order) {
 
             $selected_parcel_terminal_id = $order->get_meta('_selected_parcel_terminal_id', true);
-            error_log("is empty? : " . $selected_parcel_terminal_id);
 
             if(!$selected_parcel_terminal_id) {
                 $parcelTerminalText = $this->getOrderParcelTerminalText(110);

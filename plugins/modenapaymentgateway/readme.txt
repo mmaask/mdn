@@ -1,5 +1,5 @@
 === Modena Payments ===
-Version: 2.7.0
+Version: 3.0.0
 Contributors: modenapayments
 Donate link: https://modena.ee/
 Tags: online payment, payment, payment gateway, payment_gateway, woocommerce, sales, hire-purchase, järelmaks, financing, credit intermediary, krediidivahendaja, modena
@@ -62,9 +62,12 @@ Any questions? Just send us an email at info@modena.ee.
 = 2.6.1 =
 * Bugfixes
 
+= 2.7.0 =
+* Added Business Credit option for merchants
+
 = 3.0.0 =
 * Added Business Credit option for merchants
-* Added Itella Parchel Machine support
+* Added Itella Smartpost support
 
 == Support ==
 More information about Modena products can be found on our website [website](https://www.modena.ee)
