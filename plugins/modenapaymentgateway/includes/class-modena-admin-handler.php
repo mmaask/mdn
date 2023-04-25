@@ -17,7 +17,13 @@ class Modena_Admin_Handler
             return $columns;
         }
 
-        $columns[self::KEY_COLUMN_PAYMENT_METHOD] = __('Maksemeetod', 'modena');
+        if(get_locale() == "en_US") {
+            $columns[self::KEY_COLUMN_PAYMENT_METHOD] = __('Payment Method', 'modena');
+        } else {
+            $columns[self::KEY_COLUMN_PAYMENT_METHOD] = __('Maksemeetod', 'modena');
+
+        }
+
 
         return $columns;
     }

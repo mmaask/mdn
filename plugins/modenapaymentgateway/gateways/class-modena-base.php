@@ -317,11 +317,23 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     private function get_human_readable_selected_method($selectedOption): string
     {
         if ($this instanceof Modena_Slice_Payment) {
-            return __('Maksa 3 osas', 'modena');
+            if(get_locale() == "en_US") {
+                return __('Pay Later', 'modena');
+            } else {
+                return __('Maksa 3 osas', 'modena');
+            }
         }
 
         if ($this instanceof Modena_Leasing) {
             return __('Äri järelmaks', 'modena');
+        }
+
+        if ($this instanceof Modena_Slice_Payment_Whitelabel) {
+            return __('Maksa 3 osas WL', 'modena');
+        }
+
+        if ($this instanceof Modena_Credit_Payment_Whitelabel) {
+            return __('Järelmaks WL', 'modena');
         }
 
         if ($this instanceof Modena_Credit_Payment) {

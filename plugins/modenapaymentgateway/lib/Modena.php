@@ -240,6 +240,23 @@ class Modena {
     public function postBusinessLeasingPaymentOrder($request) {
         return $response = $this->sendPaymentOrderRequest(self::BUSINESS_LEASING_PAYMENT_ORDER_URL, $request, self::SCOPE_BUSINESS_LEASING);
     }
+    /**
+     * @param  ModenaRequest  $request
+     * @return ModenaOrderResponse
+     * @throws Exception
+     */
+    public function postSliceWhiteLabelPaymentOrder($request) {
+        return $response = $this->sendPaymentOrderRequest(self::SLICE_PAYMENT_ORDER_URL, $request, self::SCOPE_SLICE);
+    }
+    /**
+     * @param  ModenaRequest  $request
+     * @return ModenaOrderResponse
+     * @throws Exception
+     */
+    public function postCreditWhiteLabelPaymentOrder($request) {
+        return $response = $this->sendPaymentOrderRequest(self::CREDIT_PAYMENT_ORDER_URL, $request, self::SCOPE_CREDIT);
+    }
+
 
     /**
      * Try to filter payment application status request by scope

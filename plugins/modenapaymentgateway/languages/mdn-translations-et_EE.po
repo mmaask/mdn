@@ -9,3 +9,9 @@ msgstr "Vali pakipunkt"
 
 msgid "mdn-direct-title-text"
 msgstr "Panga- ja kaardimaksed"
+
+msgid "productBannerFactoringText1"
+msgstr "3 makset "
+
+msgid "productBannerFactoringText2"
+msgstr "€ kuus, ilma lisatasudeta."

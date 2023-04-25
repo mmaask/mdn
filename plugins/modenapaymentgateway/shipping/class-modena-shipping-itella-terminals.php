@@ -10,14 +10,33 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
         $this->id = 'modena-shipping-itella-terminals';
-        $this->method_title = __('Itella Smartpost', 'woocommerce');
-        $this->method_description = __('Itella Smartpost lahendus Modenalt', 'woocommerce');
-        $this->title = ('Smartpost Eesti');
+        $this->method_title = __('Itella Smartpost - Modena', 'woocommerce');
 
         $this->init_form_fields();
         $this->cost = floatval($this->get_option('cost'));
+
+        $this->setNamesBasedOnLocales(get_locale());
         $this->init_hooks();
 
+        parent::__construct();
+    }
+
+    public function setNamesBasedOnLocales($current_locale) {
+        switch ($current_locale) {
+            case 'en_GB' && 'en_US':
+                $this->method_description = __('Itella Smartpost pakiterminalid', 'woocommerce');
+                $this->title                    = 'Smartpost Estonia';
+                break;
+            case 'ru_RU':
+                $this->method_title             = 'Itella Smartpost';
+                $this->method_description = __('Itella Smartpost pakiterminalid', 'woocommerce');
+                $this->title                    = 'Ителла Смартпост';
+                break;
+            default:
+                $this->method_description = __('Itella Smartpost pakiterminalid', 'woocommerce');
+                $this->title                    = 'Smartpost Eesti';
+                break;
+        }
     }
 
     public function init_form_fields(): void {
@@ -36,7 +55,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             ),
         );
     }
-
 
     public function init_hooks() {
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
@@ -175,12 +193,27 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
         $order = wc_get_order($order_id);
         if ($order instanceof WC_Order) {
-            $selected_parcel_terminal = sanitize_text_field($_POST['userShippingSelection']);
-            error_log('Selected parcel terminal: ' . $selected_parcel_terminal);
+            // Get the shipping methods from the order
+            $shipping_methods = $order->get_shipping_methods();
 
-            $order->add_meta_data('_selected_parcel_terminal_id', $selected_parcel_terminal, true);
-            $order->save();
-            error_log('Selected parcel terminal metadata saved for order_id: ' . $order_id);
+            // Get the first shipping method ID
+            $orderShippingMethodID = '';
+            if (!empty($shipping_methods)) {
+                $first_shipping_method = reset($shipping_methods);
+                $orderShippingMethodID = $first_shipping_method->get_method_id();
+            }
+
+            // Check if the shipping method ID matches $this->id
+            if ($orderShippingMethodID == $this->id) {
+                $selected_parcel_terminal = sanitize_text_field($_POST['userShippingSelection']);
+                error_log('Selected parcel terminal: ' . $selected_parcel_terminal);
+
+                $order->add_meta_data('_selected_parcel_terminal_id', $selected_parcel_terminal, true);
+                $order->save();
+                error_log('Selected parcel terminal metadata saved for order_id: ' . $order_id);
+            } else {
+                error_log('The order shipping method does not match. Skipping metadata creation for order_id: ' . $order_id);
+            }
         } else {
             error_log('Could not fetch the order with the provided order ID: ' . $order_id);
             throw new Exception("Could not fetch the order with the provided order ID.");
@@ -194,8 +227,13 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     public function addParcelTerminalToCheckoutDetails($totals, $order) {
         $order_id = $order->get_id();
         $parcel_terminal = $this->getOrderParcelTerminalID($order_id);
-
-        if ($parcel_terminal) {
+        $shipping_methods = $order->get_shipping_methods();
+        $orderShippingMethodID = '';
+        if (!empty($shipping_methods)) {
+            $first_shipping_method = reset($shipping_methods);
+            $orderShippingMethodID = $first_shipping_method->get_method_id();
+        }
+        if ($parcel_terminal && $orderShippingMethodID == $this->id) {
             $new_totals = [];
 
             foreach ($totals as $key => $total) {
@@ -214,19 +252,35 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
         return $totals;
     }
-
     /**
      * @throws Exception
      */
     public function preparePOSTrequestForBarcodeID($order_id) {
 
         $order = wc_get_order($order_id);
+        $shipping_methods = $order->get_shipping_methods();
+
+        $orderShippingMethodID = '';
+        if (!empty($shipping_methods)) {
+            $first_shipping_method = reset($shipping_methods);
+            $orderShippingMethodID = $first_shipping_method->get_method_id();
+        }
+
+        if ($orderShippingMethodID != $this->id) {
+            return;
+        }
+
         $orderReference = $order->get_order_number();
 
-        $recipientName = WC()->customer->get_billing_first_name() . ' class-modena-shipping-itella-terminals.php' . WC()->customer->get_billing_last_name();
+        $recipientName = WC()->customer->get_billing_first_name() . " " . WC()->customer->get_billing_last_name();
         $recipientPhone = WC()->customer->get_shipping_phone();
         $recipientEmail = WC()->customer->get_billing_email();
         $placeId = $this->getOrderParcelTerminalID($orderReference);
+
+        if (!$placeId) {
+            return;
+        }
+
         $result = $this->getOrderTotalWeightAndContents($order);
         $weight = $result['total_weight'];
         $packageContent = $result['packageContent'];
@@ -239,10 +293,9 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             'recipient_phone' => $recipientPhone,
             'recipientEmail' => $recipientEmail,
             'placeId' => $placeId,
+        );
 
-            );
         $this->barcodePOSTrequest($data, $order);
-
     }
 
     /**
@@ -344,26 +397,41 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
      * @throws Exception
      */
     public function renderParcelTerminalInAdminOrder($order_id) {
+        $order = wc_get_order($order_id);
+        $shipping_methods = $order->get_shipping_methods();
+        if (empty($shipping_methods)) {
+            return;
+        }
+
+        $first_shipping_method = reset($shipping_methods);
+        $orderShippingMethodID = $first_shipping_method->get_method_id();
+
+        if(!$orderShippingMethodID || $orderShippingMethodID != $this->id) {
+            return;
+        }
+
         static $showOnce = false;
-            if(!$showOnce) {
-                ?>
-                <tr class="selected-terminal">
-                    <th>
-                        <h3>
-                            <?php _e(apply_filters('gettext', 'Smartpost pakipunkt', 'selectedParcelTerminal', 'mdn-translations')); ?>
-                        </h3>
-                    </th>
-                    <td>
-                        <p>
-                            <?php echo $this->getOrderParcelTerminalID($order_id); ?>
-                        </p>
-                        <p>
-                            <b><a href="#"><?php echo esc_html(__( 'ordersPrintLabelUrlText', 'mdn-translations' )); ?></a></b>
-                        </p>
-                    </td>
-                </tr>
-                <?php
-            }
+
+        if($showOnce) {
+            return;
+        }
+        ?>
+        <tr class="selected-terminal">
+            <th>
+                <h3>
+                    <?php _e(apply_filters('gettext', 'Smartpost pakipunkt', 'selectedParcelTerminal', 'mdn-translations')); ?>
+                </h3>
+            </th>
+            <td>
+                <p>
+                    <?php echo $this->getOrderParcelTerminalID($order_id); ?>
+                </p>
+                <p>
+                    <b><a href="#"><?php echo esc_html(__( 'ordersPrintLabelUrlText', 'mdn-translations' )); ?></a></b>
+                </p>
+            </td>
+        </tr>
+        <?php
         $showOnce = true;
     }
 

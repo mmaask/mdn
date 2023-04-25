@@ -8,4 +8,4 @@ msgid "chooseParcelTerminalDefaultText"
 msgstr "Список почтовых терминалов"
 
 msgid "mdn-direct-title-text"
-msgstr "Интернетбанк или карта"
+msgstr ""

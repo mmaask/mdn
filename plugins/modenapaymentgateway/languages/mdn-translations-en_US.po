@@ -7,5 +7,51 @@ msgstr "Print parcel label"
 msgid "chooseParcelTerminalDefaultText"
 msgstr "Select parcel terminal"
 
-msgid "mdn-direct-title-text"
+msgid "directPaymentGatewayText"
 msgstr "Bank & Card payments"
+
+msgid "slicePaymentGatewayText"
+msgstr "Pay later up to 3 installments"
+
+msgid "creditPaymentGatewayText"
+msgstr "Modena Credit from 6-48 installments"
+
+msgid "leasingPaymentGatewayText"
+msgstr "Business leasing from 6-48 installments"
+
+
+msgid "creditWhiteLabelPaymentGatewayText"
+msgstr "Credit from 6-48 installments"
+
+msgid "sliceWhiteLabelPaymentGatewayText"
+msgstr "Pay later up to 3 installments"
+
+msgid "directPaymentGatewayDescriptionText"
+msgstr "Service information"
+
+msgid "faktoringPaymentGatewayDescriptionText"
+msgstr "0€ desposit, 0% interest, 0€ additional fees. Just Pay Later."
+
+msgid "creditPaymentGatewayDescriptionText"
+msgstr "0€ deposit, 0€ management fees, 0€ contract. Make payments from 6 to 48 months."
+
+msgid "leasingPaymentGatewayDescriptionText"
+msgstr "Leasing for businesses. Make payments for your purchase from 6 to 48 months."
+
+msgid "productBannerFactoringText1"
+msgstr "3 payments "
+
+msgid "productBannerFactoringText2"
+msgstr "€ per month, without additional fees."
+
+msgid "productBannerCreditText1"
+msgstr "Credit starting from  "
+
+msgid "productBannerCreditText2"
+msgstr "€ / per month, 0€ contract fee."
+
+msgid "productBannerLeasingText1"
+msgstr "Business Leasing starting from  "
+
+msgid "productBannerLeasingText2"
+msgstr "€ / per month, 0€ contract fee."
