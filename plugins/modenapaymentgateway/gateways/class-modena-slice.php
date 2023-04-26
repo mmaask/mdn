@@ -18,8 +18,6 @@ class Modena_Slice_Payment extends Modena_Base_Payment
     }
 
     public function setNamesBasedOnLocales($current_locale) {
-        error_log($current_locale);
-
         switch ($current_locale) {
             case 'us' && 'gb':
                 $this->method_title             = 'Modena Pay in 3';

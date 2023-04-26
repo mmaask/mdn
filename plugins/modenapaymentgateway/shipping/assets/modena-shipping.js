@@ -27,7 +27,16 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Initialize Select2 for the select box
+    function checkSelectBoxValue() {
+        const selectedShippingMethod = $('input[name="shipping_method[0]"]:checked').val();
+
+        if (selectedShippingMethod === currentShippingMethod && (shippingSelectBox.val() === null || shippingSelectBox.val() === '')) {
+            shippingSelectBox.prop('required', true);
+        } else {
+            shippingSelectBox.prop('required', false);
+        }
+    }
+
     shippingSelectBox.select2({
         placeholder: mdnTranslations.please_choose_parcel_terminal,
         allowClear: true
@@ -35,14 +44,19 @@ jQuery(document).ready(function($) {
 
     toggleSelectBoxVisibility(false);
 
-    $(document.body).on('change', 'input[name="shipping_method[0]"]', () => toggleSelectBoxVisibility(false));
-    shippingSelectBox.on('change', () => toggleSelectBoxVisibility(false));
+    $(document.body).on('change', 'input[name="shipping_method[0]"]', () => {
+        toggleSelectBoxVisibility(false);
+        checkSelectBoxValue();
+    });
+    shippingSelectBox.on('change', () => {
+        toggleSelectBoxVisibility(false);
+        checkSelectBoxValue();
+    });
 
     $('form.checkout.woocommerce-checkout').on('submit', function (event) {
-        // Check if the shipping method is selected and the select box value is empty
         const selectedShippingMethod = $('input[name="shipping_method[0]"]:checked').val();
         if (selectedShippingMethod === currentShippingMethod && (shippingSelectBox.val() === null || shippingSelectBox.val() === '')) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
             toggleSelectBoxVisibility(true);
         }
     });

@@ -126,8 +126,8 @@ class Modena_Init_Handler
 
         echo $this->get_slice_banner_html($active_price);
         echo $this->get_credit_banner_html($active_price);
-        echo $this->get_credit_whitelabel_banner_html($active_price);
-        echo $this->get_slice_whitelabel_banner_html($active_price);
+        //echo $this->get_credit_whitelabel_banner_html($active_price);
+        //echo $this->get_slice_whitelabel_banner_html($active_price);
         echo $this->get_leasing_banner_html($active_price);
     }
 
