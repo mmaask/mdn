@@ -22,16 +22,19 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 $this->method_title             = 'Smartpost Estonia';
                 $this->method_description = __('Itella Smartpost parcel terminals', 'woocommerce');
                 $this->title                    = 'Smartpost Estonia';
+                $this->placeholderPrintLabelInAdmin = "Print parcel label";
                 break;
             case 'ru_RU':
                 $this->method_title             = 'Ителла Смартпост';
                 $this->method_description = __('Ителла Смартпост почтовых терминалов', 'woocommerce');
                 $this->title                    = 'Ителла Смартпост';
+                $this->placeholderPrintLabelInAdmin = "Распечатать ярлык в админке";
                 break;
             default:
                 $this->method_description = __('Itella Smartpost pakiterminalid', 'woocommerce');
                 $this->method_title = __('Itella Smartpost - Modena', 'woocommerce');
                 $this->title                    = 'Smartpost Eesti';
+                $this->placeholderPrintLabelInAdmin = "Prindi pakisilt";
                 break;
         }
     }
@@ -213,7 +216,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
                 error_log('Selected parcel terminal: ' . $selected_parcel_terminal);
 
-                $order->add_meta_data('_selected_parcel_terminal_id', $selected_parcel_terminal, true);
+                $order->add_meta_data('_selected_parcel_terminal_id_mdn', $selected_parcel_terminal, true);
                 $order->save();
                 error_log('Selected parcel terminal metadata saved for order_id: ' . $order_id);
             } else {
@@ -238,7 +241,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             $orderShippingMethodID = $first_shipping_method->get_method_id();
         }
         if ($orderShippingMethodID == $this->id) {
-            $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id');
+            $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id_mdn');
             if(empty($wcOrderParcelTerminalID)) {
                 error_log('Veateade - Tellimusel puudub pakipunkti ID '  . $wcOrderParcelTerminalID);
                 echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID</span></b>';
@@ -254,7 +257,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
                 if ($key === 'shipping') {
                     $new_totals['parcel_terminal'] = [
-                        'label' => apply_filters('gettext', 'Smartpost pakipunkt', 'selectedParcelTerminal', 'mdn-translations'),
+                        'label' => $this->title,
                         'value' => $parcel_terminal,
                     ];
                 }
@@ -305,7 +308,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $recipientName = WC()->customer->get_billing_first_name() . " " . WC()->customer->get_billing_last_name();
         $recipientPhone = WC()->customer->get_shipping_phone();
         $recipientEmail = WC()->customer->get_billing_email();
-        $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id');
+        $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id_mdn');
         if(empty($wcOrderParcelTerminalID)) {
             error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut'  . $wcOrderParcelTerminalID);
             echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut</span></b>';
@@ -390,7 +393,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             $debugString = "WIN - Lisasime Barcode ID tellimuse külge " . $parcelLabelBarcodeID;
             //echo '<br><b><span style="color:green">' . $debugString . '</span></b>';
             error_log("WIN - Lisasime Barcode ID tellimuse külge " . $parcelLabelBarcodeID);
-            $order->add_meta_data('_barcode_id', $parcelLabelBarcodeID, true);
+            $order->add_meta_data('_barcode_id_mdn', $parcelLabelBarcodeID, true);
             $order->save();
         } else {
             error_log('Could not fetch the order with the provided order ID.');
@@ -419,7 +422,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             return;
         }
 
-        $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id');
+        $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id_mdn');
         if(empty($wcOrderParcelTerminalID)) {
             error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID '  . $wcOrderParcelTerminalID);
             echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID</span></b>';
@@ -431,7 +434,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         <tr class="selected-terminal">
             <th>
                 <h3>
-                    <?php _e(apply_filters('gettext', 'Smartpost pakipunkt', 'selectedParcelTerminal', 'mdn-translations')); ?>
+                    <?php echo $this->title ?>
                 </h3>
             </th>
             <td>
@@ -442,8 +445,9 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 <p>
 
                     <b>
-                        <a id="clickedonevent" href="#">
-                            <?php echo esc_html(__('Prindi pakisilt', 'mdn-translations')); ?>
+                        <a id="clickedonevent" href="<?php echo $labelPDF ?>">
+                            <?php echo $this->placeholderPrintLabelInAdmin; ?>
+
                         </a>
                         <script>
                             document.getElementById('clickedonevent').addEventListener('click', function(event) {
@@ -475,50 +479,35 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     }
 
     public function getPDF($order): string {
-        static $showOnce = false;
+        $pdfUrl = 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id_mdn');
+        $tempFileName = $order->get_meta('_barcode_id_mdn') . '.pdf';
+        $uploads = wp_upload_dir();
+        $newDir = 'labels-mdn';
+        $tempFolderPath = trailingslashit($uploads['basedir']) . $newDir;
+        $tempFilePath = trailingslashit($tempFolderPath) . $tempFileName;
 
-        if($showOnce) {
-            return 0;
+        if (file_exists($tempFilePath)) {
+            error_log("File already found! " . $order->get_meta('_barcode_id_mdn') . '.pdf');
+            return trailingslashit($uploads['baseurl']) . $newDir . '/' . $tempFileName;
         }
 
-        $pdfUrl = 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id'); // Replace this with your actual PDF URL
-
-        $uploads = wp_upload_dir();
-        $tempFolderPath = trailingslashit($uploads['path']); // Use 'path' instead of 'basedir' to get the correct directory for uploads
-        $tempFileName = uniqid() . '.pdf';
-        $tempFilePath = $tempFolderPath . $tempFileName;
-
-        // Initialize a new cURL session
         $ch = curl_init($pdfUrl);
 
-        // Set cURL options
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return the transfer as a string
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1); // Follow redirects
-
-        // Execute the cURL session and fetch the content
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         $pdfContent = curl_exec($ch);
 
-        // Check for errors
         if ($pdfContent === false) {
             $error = curl_error($ch);
             curl_close($ch);
             throw new Exception("cURL error: {$error}");
         }
-
-        // Close the cURL session
         curl_close($ch);
-
-        // Save the fetched content as a PDF file
         $bytes_written = file_put_contents($tempFilePath, $pdfContent);
-
-        // Check if the file was created successfully
         if ($bytes_written === false) {
             throw new Exception("Failed to create temporary PDF file: {$tempFilePath}");
         }
-
-        $showOnce = true;
-        // Return the public URL for the temporary PDF file
-        return trailingslashit($uploads['url']) . $tempFileName;
+        return trailingslashit($uploads['baseurl']) . $newDir . '/' . $tempFileName;
     }
 
     /**

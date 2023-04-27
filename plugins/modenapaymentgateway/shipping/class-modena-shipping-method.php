@@ -4,6 +4,9 @@ if (!defined('ABSPATH')) {
 }
 
 abstract class Modena_Shipping_Method extends WC_Shipping_Method {
+
+    protected $placeholderPrintLabelInAdmin;
+
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
 
