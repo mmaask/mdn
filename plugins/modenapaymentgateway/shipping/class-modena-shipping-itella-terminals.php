@@ -428,7 +428,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID</span></b>';
             $wcOrderParcelTerminalID = 110;
         }
-        $labelPDF =$this->getPDF($order);
+
 
         ?>
         <tr class="selected-terminal">
@@ -445,30 +445,13 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 <p>
 
                     <b>
-                        <a id="clickedonevent" href="<?php echo $labelPDF ?>">
+                        <a id="clickedonevent" onclick="savePDFtoPC()" target="_blank" href="<?php echo $this->getPDF($order) ?>">
                             <?php echo $this->placeholderPrintLabelInAdmin; ?>
-
                         </a>
                         <script>
-                            document.getElementById('clickedonevent').addEventListener('click', function(event) {
-                                event.preventDefault();
-                                var printUrl = '<?php echo esc_html($labelPDF); ?>';
-                                var printWindow = window.open(printUrl, '_blank');
-                                printWindow.addEventListener('load', function() {
-                                    printWindow.document.body.style.zoom = "175%";
-                                    printWindow.document.title = 'Print PDF';
-                                    setTimeout(function() {
-                                        var iframe = printWindow.document.createElement('iframe');
-                                        iframe.src = printUrl;
-                                        iframe.style.display = 'none';
-                                        printWindow.document.body.appendChild(iframe);
-                                        iframe.onload = function() {
-                                            iframe.contentWindow.print();
-                                            printWindow.document.body.removeChild(iframe);
-                                        };
-                                    }, 1000);
-                                });
-                            });
+                            function savePDFtoPC() {
+                                <?php //$this->saveLabelPDFinUser($order); ?>
+                            }
                         </script>
                     </b>
                 </p>
@@ -508,6 +491,37 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             throw new Exception("Failed to create temporary PDF file: {$tempFilePath}");
         }
         return trailingslashit($uploads['baseurl']) . $newDir . '/' . $tempFileName;
+    }
+
+    public function saveLabelPDFinUser($order) {
+
+        $pdfUrl = 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id_mdn');
+        $tempFileName = $order->get_meta('_barcode_id_mdn') . '.pdf';
+
+        $ch = curl_init($pdfUrl);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        $pdfContent = curl_exec($ch);
+
+        if ($pdfContent === false) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            throw new Exception("cURL error: {$error}");
+        }
+        curl_close($ch);
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename=' . $tempFileName);
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . strlen($pdfContent));
+        ob_clean(); // Clean any pre-existing output buffers
+        flush();
+        echo $pdfContent;
+        exit;
     }
 
     /**
