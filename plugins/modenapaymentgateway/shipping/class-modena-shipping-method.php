@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) {
 abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
     protected $placeholderPrintLabelInAdmin;
+    protected  $printLabelPlaceholderInBulkActions;
 
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
@@ -20,7 +21,8 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         $this->init();
     }
 
-    public function init() {
+    public function init()
+    {
 
         $this->title = $this->get_option('title');
 
@@ -28,8 +30,8 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         add_action('wp_enqueue_scripts', array($this, 'enqueueParcelTerminalSearchBoxAssets'));
         add_action('admin_enqueue_scripts', array($this, 'enqueueParcelTerminalSearchBoxAssets'));
         add_action('login_enqueue_scripts', array($this, 'enqueueParcelTerminalSearchBoxAssets'));
-    }
 
+    }
 
     public function enqueueParcelTerminalSearchBoxAssets() {
         wp_register_style('select2', 'assets/select2/select2.min.css');
@@ -92,4 +94,10 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         //todo
     }
 
+    public function mark_orders_completed( $order_ids ) {
+        foreach ( $order_ids as $order_id ) {
+            $order = wc_get_order( $order_id );
+            $order->update_status( 'completed' );
+        }
+    }
 }

@@ -22,22 +22,53 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 $this->method_title             = 'Smartpost Estonia';
                 $this->method_description = __('Itella Smartpost parcel terminals', 'woocommerce');
                 $this->title                    = 'Smartpost Estonia';
-                $this->placeholderPrintLabelInAdmin = "Print parcel label";
+                $this->placeholderPrintLabelInAdmin = "Download Smartpost label";
+                $this->printLabelPlaceholderInBulkActions = "Download Itella Smartpost Parcel Labels";
                 break;
             case 'ru_RU':
                 $this->method_title             = 'Ителла Смартпост';
                 $this->method_description = __('Ителла Смартпост почтовых терминалов', 'woocommerce');
                 $this->title                    = 'Ителла Смартпост';
                 $this->placeholderPrintLabelInAdmin = "Распечатать ярлык в админке";
+                $this->printLabelPlaceholderInBulkActions = "Download Itella Smartpost Parcel Labels";
                 break;
             default:
                 $this->method_description = __('Itella Smartpost pakiterminalid', 'woocommerce');
                 $this->method_title = __('Itella Smartpost - Modena', 'woocommerce');
                 $this->title                    = 'Smartpost Eesti';
                 $this->placeholderPrintLabelInAdmin = "Prindi pakisilt";
+                $this->printLabelPlaceholderInBulkActions = "Lae alla Itella Smartpost pakisildid";
                 break;
         }
     }
+
+
+
+
+
+public function add_custom_bulk_action() {
+    global $post_type;
+
+    static $bass = 0;
+
+    if($bass == 1) {
+        return;
+    }
+
+    if ('shop_order' == $post_type) {
+        ?>
+        <script type="text/javascript">
+            jQuery(document).ready(function() {
+                jQuery('<option>').val('mark_as_shipped').text('<?php _e($this->printLabelPlaceholderInBulkActions, 'woocommerce'); ?>').appendTo("select[name='action']");
+            });
+        </script>
+        <?php
+
+
+    }
+    $bass += 1;
+}
+
 
     public function init_form_fields(): void {
         $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
@@ -56,14 +87,91 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         );
     }
 
-    public function init_hooks() {
+    public function init_hooks()
+    {
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
         add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
         add_action('woocommerce_checkout_update_order_meta', array($this, 'createOrderParcelMetaData'));
         add_action('woocommerce_get_order_item_totals', array($this, 'addParcelTerminalToCheckoutDetails'), 10, 2);
         add_action('woocommerce_thankyou', array($this, 'preparePOSTrequestForBarcodeID'));
         add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'renderParcelTerminalInAdminOrder'));
+        add_filter('woocommerce_order_actions', array($this, 'add_custom_order_action'));
+        add_action('woocommerce_order_action_custom_order_action', array($this, 'process_custom_order_action'));
+        add_filter('bulk_actions-edit-shop_order', array($this, 'register_custom_bulk_action'));
+        add_filter('handle_bulk_actions-edit-shop_order', array($this,  'process_custom_bulk_action', 10, 3));
+        add_action('admin_notices',  array($this, 'custom_bulk_action_admin_notice'));
+
+}
+        function custom_bulk_action_admin_notice()
+        {
+            if (!empty($_REQUEST['bulk_send_samples'])) {
+                $count = intval($_REQUEST['bulk_send_samples']);
+                printf('<div id="message" class="updated notice is-dismissible"><p>' .
+                    _n('%s sample label has been downloaded.',
+                        '%s sample labels have been downloaded.',
+                        $count,
+                        'woocommerce') . '</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>', $count);
+            }
+        }
+        function process_custom_bulk_action($redirect_to, $action, $post_ids)
+        {
+            if ($action !== 'custom_order_bulk_action') {
+                return $redirect_to;
+            }
+
+            foreach ($post_ids as $post_id) {
+                $order = wc_get_order($post_id);
+
+                if ($order) {
+                    // Your sample sending logic here
+                    // ...
+                    save_label_pdf_in_user($order);
+
+                    // Add a note to the order indicating the action was executed
+                    $order_note = $this->title . ' label has been downloaded.';
+                    $order->add_order_note($order_note);
+                }
+            }
+
+            // Redirect back to the orders list with a success message
+            $redirect_to = add_query_arg(array(
+                'bulk_send_samples' => count($post_ids),
+                'ids' => join(',', $post_ids),
+            ), $redirect_to);
+
+            return $redirect_to;
+        }
+
+    public function register_custom_bulk_action($bulk_actions)
+        {
+            $bulk_actions['custom_order_bulk_action'] = __($this->placeholderPrintLabelInAdmin, 'woocommerce');
+            return $bulk_actions;
+        }
+
+
+    public function add_custom_order_action($actions)
+    {
+        $actions['custom_order_action'] = __($this->placeholderPrintLabelInAdmin, 'woocommerce');
+        return $actions;
     }
+
+    /**
+     * @throws Exception
+     */
+    public function process_custom_order_action($order)
+    {
+        // Your code to process the custom order action, e.g., send a sample to the customer
+        $customer_email = $order->get_billing_email();
+
+        // Your sample sending logic here
+        // ...
+        $this->saveLabelPDFinUser($order);
+
+        // Add a note to the order indicating the action was executed
+        $order_note = $this->title . ' label has been downloaded.';
+        $order->add_order_note($order_note);
+    }
+
 
     public function isShippingMethodAvailable($rates, $package) {
         if (!$this->isOrderSuitableForShipping($package)) {
@@ -445,14 +553,14 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 <p>
 
                     <b>
-                        <a id="clickedonevent" onclick="savePDFtoPC()" target="_blank" href="<?php echo $this->getPDF($order) ?>">
+                        <!--<a id="clickedonevent" onclick="savePDFtoPC()" target="_blank" href="<?php echo 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id_mdn'); ?>">
                             <?php echo $this->placeholderPrintLabelInAdmin; ?>
                         </a>
                         <script>
                             function savePDFtoPC() {
                                 <?php //$this->saveLabelPDFinUser($order); ?>
                             }
-                        </script>
+                        </script>-->
                     </b>
                 </p>
             </td>
