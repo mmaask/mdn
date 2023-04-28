@@ -13,7 +13,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     protected $addBarcodeMetaDataNotePlaceholderText;
     protected $createOrderParcelMetaDataPlaceholderText;
     protected $updateParcelTerminalNewTerminalNote;
-    protected $updateParcelTerminalOldTerminalNote;
     protected $labelDownloadedPlaceholderText;
 
     public function __construct($instance_id = 0) {
@@ -37,11 +36,9 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 $this->adjustParcelTerminalInAdminPlaceholder        = "Update";
                 $this->placeholderForSelectBoxLabel                  = "Select parcel terminal";
                 $this->shorthandForTitle                             = "Smartpost";
-                $this->addBarcodeMetaDataNotePlaceholderText         = $this->shorthandForTitle . " parcel label is available to download: ";
-                $this->createOrderParcelMetaDataPlaceholderText      = $this->shorthandForTitle . " parcel terminal is selected: ";
-                $this->updateParcelTerminalNewTerminalNote           = " parcel terminal has been updated to: ";
-                $this->updateParcelTerminalOldTerminalNote           = " parcel terminal was: ";
-                $this->labelDownloadedPlaceholderText                = "parcel label has been downloaded. ";
+                $this->createOrderParcelMetaDataPlaceholderText      = $this->shorthandForTitle . " parcel terminal is selected for the order: ";
+                $this->updateParcelTerminalNewTerminalNote           = "New " . $this->shorthandForTitle . " parcel terminal has been selected for the order: ";
+                $this->labelDownloadedPlaceholderText                = "parcel label has been downloaded: ";
 
                 break;
             case 'ru_RU':
@@ -468,7 +465,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
     public function addBarcodeMetaDataToOrder($parcelLabelBarcodeID, $order) {
         $order->add_meta_data('_barcode_id_mdn', $parcelLabelBarcodeID, true);
-        $order->add_order_note($this->addBarcodeMetaDataNotePlaceholderText .  $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".");
+        //$order->add_order_note($this->addBarcodeMetaDataNotePlaceholderText .  $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".");
         $order->save();
     }
 
@@ -535,11 +532,8 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         }
         $runOnce = True;
 
-        $order_note1 = $this->shorthandForTitle . $this->updateParcelTerminalOldTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
-        $order_note2 = $this->shorthandForTitle . $this->updateParcelTerminalNewTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn'));
+        $order_note1 = $this->updateParcelTerminalNewTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
         $order->add_order_note($order_note1);
-        $order->add_order_note($order_note2);
-
         $this->preparePOSTrequestForBarcodeID($order_id);
     }
 
