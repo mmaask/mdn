@@ -14,10 +14,8 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     protected $createOrderParcelMetaDataPlaceholderText;
     protected $updateParcelTerminalNewTerminalNote;
     protected $updateParcelTerminalOldTerminalNote;
+    protected $labelDownloadedPlaceholderText;
 
-    /**
-     * @throws Exception
-     */
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
         $this->id = 'modena-shipping-itella-terminals';
@@ -31,18 +29,19 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     public function setNamesBasedOnLocales($current_locale) {
         switch ($current_locale) {
             case 'en_GB' && 'en_US':
-                $this->method_title             = 'Smartpost Estonia';
-                $this->method_description               = __('Itella Smartpost parcel terminals', 'woocommerce');
-                $this->title                              = 'Smartpost Estonia';
-                $this->placeholderPrintLabelInAdmin             = "Download Smartpost label";
-                $this->printLabelPlaceholderInBulkActions       = "Download Itella Smartpost Parcel Labels";
+                $this->method_title                                  = 'Smartpost Estonia';
+                $this->method_description                            = __('Itella Smartpost parcel terminals', 'woocommerce');
+                $this->title                                         = 'Smartpost Estonia';
+                $this->placeholderPrintLabelInAdmin                  = "Download Smartpost label";
+                $this->printLabelPlaceholderInBulkActions            = "Download Itella Smartpost Parcel Labels";
                 $this->adjustParcelTerminalInAdminPlaceholder        = "Update";
-                $this->placeholderForSelectBoxLabel             = "Select parcel terminal";
-                $this->shorthandForTitle                                            = "Smartpost";
-                $this->addBarcodeMetaDataNotePlaceholderText        = $this->shorthandForTitle . " barcode has been created and label is available to Download. ";
-                $this->createOrderParcelMetaDataPlaceholderText     = $this->shorthandForTitle . " parcel terminal is selected: ";
-                $this->updateParcelTerminalNewTerminalNote          = " parcel terminal has been updated to: ";
-                $this->updateParcelTerminalOldTerminalNote          = " parcel terminal was: ";
+                $this->placeholderForSelectBoxLabel                  = "Select parcel terminal";
+                $this->shorthandForTitle                             = "Smartpost";
+                $this->addBarcodeMetaDataNotePlaceholderText         = $this->shorthandForTitle . " parcel label is available to download: ";
+                $this->createOrderParcelMetaDataPlaceholderText      = $this->shorthandForTitle . " parcel terminal is selected: ";
+                $this->updateParcelTerminalNewTerminalNote           = " parcel terminal has been updated to: ";
+                $this->updateParcelTerminalOldTerminalNote           = " parcel terminal was: ";
+                $this->labelDownloadedPlaceholderText                = "parcel label has been downloaded. ";
 
                 break;
             case 'ru_RU':
@@ -81,9 +80,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         );
     }
 
-    /**
-     * @throws Exception
-     */
     public function init_hooks() {
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
         add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
@@ -136,9 +132,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $bass += 1;
     }
 
-    /**
-     * @throws Exception
-     */
     function process_custom_bulk_action($redirect_to, $action, $post_ids): string
         {
             if ($action !== 'custom_order_bulk_action') {
@@ -149,12 +142,9 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 $order = wc_get_order($post_id);
 
                 if ($order) {
-                    // Your sample sending logic here
-                    // ...
-                    $this->saveLabelPDFinUser($order);
 
-                    // Add a note to the order indicating the action was executed
-                    $order_note = "Smartpost: " . ' label has been downloaded.';
+                    $this->saveLabelPDFinUser($order);
+                    $order_note = $this->shorthandForTitle . " " .$this->labelDownloadedPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
                     $order->add_order_note($order_note);
 
 
@@ -181,11 +171,8 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         return $actions;
     }
 
-    /**
-     * @throws Exception
-     */
     public function process_custom_order_action($order) {
-        $order_note = "Smartpost label has been downloaded. (" . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ")";
+        $order_note = $this->shorthandForTitle . " " .$this->labelDownloadedPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
         $order->add_order_note($order_note);
         $this->saveLabelPDFinUser($order);
         header("Location: " . $_SERVER['REQUEST_URI']);
@@ -237,9 +224,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         return true;
     }
 
-    /**
-     * @throws Exception
-     */
     public function getParcelTerminalsHTTPrequest(): string {
         $ch = curl_init();
 
@@ -252,38 +236,26 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $GETrequestResponse = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            error_log('Something went wrong with curling the terminals list. Sorry. ');
-            throw new Exception('Error: ' . curl_error($ch));
+            error_log('Something went wrong with curling the terminals list. Sorry. ' . curl_error($ch));
         }
         curl_close($ch);
         return $GETrequestResponse;
     }
 
-    /**
-     * @throws Exception
-     */
     public function parseParcelTerminalsJSON() {
         $parcelTerminalsJSON = $this->getParcelTerminalsHTTPrequest();
         return json_decode($parcelTerminalsJSON)->item;
     }
 
-    /**
-     * @throws Exception
-     */
     public function getParcelTerminals() {
 
-        $parcelTerminals = $this->parseParcelTerminalsJSON();
+        $this->smartpostMachines = $this->parseParcelTerminalsJSON();
 
-        if(empty($parcelTerminals)) {
-            echo '<b><span style="color:red">Veateade - pakiterminalide listile ei pääsetud ligi.</span></b> ';
+        if(empty($this->smartpostMachines)) {
             error_log("Veateade - pakiterminalide listile ei pääsetud ligi.");
         }
-        $this->smartpostMachines = $parcelTerminals;
     }
 
-    /**
-     * @throws Exception
-     */
     public function renderParcelTerminalSelectBox() {
         static $showOnce = false;
 
@@ -316,9 +288,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $showOnce = true;
     }
 
-    /**
-     * @throws Exception
-     */
     public function createOrderParcelMetaData($order_id) {
 
         static $doOnce = False;
@@ -351,22 +320,16 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 $order->add_meta_data('_selected_parcel_terminal_id_mdn', $selected_parcel_terminal, true);
                 $order->save();
 
-                $order->add_order_note($this->createOrderParcelMetaDataPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')));
-
                 error_log('Selected parcel terminal metadata saved for order_id: ' . $order_id);
             } else {
                 error_log('The order shipping method does not match. Skipping metadata creation for order_id: ' . $order_id);
             }
         } else {
             error_log('Could not fetch the order with the provided order ID: ' . $order_id);
-            throw new Exception("Could not fetch the order with the provided order ID.");
         }
     }
 
 
-    /**
-     * @throws Exception
-     */
     public function addParcelTerminalToCheckoutDetails($totals, $order) {
 
         $shipping_methods = $order->get_shipping_methods();
@@ -380,8 +343,8 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             if(empty($wcOrderParcelTerminalID)) {
                 error_log('Veateade - Tellimusel puudub pakipunkti ID '  . $wcOrderParcelTerminalID);
                 echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID</span></b>';
-                $wcOrderParcelTerminalID = 110;
             }
+
 
             $parcel_terminal = $this->getOrderParcelTerminalText($wcOrderParcelTerminalID);
 
@@ -397,37 +360,29 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                     ];
                 }
             }
-
             $totals = $new_totals;
         }
-
+        $order->add_order_note($this->createOrderParcelMetaDataPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".");
         return $totals;
 
     }
 
-    /**
-     * @throws Exception
-     */
     public function getOrderParcelTerminalText($wcOrderParcelTerminalID) {
 
         $parcelTerminalsById = array_column($this->smartpostMachines, null, 'place_id');
 
         if (isset($parcelTerminalsById[$wcOrderParcelTerminalID])) {
             $parcelTerminal = $parcelTerminalsById[$wcOrderParcelTerminalID];
-
-            //return $parcelTerminal->{'name'} . " - " . $parcelTerminal->{'address'};
             return $parcelTerminal->{'name'};
 
         }
         return error_log("Terminal not found by ID" . $wcOrderParcelTerminalID);
     }
 
-    /**
-     * @throws Exception
-     */
     public function preparePOSTrequestForBarcodeID($order_id) {
 
         $order = wc_get_order($order_id);
+
         $shipping_methods = $order->get_shipping_methods();
 
         $orderShippingMethodID = '';
@@ -467,9 +422,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $this->barcodePOSTrequest($data, $order);
     }
 
-    /**
-     * @throws Exception
-     */
     public function barcodePOSTrequest($data, $order) {
 
         $curl = curl_init('https://monte360.com/itella/index.php?action=createShipment');
@@ -494,9 +446,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         curl_close($curl);
     }
 
-    /**
-     * @throws Exception
-     */
     public function barcodeJSONparser($POSTrequestResponse, $order) {
 
         if (is_null($POSTrequestResponse)) {
@@ -517,31 +466,12 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $this->addBarcodeMetaDataToOrder($parcelLabelBarcodeID, $order);
     }
 
-    /**
-     * @throws Exception
-     */
     public function addBarcodeMetaDataToOrder($parcelLabelBarcodeID, $order) {
-        if (!$order instanceof WC_Order) {
-            $order = wc_get_order($order);
-        }
-        if ($order instanceof WC_Order) {
-
-            error_log("WIN - Lisasime Barcode ID tellimuse külge " . $parcelLabelBarcodeID);
-            $order->add_meta_data('_barcode_id_mdn', $parcelLabelBarcodeID, true);
-
-
-            $order->add_order_note($this->addBarcodeMetaDataNotePlaceholderText . $order->get_meta('_barcode_id_mdn') . " (" .  $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ").");
-            $order->save();
-        } else {
-            error_log('Could not fetch the order with the provided order ID.');
-            throw new Exception("Could not fetch the order with the provided order ID.");
-        }
+        $order->add_meta_data('_barcode_id_mdn', $parcelLabelBarcodeID, true);
+        $order->add_order_note($this->addBarcodeMetaDataNotePlaceholderText .  $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".");
+        $order->save();
     }
 
-
-    /**
-     * @throws Exception
-     */
     public function renderParcelTerminalInAdminOrder($order_id) {
         $order = wc_get_order($order_id);
         $shipping_methods = $order->get_shipping_methods();
@@ -561,7 +491,8 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
         if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
             error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID '  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
-            echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID</span></b>';
+            echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID. Palun vali uuesti ja vali kinnita.</span></b>';
+
         }
 
         ?>
@@ -580,13 +511,12 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
                 <script>
                     document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
-
                     function startUpdatingOrderParcel() {
 
                         //todo open a list of locations,
 
                         <?php
-                        //$this->updateParcelTerminalForOrder($order, $order_id);
+                        $this->updateParcelTerminalForOrder($order, $order_id);
                         ?>
                     }
                 </script>
@@ -597,9 +527,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $showOnce = true;
     }
 
-    /**
-     * @throws Exception
-     */
     public function updateParcelTerminalForOrder($order, $order_id) {
 
         static $runOnce = False;
@@ -610,18 +537,12 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
         $order_note1 = $this->shorthandForTitle . $this->updateParcelTerminalOldTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
         $order_note2 = $this->shorthandForTitle . $this->updateParcelTerminalNewTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn'));
-
         $order->add_order_note($order_note1);
         $order->add_order_note($order_note2);
 
         $this->preparePOSTrequestForBarcodeID($order_id);
     }
 
-
-
-    /**
-     * @throws Exception
-     */
     public function saveLabelPDFinUser($order) {
 
         $pdfUrl = 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id_mdn');
@@ -636,7 +557,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         if ($pdfContent === false) {
             $error = curl_error($ch);
             curl_close($ch);
-            throw new Exception("cURL error: $error");
+            error_log("cURL error: " . $error);
         }
         curl_close($ch);
 
@@ -647,7 +568,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
         header('Content-Length: ' . strlen($pdfContent));
-        ob_clean(); // Clean any pre-existing output buffers
+        ob_clean();
         flush();
         echo $pdfContent;
         exit;
