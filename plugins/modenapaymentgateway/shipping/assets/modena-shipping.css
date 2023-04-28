@@ -24,3 +24,7 @@ label[for="shipping_method_0_modena-shipping-itella-terminals"]::after {
 .select2-selection__rendered {
 
 }
+
+.select2-container {
+    margin-top: 5px !important;
+}

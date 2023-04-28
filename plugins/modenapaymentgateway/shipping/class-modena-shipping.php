@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Modena_Shipping {
-    public function init(): void {
+    public function init() {
         if ($this->is_woocommerce_active()) {
             $this->run_shipping();
 
@@ -25,7 +25,7 @@ class Modena_Shipping {
      * @return void
      */
 
-    public function run_shipping(): void {
+    public function run_shipping() {
         if (!class_exists('Modena_Shipping_Itella_Terminals') && class_exists('WC_Shipping_Method')) {
             $this->loadAssets();
             add_filter('woocommerce_shipping_methods', array($this, 'load_modena_shipping_methods'));
@@ -57,11 +57,11 @@ class Modena_Shipping {
 
      * @return void
      */
-    public function modena_shipping_error_notice(): void {
+    public function modena_shipping_error_notice() {
         echo '<div class="notice notice-error"><p><strong>Modena Shipping Error:</strong> The required classes were not found. Please ensure the necessary dependencies are installed and active.</p></div>';
     }
 
-    public function init_WC_estonia(): void {
+    public function init_WC_estonia()  {
         $this->clear_debug_log();
         require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-method.php');
         require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-itella-terminals.php');
@@ -70,7 +70,7 @@ class Modena_Shipping {
 
     }
 
-    public function clear_debug_log(): void
+    public function clear_debug_log()
     {
         $debug_log_file = WP_CONTENT_DIR . '/debug.log';
         if (file_exists($debug_log_file) && is_writable($debug_log_file)) {
@@ -79,7 +79,7 @@ class Modena_Shipping {
         }
     }
 
-    public function loadAssets(): void {
+    public function loadAssets()  {
 
 
         wp_enqueue_style('modena_shipping_style', MODENA_PLUGIN_URL . '/shipping/assets/modena-shipping.css');

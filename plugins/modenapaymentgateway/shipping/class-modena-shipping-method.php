@@ -55,7 +55,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         $packageContent = '';
         $total_weight = 0;
 
-        foreach ($order->get_items() as $item_id => $item) {
+        foreach ($order->get_items() as $item) {
             if ($item instanceof WC_Order_Item_Product) {
                 $product_name = $item->get_name();
                 $quantity = $item->get_quantity();

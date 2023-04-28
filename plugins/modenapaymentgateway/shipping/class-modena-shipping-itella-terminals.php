@@ -6,13 +6,25 @@ if (!defined('ABSPATH')) {
 class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
     public $cost;
+    protected $smartpostMachines;
+    protected $adjustParcelTerminalInAdminPlaceholder;
+    protected $placeholderForSelectBoxLabel;
+    protected $shorthandForTitle;
+    protected $addBarcodeMetaDataNotePlaceholderText;
+    protected $createOrderParcelMetaDataPlaceholderText;
+    protected $updateParcelTerminalNewTerminalNote;
+    protected $updateParcelTerminalOldTerminalNote;
 
+    /**
+     * @throws Exception
+     */
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
         $this->id = 'modena-shipping-itella-terminals';
         $this->init_form_fields();
         $this->cost = floatval($this->get_option('cost'));
         $this->setNamesBasedOnLocales(get_locale());
+        $this->getParcelTerminals();
         $this->init_hooks();
     }
 
@@ -20,10 +32,18 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         switch ($current_locale) {
             case 'en_GB' && 'en_US':
                 $this->method_title             = 'Smartpost Estonia';
-                $this->method_description = __('Itella Smartpost parcel terminals', 'woocommerce');
-                $this->title                    = 'Smartpost Estonia';
-                $this->placeholderPrintLabelInAdmin = "Download Smartpost label";
-                $this->printLabelPlaceholderInBulkActions = "Download Itella Smartpost Parcel Labels";
+                $this->method_description               = __('Itella Smartpost parcel terminals', 'woocommerce');
+                $this->title                              = 'Smartpost Estonia';
+                $this->placeholderPrintLabelInAdmin             = "Download Smartpost label";
+                $this->printLabelPlaceholderInBulkActions       = "Download Itella Smartpost Parcel Labels";
+                $this->adjustParcelTerminalInAdminPlaceholder        = "Update";
+                $this->placeholderForSelectBoxLabel             = "Select parcel terminal";
+                $this->shorthandForTitle                                            = "Smartpost";
+                $this->addBarcodeMetaDataNotePlaceholderText        = $this->shorthandForTitle . " barcode has been created and label is available to Download. ";
+                $this->createOrderParcelMetaDataPlaceholderText     = $this->shorthandForTitle . " parcel terminal is selected: ";
+                $this->updateParcelTerminalNewTerminalNote          = " parcel terminal has been updated to: ";
+                $this->updateParcelTerminalOldTerminalNote          = " parcel terminal was: ";
+
                 break;
             case 'ru_RU':
                 $this->method_title             = 'Ителла Смартпост';
@@ -38,39 +58,13 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 $this->title                    = 'Smartpost Eesti';
                 $this->placeholderPrintLabelInAdmin = "Prindi pakisilt";
                 $this->printLabelPlaceholderInBulkActions = "Lae alla Itella Smartpost pakisildid";
+                $this->placeholderForSelectBoxLabel = "Vali pakipunkt";
                 break;
         }
     }
 
-
-
-
-
-public function add_custom_bulk_action() {
-    global $post_type;
-
-    static $bass = 0;
-
-    if($bass == 1) {
-        return;
-    }
-
-    if ('shop_order' == $post_type) {
-        ?>
-        <script type="text/javascript">
-            jQuery(document).ready(function() {
-                jQuery('<option>').val('mark_as_shipped').text('<?php _e($this->printLabelPlaceholderInBulkActions, 'woocommerce'); ?>').appendTo("select[name='action']");
-            });
-        </script>
-        <?php
-
-
-    }
-    $bass += 1;
-}
-
-
-    public function init_form_fields(): void {
+    public function init_form_fields()
+    {
         $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
 
         $this->instance_form_fields = array(
@@ -87,8 +81,10 @@ public function add_custom_bulk_action() {
         );
     }
 
-    public function init_hooks()
-    {
+    /**
+     * @throws Exception
+     */
+    public function init_hooks() {
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
         add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
         add_action('woocommerce_checkout_update_order_meta', array($this, 'createOrderParcelMetaData'));
@@ -100,9 +96,12 @@ public function add_custom_bulk_action() {
         add_filter('bulk_actions-edit-shop_order', array($this, 'register_custom_bulk_action'));
         add_filter('handle_bulk_actions-edit-shop_order', array($this,  'process_custom_bulk_action', 10, 3));
         add_action('admin_notices',  array($this, 'custom_bulk_action_admin_notice'));
+        //add_action( 'woocommerce_admin_order_data_after_shipping_address',array($this, 'renderParcelTerminalSelectBox' ));
 
-}
-        function custom_bulk_action_admin_notice()
+
+    }
+
+    public function custom_bulk_action_admin_notice()
         {
             if (!empty($_REQUEST['bulk_send_samples'])) {
                 $count = intval($_REQUEST['bulk_send_samples']);
@@ -113,7 +112,34 @@ public function add_custom_bulk_action() {
                         'woocommerce') . '</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>', $count);
             }
         }
-        function process_custom_bulk_action($redirect_to, $action, $post_ids)
+
+    public function add_custom_bulk_action() {
+        global $post_type;
+
+        static $bass = 0;
+
+        if($bass == 1) {
+            return;
+        }
+
+        if ('shop_order' == $post_type) {
+            ?>
+            <script type="text/javascript">
+                jQuery(document).ready(function() {
+                    jQuery('<option>').val('mark_as_shipped').text('<?php _e($this->printLabelPlaceholderInBulkActions, 'woocommerce'); ?>').appendTo("select[name='action']");
+                });
+            </script>
+            <?php
+
+
+        }
+        $bass += 1;
+    }
+
+    /**
+     * @throws Exception
+     */
+    function process_custom_bulk_action($redirect_to, $action, $post_ids): string
         {
             if ($action !== 'custom_order_bulk_action') {
                 return $redirect_to;
@@ -125,21 +151,21 @@ public function add_custom_bulk_action() {
                 if ($order) {
                     // Your sample sending logic here
                     // ...
-                    save_label_pdf_in_user($order);
+                    $this->saveLabelPDFinUser($order);
 
                     // Add a note to the order indicating the action was executed
-                    $order_note = $this->title . ' label has been downloaded.';
+                    $order_note = "Smartpost: " . ' label has been downloaded.';
                     $order->add_order_note($order_note);
+
+
                 }
             }
 
             // Redirect back to the orders list with a success message
-            $redirect_to = add_query_arg(array(
+            return add_query_arg(array(
                 'bulk_send_samples' => count($post_ids),
                 'ids' => join(',', $post_ids),
             ), $redirect_to);
-
-            return $redirect_to;
         }
 
     public function register_custom_bulk_action($bulk_actions)
@@ -158,18 +184,12 @@ public function add_custom_bulk_action() {
     /**
      * @throws Exception
      */
-    public function process_custom_order_action($order)
-    {
-        // Your code to process the custom order action, e.g., send a sample to the customer
-        $customer_email = $order->get_billing_email();
-
-        // Your sample sending logic here
-        // ...
-        $this->saveLabelPDFinUser($order);
-
-        // Add a note to the order indicating the action was executed
-        $order_note = $this->title . ' label has been downloaded.';
+    public function process_custom_order_action($order) {
+        $order_note = "Smartpost label has been downloaded. (" . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ")";
         $order->add_order_note($order_note);
+        $this->saveLabelPDFinUser($order);
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
     }
 
 
@@ -258,8 +278,7 @@ public function add_custom_bulk_action() {
             echo '<b><span style="color:red">Veateade - pakiterminalide listile ei pääsetud ligi.</span></b> ';
             error_log("Veateade - pakiterminalide listile ei pääsetud ligi.");
         }
-
-        return $parcelTerminals;
+        $this->smartpostMachines = $parcelTerminals;
     }
 
     /**
@@ -271,14 +290,12 @@ public function add_custom_bulk_action() {
         if(!$showOnce) {
             ?>
             <div class="mdn-shipping-select-wrapper" style="margin-bottom: 15px">
-                <label for="mdn-shipping-select-box"></label>
+                <label  for="mdn-shipping-select-box"><?php echo $this->placeholderForSelectBoxLabel ?></label>
                 <select name="userShippingSelection" id="mdn-shipping-select-box" data-method-id="<?php echo $this->id; ?>" style="width: 100%; height: 400px;">
                     <option disabled selected="selected"></option>
                     <?php
-                    $terminalList = $this->getParcelTerminals();
-
                     $cities = array();
-                    foreach ($terminalList as $terminal) {
+                    foreach ($this->smartpostMachines as $terminal) {
                         $cities[$terminal->{'city'}][] = $terminal;
                     }
 
@@ -303,6 +320,13 @@ public function add_custom_bulk_action() {
      * @throws Exception
      */
     public function createOrderParcelMetaData($order_id) {
+
+        static $doOnce = False;
+        if($doOnce){
+            return;
+        }
+        $doOnce = True;
+
         error_log('createOrderParcelMetaData called with order_id: ' . $order_id);
 
         $order = wc_get_order($order_id);
@@ -326,6 +350,9 @@ public function add_custom_bulk_action() {
 
                 $order->add_meta_data('_selected_parcel_terminal_id_mdn', $selected_parcel_terminal, true);
                 $order->save();
+
+                $order->add_order_note($this->createOrderParcelMetaDataPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')));
+
                 error_log('Selected parcel terminal metadata saved for order_id: ' . $order_id);
             } else {
                 error_log('The order shipping method does not match. Skipping metadata creation for order_id: ' . $order_id);
@@ -341,7 +368,7 @@ public function add_custom_bulk_action() {
      * @throws Exception
      */
     public function addParcelTerminalToCheckoutDetails($totals, $order) {
-        $order_id = $order->get_id();
+
         $shipping_methods = $order->get_shipping_methods();
         $orderShippingMethodID = '';
         if (!empty($shipping_methods)) {
@@ -378,21 +405,23 @@ public function add_custom_bulk_action() {
 
     }
 
-
-
     /**
      * @throws Exception
      */
     public function getOrderParcelTerminalText($wcOrderParcelTerminalID) {
-        $parcelTerminals = $this->getParcelTerminals();
 
-        foreach ($parcelTerminals as $parcelTerminal) {
-            $parcelTerminalID = $parcelTerminal->{'place_id'};
-            if ($parcelTerminalID == $wcOrderParcelTerminalID) {
-                return $parcelTerminal->{'name'} . " - " . $parcelTerminal->{'address'};
-            }
+        $parcelTerminalsById = array_column($this->smartpostMachines, null, 'place_id');
+
+        if (isset($parcelTerminalsById[$wcOrderParcelTerminalID])) {
+            $parcelTerminal = $parcelTerminalsById[$wcOrderParcelTerminalID];
+
+            //return $parcelTerminal->{'name'} . " - " . $parcelTerminal->{'address'};
+            return $parcelTerminal->{'name'};
+
         }
+        return error_log("Terminal not found by ID" . $wcOrderParcelTerminalID);
     }
+
     /**
      * @throws Exception
      */
@@ -413,14 +442,12 @@ public function add_custom_bulk_action() {
 
         $orderReference = $order->get_order_number();
 
-        $recipientName = WC()->customer->get_billing_first_name() . " " . WC()->customer->get_billing_last_name();
-        $recipientPhone = WC()->customer->get_shipping_phone();
-        $recipientEmail = WC()->customer->get_billing_email();
-        $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id_mdn');
-        if(empty($wcOrderParcelTerminalID)) {
-            error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut'  . $wcOrderParcelTerminalID);
-            echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut</span></b>';
-            $wcOrderParcelTerminalID = 110;
+        $recipientName = $order->get_billing_first_name() . " " . $order->get_billing_last_name();
+        $recipientEmail = $order->get_billing_email();
+        $recipientPhone = $order->get_billing_phone();
+
+        if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
+            error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut'  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
         }
 
         $result = $this->getOrderTotalWeightAndContents($order);
@@ -434,7 +461,7 @@ public function add_custom_bulk_action() {
             'recipient_name' => $recipientName,
             'recipient_phone' => $recipientPhone,
             'recipientEmail' => $recipientEmail,
-            '$wcOrderParcelTerminalID' => $wcOrderParcelTerminalID,
+            '$wcOrderParcelTerminalID' => $order->get_meta('_selected_parcel_terminal_id_mdn'),
         );
 
         $this->barcodePOSTrequest($data, $order);
@@ -498,10 +525,12 @@ public function add_custom_bulk_action() {
             $order = wc_get_order($order);
         }
         if ($order instanceof WC_Order) {
-            $debugString = "WIN - Lisasime Barcode ID tellimuse külge " . $parcelLabelBarcodeID;
-            //echo '<br><b><span style="color:green">' . $debugString . '</span></b>';
+
             error_log("WIN - Lisasime Barcode ID tellimuse külge " . $parcelLabelBarcodeID);
             $order->add_meta_data('_barcode_id_mdn', $parcelLabelBarcodeID, true);
+
+
+            $order->add_order_note($this->addBarcodeMetaDataNotePlaceholderText . $order->get_meta('_barcode_id_mdn') . " (" .  $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ").");
             $order->save();
         } else {
             error_log('Could not fetch the order with the provided order ID.');
@@ -530,13 +559,10 @@ public function add_custom_bulk_action() {
             return;
         }
 
-        $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id_mdn');
-        if(empty($wcOrderParcelTerminalID)) {
-            error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID '  . $wcOrderParcelTerminalID);
+        if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
+            error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID '  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
             echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID</span></b>';
-            $wcOrderParcelTerminalID = 110;
         }
-
 
         ?>
         <tr class="selected-terminal">
@@ -547,60 +573,55 @@ public function add_custom_bulk_action() {
             </th>
             <td>
                 <p>
-                    <?php echo $this->getOrderParcelTerminalText($wcOrderParcelTerminalID); ?>
-                </p>
+                    <?php echo $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')); ?>
 
-                <p>
-
-                    <b>
-                        <!--<a id="clickedonevent" onclick="savePDFtoPC()" target="_blank" href="<?php echo 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id_mdn'); ?>">
-                            <?php echo $this->placeholderPrintLabelInAdmin; ?>
-                        </a>
-                        <script>
-                            function savePDFtoPC() {
-                                <?php //$this->saveLabelPDFinUser($order); ?>
-                            }
-                        </script>-->
-                    </b>
                 </p>
+                <button id="buttonForClicking" onClick="startUpdatingOrderParcel()" class="button grant-access"><?php _e($this->adjustParcelTerminalInAdminPlaceholder)?></button>
+
+                <script>
+                    document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
+
+                    function startUpdatingOrderParcel() {
+
+                        //todo open a list of locations,
+
+                        <?php
+                        //$this->updateParcelTerminalForOrder($order, $order_id);
+                        ?>
+                    }
+                </script>
             </td>
         </tr>
         <?php
+
         $showOnce = true;
     }
 
-    public function getPDF($order): string {
-        $pdfUrl = 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id_mdn');
-        $tempFileName = $order->get_meta('_barcode_id_mdn') . '.pdf';
-        $uploads = wp_upload_dir();
-        $newDir = 'labels-mdn';
-        $tempFolderPath = trailingslashit($uploads['basedir']) . $newDir;
-        $tempFilePath = trailingslashit($tempFolderPath) . $tempFileName;
+    /**
+     * @throws Exception
+     */
+    public function updateParcelTerminalForOrder($order, $order_id) {
 
-        if (file_exists($tempFilePath)) {
-            error_log("File already found! " . $order->get_meta('_barcode_id_mdn') . '.pdf');
-            return trailingslashit($uploads['baseurl']) . $newDir . '/' . $tempFileName;
+        static $runOnce = False;
+        if ($runOnce) {
+            return;
         }
+        $runOnce = True;
 
-        $ch = curl_init($pdfUrl);
+        $order_note1 = $this->shorthandForTitle . $this->updateParcelTerminalOldTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
+        $order_note2 = $this->shorthandForTitle . $this->updateParcelTerminalNewTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn'));
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        $pdfContent = curl_exec($ch);
+        $order->add_order_note($order_note1);
+        $order->add_order_note($order_note2);
 
-        if ($pdfContent === false) {
-            $error = curl_error($ch);
-            curl_close($ch);
-            throw new Exception("cURL error: {$error}");
-        }
-        curl_close($ch);
-        $bytes_written = file_put_contents($tempFilePath, $pdfContent);
-        if ($bytes_written === false) {
-            throw new Exception("Failed to create temporary PDF file: {$tempFilePath}");
-        }
-        return trailingslashit($uploads['baseurl']) . $newDir . '/' . $tempFileName;
+        $this->preparePOSTrequestForBarcodeID($order_id);
     }
 
+
+
+    /**
+     * @throws Exception
+     */
     public function saveLabelPDFinUser($order) {
 
         $pdfUrl = 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id_mdn');
@@ -615,7 +636,7 @@ public function add_custom_bulk_action() {
         if ($pdfContent === false) {
             $error = curl_error($ch);
             curl_close($ch);
-            throw new Exception("cURL error: {$error}");
+            throw new Exception("cURL error: $error");
         }
         curl_close($ch);
 
