@@ -8,17 +8,9 @@ jQuery(document).ready(function($) {
 
         if (selectedShippingMethod === currentShippingMethod) {
             shippingSelectWrapper.show();
-            if (shippingSelectBox.val() === null || shippingSelectBox.val() === '') {
-                shippingSelectBox.prop('required', true);
-                if (isSubmitEvent) {
-                    shippingSelectWrapper.addClass('woocommerce-invalid');
-                }
-            } else {
-                shippingSelectBox.prop('required', false);
-                shippingSelectWrapper.removeClass('required-border woocommerce-invalid');
-                if (isSubmitEvent) {
-                    shippingSelectWrapper.addClass('woocommerce-validated');
-                }
+            shippingSelectBox.prop('required', true);
+            if (isSubmitEvent) {
+                shippingSelectWrapper.addClass('woocommerce-invalid');
             }
         } else {
             shippingSelectWrapper.hide();
@@ -30,7 +22,7 @@ jQuery(document).ready(function($) {
     function checkSelectBoxValue() {
         const selectedShippingMethod = $('input[name="shipping_method[0]"]:checked').val();
 
-        if (selectedShippingMethod === currentShippingMethod && (shippingSelectBox.val() === null || shippingSelectBox.val() === '')) {
+        if (selectedShippingMethod === currentShippingMethod) {
             shippingSelectBox.prop('required', true);
         } else {
             shippingSelectBox.prop('required', false);

@@ -485,6 +485,11 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         if($showOnce) {
             return;
         }
+        $showOnce = true;
+
+        if ($order->get_status() == 'pending') {
+            return;
+        }
 
         if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
             error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID '  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
@@ -521,7 +526,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         </tr>
         <?php
 
-        $showOnce = true;
+
     }
 
     public function updateParcelTerminalForOrder($order, $order_id) {
