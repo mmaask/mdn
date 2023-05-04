@@ -20,6 +20,8 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $this->id = 'modena-shipping-itella-terminals';
         $this->init_form_fields();
         $this->cost = floatval($this->get_option('cost'));
+        $this->clientAPIkey = $this->get_option('clientAPIkey');
+        $this->clientAPIsecret = $this->get_option('clientAPIsecret');
         $this->setNamesBasedOnLocales(get_locale());
         $this->getParcelTerminals();
         $this->init_hooks();
@@ -74,6 +76,20 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                 'desc_tip' => true,
                 'sanitize_callback' => array($this, 'sanitizeshippingMethodCost'),
             ),
+            'clientAPIkey' => array(
+                'title' => __('API key'),
+                'type' => 'float',
+                'placeholder' => '',
+                'description' => 'Package Provider account API secret',
+                'desc_tip' => true,
+            ),
+            'clientAPIsecret' => array(
+                'title' => __('API secret'),
+                'type' => 'float',
+                'placeholder' => '',
+                'description' => 'Package Provider account API secret',
+                'desc_tip' => true,
+            ),
         );
     }
 
@@ -89,7 +105,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         add_filter('bulk_actions-edit-shop_order', array($this, 'register_custom_bulk_action'));
         add_filter('handle_bulk_actions-edit-shop_order', array($this,  'process_custom_bulk_action', 10, 3));
         add_action('admin_notices',  array($this, 'custom_bulk_action_admin_notice'));
-        //add_action( 'woocommerce_admin_order_data_after_shipping_address',array($this, 'renderParcelTerminalSelectBox' ));
+        //add_action('admin_init', array($this, 'add_shipping_shortcut'));
 
     }
 
@@ -394,11 +410,10 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
             return;
         }
 
-        $orderReference = $order->get_order_number();
-
-        $recipientName = $order->get_billing_first_name() . " " . $order->get_billing_last_name();
-        $recipientEmail = $order->get_billing_email();
-        $recipientPhone = $order->get_billing_phone();
+        if(empty($this->clientAPIkey) || empty($this->clientAPIsecret)) {
+            error_log("clientAPIkey or clientAPIsecret not set, exiting posting barcodeID");
+            return;
+        }
 
         if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
             error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut'  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
@@ -409,13 +424,15 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $packageContent = $result['packageContent'];
 
         $data = array(
-            'orderReference' => $orderReference,
+            'orderReference' => $order->get_order_number(),
             'packageContent' => $packageContent,
             'weight' => $weight,
-            'recipient_name' => $recipientName,
-            'recipient_phone' => $recipientPhone,
-            'recipientEmail' => $recipientEmail,
+            'recipient_name' => $order->get_billing_first_name() . " " . $order->get_billing_last_name(),
+            'recipient_phone' => $order->get_billing_phone(),
+            'recipientEmail' => $order->get_billing_email(),
             '$wcOrderParcelTerminalID' => $order->get_meta('_selected_parcel_terminal_id_mdn'),
+            'clientAPIkey' => $this->clientAPIkey,
+            'clientAPIsecret' => $this->clientAPIsecret,
         );
 
         $this->barcodePOSTrequest($data, $order);
@@ -535,6 +552,8 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
 
     }
+
+
 
     public function updateParcelTerminalForOrder($order, $order_id) {
 
