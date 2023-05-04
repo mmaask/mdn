@@ -84,13 +84,12 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         add_action('woocommerce_get_order_item_totals', array($this, 'addParcelTerminalToCheckoutDetails'), 10, 2);
         add_action('woocommerce_thankyou', array($this, 'preparePOSTrequestForBarcodeID'));
         add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'renderParcelTerminalInAdminOrder'));
-        add_filter('woocommerce_order_actions', array($this, 'add_custom_order_action'));
-        add_action('woocommerce_order_action_custom_order_action', array($this, 'process_custom_order_action'));
+        add_filter('woocommerce_order_actions', array($this, 'addSmartpostPrintLabelCustomOrderAction'));
+        add_action('woocommerce_order_action_custom_order_action', array($this, 'processSmartpostPrintLabelCustomOrderAction'));
         add_filter('bulk_actions-edit-shop_order', array($this, 'register_custom_bulk_action'));
         add_filter('handle_bulk_actions-edit-shop_order', array($this,  'process_custom_bulk_action', 10, 3));
         add_action('admin_notices',  array($this, 'custom_bulk_action_admin_notice'));
         //add_action( 'woocommerce_admin_order_data_after_shipping_address',array($this, 'renderParcelTerminalSelectBox' ));
-
 
     }
 
@@ -144,7 +143,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                     $order_note = $this->shorthandForTitle . " " .$this->labelDownloadedPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
                     $order->add_order_note($order_note);
 
-
                 }
             }
 
@@ -162,20 +160,16 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         }
 
 
-    public function add_custom_order_action($actions)
-    {
+    public function addSmartpostPrintLabelCustomOrderAction($actions) {
         $actions['custom_order_action'] = __($this->placeholderPrintLabelInAdmin, 'woocommerce');
         return $actions;
     }
 
-    public function process_custom_order_action($order) {
-        $order_note = $this->shorthandForTitle . " " .$this->labelDownloadedPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
+    public function processSmartpostPrintLabelCustomOrderAction($order) {
+        $order_note = $this->shorthandForTitle . " " . $this->labelDownloadedPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
         $order->add_order_note($order_note);
         $this->saveLabelPDFinUser($order);
-        header("Location: " . $_SERVER['REQUEST_URI']);
-        exit;
     }
-
 
     public function isShippingMethodAvailable($rates, $package) {
         if (!$this->isOrderSuitableForShipping($package)) {
@@ -233,7 +227,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         $GETrequestResponse = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            error_log('Something went wrong with curling the terminals list. Sorry. ' . curl_error($ch));
+            error_log('Something went wrong with curling the terminals list. Finding fallback from local file. ' . curl_error($ch));
         }
         curl_close($ch);
         return $GETrequestResponse;
@@ -241,15 +235,23 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
     public function parseParcelTerminalsJSON() {
         $parcelTerminalsJSON = $this->getParcelTerminalsHTTPrequest();
+
+        if(!$parcelTerminalsJSON) {
+            $fallbackFile = MODENA_PLUGIN_PATH . '/shipping/assets/json/packagepointfallback.json';
+
+            if (file_exists($fallbackFile) && is_readable($fallbackFile)) {
+                return json_decode(file_get_contents($fallbackFile))->item;
+            } else {
+                error_log('Fallback JSON file not found or not readable.');
+            }
+        }
         return json_decode($parcelTerminalsJSON)->item;
     }
 
     public function getParcelTerminals() {
-
-        $this->smartpostMachines = $this->parseParcelTerminalsJSON();
-
         if(empty($this->smartpostMachines)) {
-            error_log("Veateade - pakiterminalide listile ei pääsetud ligi.");
+            //error_log("Otsime veebist pakiterminalide listi, kuna pole varem laetud.");
+            $this->smartpostMachines = $this->parseParcelTerminalsJSON();
         }
     }
 
@@ -471,10 +473,14 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
     public function renderParcelTerminalInAdminOrder($order_id) {
         $order = wc_get_order($order_id);
-        $shipping_methods = $order->get_shipping_methods();
 
-        $first_shipping_method = reset($shipping_methods);
-        $orderShippingMethodID = $first_shipping_method->get_method_id();
+        if(empty($order->get_shipping_methods())) {
+            return;
+        } else {
+            $shipping_methods = $order->get_shipping_methods();
+            $first_shipping_method = reset($shipping_methods);
+            $orderShippingMethodID = $first_shipping_method->get_method_id();
+        }
 
         if(!$orderShippingMethodID || $orderShippingMethodID != $this->id) {
             return;
@@ -485,6 +491,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         if($showOnce) {
             return;
         }
+
         $showOnce = true;
 
         if ($order->get_status() == 'pending') {
@@ -493,7 +500,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
 
         if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
             error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID '  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
-            echo '<b><span style="color:red">Veateade - Tellimusel puudub salvestatud pakipunkti ID. Palun vali uuesti ja vali kinnita.</span></b>';
+            echo '<b><span style="color:black">Tellimusel puudub salvestatud pakipunkti ID. Palun vali uuesti ja vali kinnita.</span></b>';
 
         }
 
@@ -518,7 +525,7 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
                         //todo open a list of locations,
 
                         <?php
-                        $this->updateParcelTerminalForOrder($order, $order_id);
+                        //$this->updateParcelTerminalForOrder($order, $order_id);
                         ?>
                     }
                 </script>
