@@ -10,7 +10,6 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     protected $adjustParcelTerminalInAdminPlaceholder;
     protected $placeholderForSelectBoxLabel;
     protected $shorthandForTitle;
-    protected $addBarcodeMetaDataNotePlaceholderText;
     protected $createOrderParcelMetaDataPlaceholderText;
     protected $updateParcelTerminalNewTerminalNote;
     protected $labelDownloadedPlaceholderText;
@@ -19,6 +18,8 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
         parent::__construct($instance_id);
         $this->id = 'modena-shipping-itella-terminals';
         $this->urltoJSONlist = 'https://monte360.com/itella/index.php?action=displayParcelsList';
+        $this->urlToPackageLabel = 'https://monte360.com/itella/index.php?action=getLable&barcode=';
+        $this->barcodePostURL = 'https://monte360.com/itella/index.php?action=createShipment';
         $this->maxCapacityForTerminal = 35;
         $this->pathToLocalTerminalsFile = '/shipping/assets/json/smartpostterminals.json';
         $this->init_form_fields();
@@ -97,52 +98,45 @@ class Modena_Shipping_Itella_Terminals extends Modena_Shipping_Method {
     }
 
     public function getParcelTerminals() {
-       return $this->parseParcelTerminalsJSON()->item;
+       return $this->parseParcelTerminalsJSON($this->urltoJSONlist)->item;
 
     }
 
     public function renderParcelTerminalSelectBox() {
-        static $showOnce = false;
 
         if(empty($this->smartpostMachines)) {
             $this->smartpostMachines = $this->getParcelTerminals();
         }
 
+        ?>
+        <div class="mdn-shipping-select-wrapper-<?php echo $this->id ?>" style="margin-bottom: 15px">
+            <label  for="mdn-shipping-select-box-itella"><?php echo $this->placeholderForSelectBoxLabel ?></label>
+            <select name="userShippingSelection-<?php echo $this->id ?>" id="mdn-shipping-select-box-itella" data-method-id="<?php echo $this->id; ?>" style="width: 100%; height: 400px;">
+                <option disabled selected="selected"></option>
+                <?php
+                $cities = array();
+                foreach ($this->smartpostMachines as $terminal) {
+                    $cities[$terminal->{'city'}][] = $terminal;
+                }
 
-        if(!$showOnce) {
-            ?>
-            <div class="mdn-shipping-select-wrapper-<?php echo $this->id ?>" style="margin-bottom: 15px">
-                <label  for="mdn-shipping-select-box-itella"><?php echo $this->placeholderForSelectBoxLabel ?></label>
-                <select name="userShippingSelection-<?php echo $this->id ?>" id="mdn-shipping-select-box-itella" data-method-id="<?php echo $this->id; ?>" style="width: 100%; height: 400px;">
-                    <option disabled selected="selected"></option>
-                    <?php
-                    $cities = array();
-                    foreach ($this->smartpostMachines as $terminal) {
-                        $cities[$terminal->{'city'}][] = $terminal;
+                foreach ($cities as $city => $terminals) {
+                    echo "<optgroup label='$city'>";
+                    foreach ($terminals as $terminal) {
+                        $terminalID = $terminal->{'place_id'};
+                        echo "<option value='$terminalID' >" . $terminal->{'name'} . "</option>";
                     }
-
-                    foreach ($cities as $city => $terminals) {
-                        echo "<optgroup label='$city'>";
-                        foreach ($terminals as $terminal) {
-                            $terminalID = $terminal->{'place_id'};
-                            echo "<option value='$terminalID' >" . $terminal->{'name'} . "</option>";
-                        }
-                        echo "</optgroup>";
-                    }
-                    ?>
-                </select>
-            </div>
-            <?php
-        }
-
-        $showOnce = true;
+                    echo "</optgroup>";
+                }
+                ?>
+            </select>
+        </div>
+        <?php
     }
 
-
-
     public function getOrderParcelTerminalText($wcOrderParcelTerminalID) {
-        $this->smartpostMachines = $this->getParcelTerminals();
 
+        error_log("getOrderParcelTerminalText called with ID: " . $wcOrderParcelTerminalID); // Log the input
+        $this->smartpostMachines = $this->getParcelTerminals();
         $parcelTerminalsById = array_column($this->smartpostMachines, null, 'place_id');
 
         if (isset($parcelTerminalsById[$wcOrderParcelTerminalID])) {

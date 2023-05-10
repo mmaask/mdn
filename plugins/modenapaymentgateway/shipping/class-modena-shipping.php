@@ -67,7 +67,7 @@ class Modena_Shipping {
 
     public function init_WC_estonia()  {
 
-        $this->clear_debug_log();
+        //$this->clear_debug_log();
         require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-method.php');
         require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-itella-terminals.php');
         require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-omniva-terminals.php');

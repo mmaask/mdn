@@ -12,6 +12,8 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     protected $urltoJSONlist;
     protected $maxCapacityForTerminal;
     protected $pathToLocalTerminalsFile;
+    protected $urlToPackageLabel;
+    protected $barcodePostURL;
 
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
@@ -24,6 +26,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         );
         $this->init();
         $this->init_form_fields();
+        $this->enqueueAssests();
     }
     public function init_form_fields()
     {
@@ -36,16 +39,16 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     {
 
         $this->title = $this->get_option('title');
+        $this->placeholderPrintLabelInAdmin = "Download parcel label";
 
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
         add_action('wp_enqueue_scripts', array($this, 'enqueueParcelTerminalSearchBoxAssets'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueueAssests'));
-        add_action('login_enqueue_scripts', array($this, 'enqueueAssests'));
+
         add_action('woocommerce_checkout_update_order_review', array($this, 'isShippingMethodAvailable'));
 
         add_action('woocommerce_checkout_update_order_meta', array($this, 'createOrderParcelMetaData'));
 
-        add_action('woocommerce_get_order_item_totals', array($this, 'addParcelTerminalToCheckoutDetails'), 10, 2);
+        add_action('woocommerce_get_order_item_totals', array($this, 'addParcelTerminalToCheckoutDetails'));
         add_action('woocommerce_thankyou', array($this, 'preparePOSTrequestForBarcodeID'));
         add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'renderParcelTerminalInAdminOrder'));
 
@@ -55,10 +58,13 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
         add_filter('woocommerce_order_actions', array($this, 'addPrintLabelCustomOrderAction'));
         add_action('woocommerce_order_action_custom_order_action', array($this, 'processPrintLabelCustomOrderAction'));
+
     }
 
     public function enqueueAssests() {
-
+        if (!wp_script_is('jquery')) {
+            wp_enqueue_script('jquery');
+        }
         wp_enqueue_style('modena_shipping_style', MODENA_PLUGIN_URL . '/shipping/assets/modena-shipping.css');
         wp_enqueue_script('modena_shipping_script', MODENA_PLUGIN_URL . 'shipping/assets/modena-shipping.js', array('jquery'), '6.2', true);
 
@@ -68,10 +74,6 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         );
 
         wp_localize_script('modena_shipping_script', 'mdnTranslations', $translations);
-
-        if (!wp_script_is('jquery')) {
-            wp_enqueue_script('jquery');
-        }
 
         wp_register_style('select2', 'assets/select2/select2.min.css');
         wp_register_script('select2', 'assets/select2/select2.min.js', array('jquery'), true);
@@ -105,16 +107,40 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         $this->add_rate($rate);
     }
 
-    public function addPrintLabelCustomOrderAction($actions) {
-        error_log("Create label print custom action: " . $this->id);
-        $actions['custom_order_action'] = __($this->placeholderPrintLabelInAdmin, 'woocommerce');
-        return $actions;
+    public function sanitizeshippingMethodCost($shippingMethodCost): float {
+        $sanitizedshippingMethodCost = floatval($shippingMethodCost);
+        if ($sanitizedshippingMethodCost < 0) {
+            $sanitizedshippingMethodCost = $this->cost;
+        }
+        return $sanitizedshippingMethodCost;
     }
 
-    public function processPrintLabelCustomOrderAction($order) {
-        $order_note = $this->shorthandForTitle . " " . $this->labelDownloadedPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
-        $order->add_order_note($order_note);
-        $this->saveLabelPDFinUser($order);
+    public function getShippingMethodAndCompareItWithOrder($shippingMethodID, $order_id) {
+        $order = wc_get_order($order_id);
+        $shipping_methods = $order->get_shipping_methods();
+
+        if (empty($shipping_methods)) {
+            //error_log("Metadata not saved since order no shipping method: ");
+            return False;
+        }
+
+        $first_shipping_method = reset($shipping_methods);
+        $orderShippingMethodID = $first_shipping_method->get_method_id();
+
+        error_log("Comparing methods... " . $shippingMethodID . " with:  " . $orderShippingMethodID);
+
+        if (empty($orderShippingMethodID)) {
+            error_log("Metadata not saved since order no shipping method with id: " . $orderShippingMethodID);
+            return False;
+        }
+
+        if($orderShippingMethodID == $shippingMethodID) {
+            error_log("win, because methods are same named. saned.");
+            return True;
+        } else {
+            //error_log("Metadata not saved: " . $shippingMethodID);
+            return False;
+        }
     }
 
     public function getParcelTerminalsHTTPrequest($urltoJSONlist) {
@@ -134,6 +160,51 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         }
         curl_close($ch);
         return $GETrequestResponse;
+    }
+
+    public function parseParcelTerminalsJSON($urltoJSONlist) {
+        $parcelTerminalsJSON = $this->getParcelTerminalsHTTPrequest($urltoJSONlist);
+
+        if(!$parcelTerminalsJSON) {
+            $fallbackFile = MODENA_PLUGIN_PATH . $this->pathToLocalTerminalsFile;
+
+            if (file_exists($fallbackFile) && is_readable($fallbackFile)) {
+                return json_decode(file_get_contents($fallbackFile));
+            } else {
+                error_log('Fallback JSON file not found or not readable.');
+            }
+        }
+        return json_decode($parcelTerminalsJSON);
+    }
+
+    public function getOrderTotalWeightAndContents($order): array {
+        $packageContent = '';
+        $total_weight = 0;
+
+        foreach ($order->get_items() as $item) {
+            if ($item instanceof WC_Order_Item_Product) {
+                $product_name = $item->get_name();
+                $quantity = $item->get_quantity();
+                $packageContent .= $quantity . ' x ' . $product_name . "\n";
+
+                $product = $item->get_product();
+                $product_weight = $product->get_weight();
+                $total_weight += $product_weight * $quantity;
+            }
+        }
+        error_log("Total weight: " . $total_weight . " and package content: " . $packageContent);
+        return array(
+            'total_weight' => $total_weight,
+            'packageContent' => $packageContent,
+        );
+    }
+
+
+
+    public function sanitizeOrderProductDimensions($ProductDimensions): array {
+        return array_map(function ($ProductDimensions) {
+            return max(0, (float) $ProductDimensions);
+        }, $ProductDimensions);
     }
 
     public function isOrderSuitableForShipping($package, $maxCapacityForTerminal) {
@@ -172,210 +243,140 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         return true;
     }
 
-    public function parseParcelTerminalsJSON() {
-        $parcelTerminalsJSON = $this->getParcelTerminalsHTTPrequest($this->urltoJSONlist);
+    public function createOrderParcelMetaData($order_id) {
+        $order = wc_get_order($order_id);
+        if ($this->getShippingMethodAndCompareItWithOrder($this->id, $order_id)) {
+            $selected_parcel_terminal = sanitize_text_field($_POST['userShippingSelection-' . $this->id]);
 
-        if(!$parcelTerminalsJSON) {
-            $fallbackFile = MODENA_PLUGIN_PATH . $this->pathToLocalTerminalsFile;
-
-            if (file_exists($fallbackFile) && is_readable($fallbackFile)) {
-                return json_decode(file_get_contents($fallbackFile));
-            } else {
-                error_log('Fallback JSON file not found or not readable.');
+            if(empty($selected_parcel_terminal)) {
+                error_log("Veateade - Pakipunkti ID ei leitud.");
             }
+
+            $order->add_meta_data('_selected_parcel_terminal_id_mdn', $selected_parcel_terminal, true);
+            $order->save();
+            error_log('Selected parcel terminal metadata ' . $order->get_meta('_selected_parcel_terminal_id_mdn') . ' saved for order_id: ' . $order_id);
         }
-        return json_decode($parcelTerminalsJSON);
     }
 
-    public function getOrderTotalWeightAndContents($order): array {
-        $packageContent = '';
-        $total_weight = 0;
-
-        foreach ($order->get_items() as $item) {
-            if ($item instanceof WC_Order_Item_Product) {
-                $product_name = $item->get_name();
-                $quantity = $item->get_quantity();
-                $packageContent .= $quantity . ' x ' . $product_name . "\n";
-
-                $product = $item->get_product();
-                $product_weight = $product->get_weight();
-                $total_weight += $product_weight * $quantity;
-            }
+    public function hasOrderGotPackagePointMetaData($order) {
+        if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
+            error_log("oh no, order does not yet have a terminal.");
+            return False;
+        } else {
+            return True;
         }
-        return array(
-            'total_weight' => $total_weight,
-            'packageContent' => $packageContent,
-        );
     }
 
-    public function addParcelTerminalToCheckoutDetails($totals, $order) {
-
-        $shipping_methods = $order->get_shipping_methods();
-        $orderShippingMethodID = '';
-        if (!empty($shipping_methods)) {
-            $first_shipping_method = reset($shipping_methods);
-            $orderShippingMethodID = $first_shipping_method->get_method_id();
-        }
-        if ($orderShippingMethodID == $this->id) {
-            $wcOrderParcelTerminalID = $order->get_meta('_selected_parcel_terminal_id_mdn');
-            if(empty($wcOrderParcelTerminalID)) {
-                error_log('Veateade - Tellimusel puudub pakipunkti ID '  . $wcOrderParcelTerminalID);
-            }
-
-            $parcel_terminal = $this->getOrderParcelTerminalText($wcOrderParcelTerminalID);
+    public function addParcelTerminalToCheckoutDetails($totals, $order_id)
+    {
+        error_log("Hello, does it get here?");
+        $order = wc_get_order($order_id);
+        if (!$this->hasOrderGotPackagePointMetaData($order)) return $totals;
+        if ($this->getShippingMethodAndCompareItWithOrder($this->id, $order_id)) {
+            $parcel_terminal = $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn'));
 
             foreach ($totals as $key => $total) {
                 if ($key === 'shipping') {
                     $totals['shipping']['value'] = $totals['shipping']['value'] . " (" . $parcel_terminal . ")";
-
                 }
             }
-        }
 
+        }
         return $totals;
     }
 
-
-
-    public function renderParcelTerminalInAdminOrder($order_id) {
-        $order = wc_get_order($order_id);
-
-        if(empty($order->get_shipping_methods())) {
-            return;
-        } else {
-            $shipping_methods = $order->get_shipping_methods();
-            $first_shipping_method = reset($shipping_methods);
-            $orderShippingMethodID = $first_shipping_method->get_method_id();
-        }
-
-        if(!$orderShippingMethodID || $orderShippingMethodID != $this->id) {
-            return;
-        }
-
-        static $showOnce = false;
-
-        if($showOnce) {
-            return;
-        }
-
-        $showOnce = true;
-
+    public function returnTrueIfOrderPending($order) {
         if ($order->get_status() == 'pending') {
-            return;
+            return True;
+        } else {
+            return False;
         }
-
-        if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
-            error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID '  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
-            echo '<b><span style="color:black">Tellimusel puudub salvestatud pakipunkti ID. Palun vali uuesti ja vali kinnita.</span></b>';
-
-        }
-
-        ?>
-        <tr class="selected-terminal">
-            <th>
-                <h3>
-                    <?php echo $this->title ?>
-                </h3>
-            </th>
-            <td>
-                <p>
-                    <?php echo $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')); ?>
-
-                </p>
-                <button id="buttonForClicking" onClick="startUpdatingOrderParcel()" class="button grant-access"><?php _e($this->adjustParcelTerminalInAdminPlaceholder)?></button>
-
-                <script>
-                    document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
-                    function startUpdatingOrderParcel() {
-
-
-                        <?php
-                        //$this->updateParcelTerminalForOrder($order, $order_id);
-                        ?>
-                    }
-                </script>
-            </td>
-        </tr>
-        <?php
-
-
     }
 
-    public function updateParcelTerminalForOrder($order, $order_id) {
+    public function renderParcelTerminalInAdminOrder($order_id) {
+        //error_log("Trying to run into admin orders");
 
-        static $runOnce = False;
-        if ($runOnce) {
-            return;
+        $order = wc_get_order($order_id);
+
+        if ($this->returnTrueIfOrderPending($order)) return;
+
+        if ($this->getShippingMethodAndCompareItWithOrder($this->id, $order_id)) {
+
+            ?>
+            <tr class="selected-terminal">
+                <th>
+                    <h3>
+                        <?php echo $this->title ?>
+                    </h3>
+                </th>
+                <td>
+                    <p>
+                        <?php echo $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')); ?>
+
+                    </p>
+                    <button id="buttonForClicking" onClick="startUpdatingOrderParcel()" class="button grant-access"><?php _e($this->adjustParcelTerminalInAdminPlaceholder)?></button>
+
+                    <script>
+                        document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
+                        function startUpdatingOrderParcel() {
+
+
+                            <?php
+                            //$this->updateParcelTerminalForOrder($order, $order_id);
+                            ?>
+                        }
+                    </script>
+                </td>
+            </tr>
+            <?php
         }
-        $runOnce = True;
 
-        $order_note1 = $this->updateParcelTerminalNewTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
-        $order->add_order_note($order_note1);
-        $this->preparePOSTrequestForBarcodeID($order_id);
     }
 
     public function preparePOSTrequestForBarcodeID($order_id) {
+        error_log("preparing post for order: " . $order_id);
 
         $order = wc_get_order($order_id);
+        if ($this->getShippingMethodAndCompareItWithOrder($this->id, $order_id)) {
+            if(empty($this->clientAPIkey) || empty($this->clientAPIsecret)) {
+                error_log("clientAPIkey or clientAPIsecret not set, exiting posting barcodeID");
+                return;
+            }
 
-        $shipping_methods = $order->get_shipping_methods();
+            if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
+                error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut'  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
+            }
 
-        $orderShippingMethodID = '';
-        if (!empty($shipping_methods)) {
-            $first_shipping_method = reset($shipping_methods);
-            $orderShippingMethodID = $first_shipping_method->get_method_id();
+            $result = $this->getOrderTotalWeightAndContents($order);
+            $weight = $result['total_weight'];
+            $packageContent = $result['packageContent'];
+
+            $data = array(
+                'orderReference' => $order->get_order_number(),
+                'packageContent' => $packageContent,
+                'weight' => $weight,
+                'recipient_name' => $order->get_billing_first_name() . " " . $order->get_billing_last_name(),
+                'recipient_phone' => $order->get_billing_phone(),
+                'recipientEmail' => $order->get_billing_email(),
+                '$wcOrderParcelTerminalID' => $order->get_meta('_selected_parcel_terminal_id_mdn'),
+                'clientAPIkey' => $this->clientAPIkey,
+                'clientAPIsecret' => $this->clientAPIsecret,
+            );
+
+            $this->barcodePOSTrequest($data, $order, $this->barcodePostURL);
         }
-
-        if ($orderShippingMethodID != $this->id) {
-            return;
-        }
-
-        if(empty($this->clientAPIkey) || empty($this->clientAPIsecret)) {
-            error_log("clientAPIkey or clientAPIsecret not set, exiting posting barcodeID");
-            return;
-        }
-
-        if(empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
-            error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut'  . $order->get_meta('_selected_parcel_terminal_id_mdn'));
-        }
-
-        $result = $this->getOrderTotalWeightAndContents($order);
-        $weight = $result['total_weight'];
-        $packageContent = $result['packageContent'];
-
-        $data = array(
-            'orderReference' => $order->get_order_number(),
-            'packageContent' => $packageContent,
-            'weight' => $weight,
-            'recipient_name' => $order->get_billing_first_name() . " " . $order->get_billing_last_name(),
-            'recipient_phone' => $order->get_billing_phone(),
-            'recipientEmail' => $order->get_billing_email(),
-            '$wcOrderParcelTerminalID' => $order->get_meta('_selected_parcel_terminal_id_mdn'),
-            'clientAPIkey' => $this->clientAPIkey,
-            'clientAPIsecret' => $this->clientAPIsecret,
-        );
-
-        $this->barcodePOSTrequest($data, $order);
     }
 
-    public function addBarcodeMetaDataToOrder($parcelLabelBarcodeID, $order) {
-        $order->add_meta_data('_barcode_id_mdn', $parcelLabelBarcodeID, true);
-        //$order->add_order_note($this->addBarcodeMetaDataNotePlaceholderText .  $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".");
-        $order->save();
-    }
+    public function barcodePOSTrequest($data, $order, $barcodePostURL) {
 
-
-
-    public function barcodePOSTrequest($data, $order) {
-
-        $curl = curl_init('https://monte360.com/itella/index.php?action=createShipment');
+        $curl = curl_init($barcodePostURL);
 
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 5); // Add a 5-second wait time for the response
+        curl_setopt($curl, CURLOPT_TIMEOUT, 2); // Add a 5-second wait time for the response
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
 
@@ -383,7 +384,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
         if (curl_errno($curl)) {
             error_log('Error in POST response: ' . curl_error($curl));
-            echo '<b><span style="color:red">Veateade - POST päringul tegemisel ilmnes viga. </span></b> ' . curl_error($curl);
+            echo '<b><span style="color:black">Veateade - POST päringul tegemisel ilmnes viga. Kontrollige interneti/Itella ühenduse olemasolu. </span></b> ' . curl_error($curl);
         } else {
             $this->barcodeJSONparser($POSTrequestResponse, $order);
         }
@@ -402,7 +403,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
         if (is_null($array) || !isset($array['item']['barcode'])) {
             error_log('Cannot access barcode_id. Invalid JSON or missing key in array.');
-            echo '<b><span style="color:red">Veateade - barcode_id polnud kättesaadav. </span></b> ';
+
             return Null;
         }
 
@@ -410,9 +411,16 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         $this->addBarcodeMetaDataToOrder($parcelLabelBarcodeID, $order);
     }
 
-    public function saveLabelPDFinUser($order) {
+    public function addBarcodeMetaDataToOrder($parcelLabelBarcodeID, $order) {
+        $order->add_meta_data('_barcode_id_mdn', $parcelLabelBarcodeID, true);
+        $order->save();
+    }
 
-        $pdfUrl = 'https://monte360.com/itella/index.php?action=getLable&barcode=' . $order->get_meta('_barcode_id_mdn');
+    public function saveLabelPDFinUser($order, $urlToPackageLabel) {
+
+        error_log("attempting to download label");
+
+        $pdfUrl = $urlToPackageLabel . $order->get_meta('_barcode_id_mdn');
         $tempFileName = $order->get_meta('_barcode_id_mdn') . '.pdf';
 
         $ch = curl_init($pdfUrl);
@@ -450,52 +458,23 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         return $rates;
     }
 
-    public function getShippingMethodAndCompareItWithOrder($shippingMethodID, $order_id) {
-        $order = wc_get_order($order_id);
-        $shipping_methods = $order->get_shipping_methods();
-
-        $first_shipping_method = reset($shipping_methods);
-        $orderShippingMethodID = $first_shipping_method->get_method_id();
-
-        if (empty($orderShippingMethodID)) {
-            error_log("Metadata not saved since order no shipping method: " . $orderShippingMethodID);
-            return False;
-        }
-
-        if($orderShippingMethodID == $shippingMethodID) {
-            return True;
-        } else {
-            error_log("Metadata not saved: " . $shippingMethodID);
-            return False;
-        }
+    public function addPrintLabelCustomOrderAction($actions) {
+        //error_log("Create label print custom action: " . $this->id);
+        $actions['custom_order_action'] = __($this->placeholderPrintLabelInAdmin, 'woocommerce');
+        return $actions;
     }
 
-    public function createOrderParcelMetaData($order_id) {
-        $order = wc_get_order($order_id);
-        if ($this->getShippingMethodAndCompareItWithOrder($this->id, $order_id)) {
-            $selected_parcel_terminal = sanitize_text_field($_POST['userShippingSelection-' . $this->id]);
-
-            if(empty($selected_parcel_terminal)) {
-                error_log("Veateade - Pakipunkti ID ei leitud.");
-            }
-            $order->add_meta_data('_selected_parcel_terminal_id_mdn', $selected_parcel_terminal, true);
-            $order->save();
-            error_log('Selected parcel terminal metadata saved for order_id: ' . $order_id);
-        }
+    public function processPrintLabelCustomOrderAction($order) {
+        $order_note = $this->shorthandForTitle . " " . $this->labelDownloadedPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
+        $order->add_order_note($order_note);
+        error_log("this is the url to the label: " . $this->urlToPackageLabel);
+        $this->saveLabelPDFinUser($order, $this->urlToPackageLabel);
     }
+    public function updateParcelTerminalForOrder($order, $order_id) {
 
-    public function sanitizeOrderProductDimensions($ProductDimensions): array {
-        return array_map(function ($ProductDimensions) {
-            return max(0, (float) $ProductDimensions);
-        }, $ProductDimensions);
-    }
-
-    public function sanitizeshippingMethodCost($shippingMethodCost): float {
-        $sanitizedshippingMethodCost = floatval($shippingMethodCost);
-        if ($sanitizedshippingMethodCost < 0) {
-            $sanitizedshippingMethodCost = $this->cost;
-        }
-        return $sanitizedshippingMethodCost;
+        $order_note1 = $this->updateParcelTerminalNewTerminalNote . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
+        $order->add_order_note($order_note1);
+        $this->preparePOSTrequestForBarcodeID($order_id);
     }
 
     public function addFreeShippingToProduct() {
@@ -518,11 +497,6 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     public function add_custom_bulk_action() {
         global $post_type;
 
-        static $bass = 0;
-
-        if($bass == 1) {
-            return;
-        }
 
         if ('shop_order' == $post_type) {
             ?>
@@ -535,7 +509,6 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
 
         }
-        $bass += 1;
     }
 
     public function process_custom_bulk_action($redirect_to, $action, $post_ids): string
@@ -549,7 +522,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
             if ($order) {
 
-                $this->saveLabelPDFinUser($order);
+                $this->saveLabelPDFinUser($order, $this->urlToPackageLabel);
                 $order_note = $this->shorthandForTitle . " " .$this->labelDownloadedPlaceholderText . $this->getOrderParcelTerminalText($order->get_meta('_selected_parcel_terminal_id_mdn')) . ".";
                 $order->add_order_note($order_note);
 
