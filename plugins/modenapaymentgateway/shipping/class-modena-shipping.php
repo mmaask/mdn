@@ -26,14 +26,17 @@ class Modena_Shipping {
      */
 
     public function run_shipping() {
-        if (!class_exists('Modena_Shipping_Itella_Terminals') && class_exists('WC_Shipping_Method')) {
-            $this->loadAssets();
+        if (!class_exists('Modena_Shipping_Omniva_Terminals') && class_exists('WC_Shipping_Method') && !class_exists('Modena_Shipping_Itella_Terminals')) {
+
             add_filter('woocommerce_shipping_methods', array($this, 'load_modena_shipping_methods'));
             add_action('woocommerce_shipping_init', array($this, 'init_WC_estonia'));
         } else {
             $errorMessage = "Error: ";
+            if (!class_exists('Modena_Shipping_Omniva_Terminals')) {
+                $errorMessage .= "The 'Modena_Shipping_Omniva_Terminals' class does not exist. ";
+            }
             if (!class_exists('Modena_Shipping_Itella_Terminals')) {
-                $errorMessage .= "The 'WC_Estonia_Shipping_Method' class does not exist. ";
+                $errorMessage .= "The 'Modena_Shipping_Itella_Terminals' class does not exist. ";
             }
             if (!class_exists('WC_Shipping_Method')) {
                 $errorMessage .= "The 'WC_Shipping_Method' class does not exist. ";
@@ -49,6 +52,7 @@ class Modena_Shipping {
 
     public function load_modena_shipping_methods(array $methods): array {
         $methods['modena-shipping-itella-terminals'] = 'Modena_Shipping_Itella_Terminals';
+        $methods['modena-shipping-omniva-terminals'] = 'Modena_Shipping_Omniva_Terminals';
         return $methods;
     }
 
@@ -62,12 +66,11 @@ class Modena_Shipping {
     }
 
     public function init_WC_estonia()  {
+
         $this->clear_debug_log();
         require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-method.php');
         require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-itella-terminals.php');
-
-        $shipping_ai_object = new Modena_Shipping_Itella_Terminals();
-
+        require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-omniva-terminals.php');
     }
 
     public function clear_debug_log()
@@ -79,19 +82,6 @@ class Modena_Shipping {
         }
     }
 
-    public function loadAssets()  {
-
-
-        wp_enqueue_style('modena_shipping_style', MODENA_PLUGIN_URL . '/shipping/assets/modena-shipping.css');
-        wp_enqueue_script('modena_shipping_script', MODENA_PLUGIN_URL . 'shipping/assets/modena-shipping.js', array('jquery'), '6.2', true);
-
-        $translations = array(
-            'please_choose_parcel_terminal' => __($this->getParcelTerminalDefaultTextTranslation(), 'mdn-translations')
-
-        );
-
-        wp_localize_script('modena_shipping_script', 'mdnTranslations', $translations);
-    }
 
     public function getParcelTerminalDefaultTextTranslation(): string
     {

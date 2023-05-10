@@ -23,7 +23,7 @@ class Modena_Init_Handler
         new Modena_Admin_Handler();
         add_action('plugins_loaded', [$this, 'maybe_init'], 99);
     }
-    public function maybe_init(): void
+    public function maybe_init()
     {
         if (!$this->is_woocommerce_active() || !class_exists('WC_Payment_Gateway')) {
             return;
@@ -37,7 +37,7 @@ class Modena_Init_Handler
             (is_multisite() && in_array('woocommerce/woocommerce.php',
                     array_keys(get_site_option('active_sitewide_plugins'))));
     }
-    public function init(): void
+    public function init()
     {
         add_filter('plugin_action_links_modena/modena.php', array($this, 'modena_plugin_action_links'));
 
@@ -111,7 +111,7 @@ class Modena_Init_Handler
 
         return $setting === 'yes';
     }
-    public function display_product_installments(): void
+    public function display_product_installments()
     {
         global $product;
 

@@ -43,7 +43,6 @@ class Modena_Slice_Payment extends Modena_Base_Payment
                 $this->default_image            = 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_alt_2dacff6e81.png?15560016.3';
                 $this->default_icon_title_text  = 'Osamakseid võimaldab Modena Estonia OÜ.';
                 break;
-
         }
     }
     public function init_form_fields()
