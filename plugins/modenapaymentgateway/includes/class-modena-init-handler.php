@@ -167,17 +167,7 @@ class Modena_Init_Handler
         return $this->get_installment_price_whitelabel($this->get_slice_whitelabel_banner_text($active_price));
     }
 
-    private function get_slice_whitelabel_banner_text($active_price): string
-    {
-        return sprintf(__("3 makset %s€ kuus, ilma lisatasudeta.&ensp;", "woocommerce"),
-            $this->get_installment_number($active_price / 3.0));
-    }
 
-    private function get_credit_whitelabel_banner_text($active_price): string
-    {
-        return sprintf(__("Järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;", "woocommerce"),
-            $this->get_installment_number($active_price * 0.0325));
-    }
 
     private function get_credit_whitelabel_banner_html($active_price): string
     {
@@ -235,10 +225,38 @@ class Modena_Init_Handler
             $this->get_installment_number($active_price * 0.0325));
     }
 
+    private function get_slice_whitelabel_banner_text($active_price): string
+    {
+        return sprintf(__("3 makset %s€ kuus, ilma lisatasudeta.&ensp;", "woocommerce"),
+            $this->get_installment_number($active_price / 3.0));
+    }
+
+    private function get_credit_whitelabel_banner_text($active_price): string
+    {
+        return sprintf(__("Järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;", "woocommerce"),
+            $this->get_installment_number($active_price * 0.0325));
+    }
+
     private function get_leasing_banner_text($active_price): string
     {
-        return sprintf(__("Ärikliendi järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;", "woocommerce"),
+        return sprintf(__($this->getLocaleForBannerTextForLeasing(), "woocommerce"),
             $this->get_installment_number($active_price * 0.0325));
+    }
+
+    private function getLocaleForBannerTextForLeasing() {
+        switch (get_locale()) {
+            case 'ru_RU':
+                return "Рассрочка для корпоративных клиентов от %s€ в месяц, без комиссии за договор.&ensp;";
+                break;
+            case 'en_GB':
+            case 'en_US':
+                return "Business customer installment payment starting from %s€ / month, 0€ contract fee.&ensp;";
+                break;
+            default:
+                return "Ärikliendi järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;";
+                break;
+        }
+
     }
 
     private function get_installment_price_html($text): string
