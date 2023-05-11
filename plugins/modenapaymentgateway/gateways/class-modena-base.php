@@ -32,6 +32,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     protected $button_text;
     protected $icon_alt_text;
     protected $icon_title_text;
+    protected $default_payment_button_description;
 
     public function __construct()
     {

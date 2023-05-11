@@ -17,33 +17,56 @@ class Modena_Leasing extends Modena_Base_Payment
 
         parent::__construct();
     }
+    public function setNamesBasedOnLocales($current_locale)
+    {
+        error_log("Finding locale: "  . $current_locale);
+        $translations = array(
+            'en' => $array = array(
+                'method_title' => __('Modena Business Leasing', 'mdn-translations'),
+                'default_alt' => __('Modena - Leasing up to 48 months', 'mdn-translations'),
+                'method_description' => __('Arrange installment plan for the company name. Pay for the purchase over 6-48 months.', 'modena'),
+                'title' => __('Modena Leasing', 'mdn-translations'),
+                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808',
+                'default_icon_title_text' => __('Modena Leasing is provided by Modena Estonia OÜ.', 'mdn-translations'),
+                'default_payment_button_description' => __('0€ down payment, 0% interest, 0€ extra charge. Simply pay later.', 'mdn-translations')
+            ),
+            'ru' => array(
+                'method_title' => __('Modena бизнес лизинг', 'mdn-translations'),
+                'default_alt' => __('Modena - Рассрочка до 48 месяцев', 'mdn-translations'),
+                'method_description' => __('Оформите рассрочку на имя компании. Оплатите покупку в течение 6-48 месяцев.', 'modena'),
+                'title' => __('Бизнес лизинг', 'mdn-translations'),
+                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808',
+                'default_icon_title_text' => __('Модена рассрочка предоставляется Modena Estonia OÜ.', 'mdn-translations'),
+                'default_payment_button_description' => __('0€ down payment, 0% interest, 0€ extra charge. Simply pay later.', 'mdn-translations'),
+            ),
+            'et' => array(
+                'method_title' => __('Modena Äri järelmaks', 'mdn-translations'),
+                'default_alt' => __('Modena - Järelmaks kuni 48 kuud', 'mdn-translations'),
+                'method_description' => __('Vormista järelmaks ettevõtte nimele. Tasu ostu eest 6-48 kuu jooksul.', 'modena'),
+                'title' => __('Modena ärikliendi järelmaks', 'mdn-translations'),
+                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808',
+                'default_icon_title_text' => __('Modena äri järelmaksu võimaldab Modena Estonia OÜ.', 'mdn-translations'),
+                'default_payment_button_description' => 'Ettevõtetele mõeldud järelmaks. Tasu ostu eest osadena 6 - 48 kuu jooksul.',
+            ),
+        );
 
-    public function setNamesBasedOnLocales($current_locale) {
+        // Set the locale key based on the current locale
+        $locale_key = 'en';
+
         switch ($current_locale) {
-            case 'en_GB' && 'en_US':
-                $this->method_title             = 'Modena Business Leasing';
-                $this->default_alt              = 'Modena - Leasing up to 48 months';
-                $this->method_description       = __('Arrange installment plan for the company name. Pay for the purchase over 6-48 months.', 'modena');
-                $this->title                    = 'Modena Leasing';
-                $this->default_image            = 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808';
-                $this->default_icon_title_text  = 'Modena Leasing is provided by Modena Estonia OÜ.';
-                break;
             case 'ru_RU':
-                $this->method_title             = 'Modena бизнес лизинг';
-                $this->title                    = 'Бизнес лизинг';
-                $this->default_alt              = 'Modena - Рассрочка до 48 месяцев';
-                $this->method_description       = __('Оформите рассрочку на имя компании. Оплатите покупку в течение 6-48 месяцев.', 'modena');
-                $this->default_image            = 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808';
-                $this->default_icon_title_text  = 'Модена рассрочка предоставляется Modena Estonia OÜ.';
+                $locale_key = 'ru';
+                break;
+            case 'en_GB':
+            case 'en_US':
                 break;
             default:
-                $this->title                    = __('Modena ärikliendi järelmaks', 'modena');
-                $this->method_title             = 'Modena Ärijärelemaks';
-                $this->default_alt              = 'Vormista järelmaks ettevõtte nimele. Tasu ostu eest 6-48 kuu jooksul.';
-                $this->method_description       = __('Vormista järelmaks ettevõtte nimele. Tasu ostu eest 6-48 kuu jooksul.', 'modena');
-                $this->default_image            = 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808';
-                $this->default_icon_title_text = 'Vormista järelmaks ettevõtte nimele. Tasu ostu eest 6-48 kuu jooksul.';
+                $locale_key = 'et';
                 break;
+        }
+
+        foreach ($translations[$locale_key] as $key => $value) {
+            $this->{$key} = $value;
         }
     }
 
@@ -55,9 +78,8 @@ class Modena_Leasing extends Modena_Base_Payment
             'title'       => __('Payment Button Description', 'modena'),
             'type'        => 'textarea',
             'description' => __('This controls the description which the user sees during checkout.', 'modena'),
-            //'default'     => __('Ettevõtetele mõeldud järelmaks. Tasu ostu eest osadena 6 - 48 kuu jooksul.', 'modena'),
-
-            'default'     => __('leasingPaymentGatewayDescriptionText', 'mdn-translations'),
+            //'default'     => __('', 'modena'),
+            'default'     => __($this->default_payment_button_description, 'modena'),
             'css'         => 'width:25em',
             'desc_tip'    => true,
         ];

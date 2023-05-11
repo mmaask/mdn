@@ -5,40 +5,71 @@ if (!defined('ABSPATH')) {
 }
 
  class Modena_Direct_Payment extends Modena_Base_Payment {
-     public function __construct() {
-         $this->id      = 'modena_direct';
-         $this->enabled = $this->get_option('enabled');
-         $this->maturity_in_months = 0;
-         $this->default_alt             = '';
 
-         $this->setNamesBasedOnLocales(get_locale());
+    protected $service_info_text;
+
+    public function __construct() {
+         $this->id      = 'modena_direct';
+         $this->enabled = $this->get_option('disabled');
+         $this->maturity_in_months = 0;
+         $this->default_alt = '';
+        $this->setNamesBasedOnLocales(get_locale());
 
          parent::__construct();
      }
 
-     public function setNamesBasedOnLocales($current_locale) {
+     public function setNamesBasedOnLocales($current_locale)
+     {
+         error_log("Finding locale: " . $current_locale);
+         $translations = array(
+             'en' => array(
+                 'method_title' => __('Modena Bank & Card Payments', 'mdn-translations'),
+                 'default_alt' => __('Modena - Credit up to 48 months', 'mdn-translations'),
+                 'method_description' => __('Bank payments / card payments', 'mdn-translations'),
+                 'title' => __('Bank & Card Payments', 'mdn-translations'),
+                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
+                 'default_icon_title_text' => __('Modena Bank Payments is provided by Modena Estonia OÜ.', 'mdn-translations'),
+                 'default_payment_button_description' => __('Payment services are provided by Modena Payments OÜ in cooperation with EveryPay AS', 'mdn-translations'),
+                 'service_info' => __('Service info'),
+             ),
+             'ru' => array(
+                 'method_title' => __('Modena банковские платежи и платежи картами', 'mdn-translations'),
+                 'default_alt' => __('Банковские платежи / платежи картами', 'mdn-translations'),
+                 'method_description' => __('', 'modena'),
+                 'title' => __('Интернетбанк или карта', 'mdn-translations'),
+                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
+                 'default_icon_title_text' => __('Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.', 'mdn-translations'),
+                 'default_payment_button_description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
+                 'service_info' => __('Сведения о сервисе'),
+             ),
+             'et' => array(
+                 'method_title' => __('Modena pangamaksed ja kaardimaksed', 'mdn-translations'),
+                 'default_alt' => __('Modena pangamaksed ja kaardimaksed', 'mdn-translations'),
+                 'method_description' => __('Pangamaksed / kaardimaksed', 'modena'),
+                 'title' => __('Panga- ja kaardimaksed', 'mdn-translations'),
+                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
+                 'default_icon_title_text' => __('Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.', 'mdn-translations'),
+                 'default_payment_button_description' => '0€ sissemakse, 0€ haldustasu, 0€ lepingutasu. Hajuta mugavalt maksed 6-48 kuu peale.',
+                 'service_info' => __('Teenuse info'),
+             ),
+         );
+         // Set the locale key based on the current locale
+         $locale_key = 'en';
+
          switch ($current_locale) {
-             case 'ru':
-                 $this->method_title       = 'Modena банковские платежи и платежи картами';
-                 $this->method_description = __('Банковские платежи / платежи картами', 'modena');
-                 $this->title = "Интернетбанк или карта";
-                 $this->default_image = 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963';
-                 $this->default_icon_title_text = 'Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.';
+             case 'ru_RU':
+                 $locale_key = 'ru';
                  break;
-             case 'gb' && 'us':
-                 $this->method_title       = 'Modena Bank & Card Payments';
-                 $this->method_description = __('Bank payments / card payments', 'modena');
-                 $this->title = "Bank & Card Payments";
-                 $this->default_image = 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963';
-                 $this->default_icon_title_text = 'Payment services are provided by Modena Payments OÜ in cooperation with EveryPay AS';
+             case 'en_GB':
+             case 'en_US':
                  break;
              default:
-                 $this->method_title       = 'Modena pangamaksed ja kaardimaksed';
-                 $this->method_description = __('Pangamaksed / kaardimaksed', 'modena');
-                 $this->title = "Panga- ja kaardimaksed";
-                 $this->default_image = 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963';
-                 $this->default_icon_title_text = 'Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.';
+                 $locale_key = 'et';
                  break;
+         }
+
+         foreach ($translations[$locale_key] as $key => $value) {
+             $this->{$key} = $value;
          }
      }
 
@@ -91,22 +122,12 @@ if (!defined('ABSPATH')) {
 
     private function getServiceInfoHtml()
     {
-        $linkLabel = $this->getServiceInfoText();
+        $linkLabel = $this->service_info_text;
         return "<a class='mdn_service_info' href='https://modena.ee/makseteenused/' target='_blank'>{$linkLabel}</a>";
     }
      protected function postPaymentOrderInternal($request) {
          return $this->modena->postDirectPaymentOrder($request);
      }
 
-     protected function getServiceInfoText() {
-         switch (get_locale()) {
-            case 'en_US' && 'en_GB':
-                return 'Service info';
-            case 'et' && 'et_EE':
-                return 'Teenuse info';
-            case 'ru_RU':
-                return 'Сведения о сервисе';
-        }
- }
 
 }
