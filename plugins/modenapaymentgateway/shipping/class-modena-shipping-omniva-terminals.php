@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 
 class Modena_Shipping_Omniva_Terminals extends Modena_Shipping_Method {
 
-    public $cost;
+
     protected $omnivaMachines;
     protected $adjustParcelTerminalInAdminPlaceholder;
     protected $placeholderForSelectBoxLabel;
@@ -14,19 +14,16 @@ class Modena_Shipping_Omniva_Terminals extends Modena_Shipping_Method {
     protected $updateParcelTerminalNewTerminalNote;
     protected $labelDownloadedPlaceholderText;
 
-
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
         $this->id = 'modena-shipping-omniva-terminals';
         $this->urltoJSONlist = 'https://www.omniva.ee/locations.json';
         $this->urlToPackageLabel = 'https://monte360.com/itella/index.php?action=getLable&barcode=';
         $this->barcodePostURL = 'https://monte360.com/itella/index.php?action=createShipment';
+        $this->cost = 3.99;
         $this->maxCapacityForTerminal = 35;
         $this->pathToLocalTerminalsFile = '/shipping/assets/json/omnivaparcelterminals.json';
-        $this->init_form_fields();
-        $this->cost = floatval($this->get_option('cost'));
-        $this->clientAPIkey = $this->get_option('clientAPIkey');
-        $this->clientAPIsecret = $this->get_option('clientAPIsecret');
+
         $this->setNamesBasedOnLocales(get_locale());
         add_action('woocommerce_review_order_before_payment', array($this, 'renderParcelTerminalSelectBox'));
 
@@ -90,41 +87,6 @@ class Modena_Shipping_Omniva_Terminals extends Modena_Shipping_Method {
         }
     }
 
-    public function init_form_fields()
-    {
-
-        $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
-
-        $this->instance_form_fields = array(
-
-            'cost' => array(
-                'title' => __('Cost'),
-                'type' => 'float',
-                'placeholder' => '',
-                'description' => $cost_desc,
-                'default' => $this->cost,
-                'desc_tip' => true,
-                'sanitize_callback' => array($this, 'sanitizeshippingMethodCost'),
-            ),
-            'clientAPIkey' => array(
-                'title' => __('API key'),
-                'type' => 'float',
-                'placeholder' => '',
-                'description' => 'Package Provider account API secret',
-                'desc_tip' => true,
-            ),
-            'clientAPIsecret' => array(
-                'title' => __('API secret'),
-                'type' => 'float',
-                'placeholder' => '',
-                'description' => 'Package Provider account API secret',
-                'desc_tip' => true,
-            ),
-        );
-    }
-
-
-
     public function getParcelTerminalsbyCity() {
         if(empty($this->omnivaMachines)) {
             //error_log("Otsime veebist pakiterminalide listi, kuna pole varem laetud.");
@@ -182,7 +144,7 @@ class Modena_Shipping_Omniva_Terminals extends Modena_Shipping_Method {
     }
 
     public function getOrderParcelTerminalText($wcOrderParcelTerminalID) {
-        error_log("getOrderParcelTerminalText called with ID: " . $wcOrderParcelTerminalID); // Log the input
+        //error_log("getOrderParcelTerminalText called with ID: " . $wcOrderParcelTerminalID . " this method belongs to: " . $this->id); // Log the input
 
         $this->omnivaMachines = $this->getParcelTerminals();
         $parcelTerminalsById = array_column($this->omnivaMachines, null, 'ZIP');

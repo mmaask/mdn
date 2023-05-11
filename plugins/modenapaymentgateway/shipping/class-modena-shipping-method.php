@@ -14,6 +14,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     protected $pathToLocalTerminalsFile;
     protected $urlToPackageLabel;
     protected $barcodePostURL;
+    public $cost;
 
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
@@ -31,14 +32,43 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     public function init_form_fields()
     {
 
+        $cost_desc = __('Enter a cost (excl. tax) or sum, e.g. <code>10.00 * [qty]</code>.') . '<br/><br/>' . __('Use <code>[qty]</code> for the number of items, <br/><code>[cost]</code> for the total cost of items, and <code>[fee percent="10" min_fee="20" max_fee=""]</code> for percentage based fees.');
 
+        $this->instance_form_fields = array(
 
+            'cost' => array(
+                'title' => __('Cost'),
+                'type' => 'float',
+                'placeholder' => '',
+                'description' => $cost_desc,
+                'default' => 5.99,
+                'desc_tip' => true,
+                'sanitize_callback' => array($this, 'sanitizeshippingMethodCost'),
+            ),
+            'clientAPIkey' => array(
+                'title' => __('API key'),
+                'type' => 'text',
+                'placeholder' => '',
+                'description' => 'Package Provider account API secret',
+                'desc_tip' => true,
+            ),
+            'clientAPIsecret' => array(
+                'title' => __('API secret'),
+                'type' => 'text',
+                'placeholder' => '',
+                'description' => 'Package Provider account API secret',
+                'desc_tip' => true,
+            ),
+        );
     }
 
     public function init()
     {
 
         $this->title = $this->get_option('title');
+        $this->cost = floatval($this->get_option('cost'));
+        $this->clientAPIkey = $this->get_option('clientAPIkey');
+        $this->clientAPIsecret = $this->get_option('clientAPIsecret');
         $this->placeholderPrintLabelInAdmin = "Download parcel label";
 
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
@@ -127,15 +157,15 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
         $first_shipping_method = reset($shipping_methods);
         $orderShippingMethodID = $first_shipping_method->get_method_id();
 
-        error_log("Comparing methods... " . $shippingMethodID . " with:  " . $orderShippingMethodID);
+        //error_log("Comparing methods... " . $shippingMethodID . " with:  " . $orderShippingMethodID);
 
         if (empty($orderShippingMethodID)) {
-            error_log("Metadata not saved since order no shipping method with id: " . $orderShippingMethodID);
+            //error_log("Metadata not saved since order no shipping method with id: " . $orderShippingMethodID);
             return False;
         }
 
         if($orderShippingMethodID == $shippingMethodID) {
-            error_log("win, because methods are same named. saned.");
+            //error_log("win, because methods are same named. saned.");
             return True;
         } else {
             //error_log("Metadata not saved: " . $shippingMethodID);
@@ -246,15 +276,21 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     public function createOrderParcelMetaData($order_id) {
         $order = wc_get_order($order_id);
         if ($this->getShippingMethodAndCompareItWithOrder($this->id, $order_id)) {
+            if(!empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
+                error_log("Metadata already saved to order. Exiting early: " . sanitize_text_field($_POST['userShippingSelection-' . $this->id]));
+                return;
+            }
+
             $selected_parcel_terminal = sanitize_text_field($_POST['userShippingSelection-' . $this->id]);
 
             if(empty($selected_parcel_terminal)) {
-                error_log("Veateade - Pakipunkti ID ei leitud.");
+                error_log("Veateade - Pakipunkti ID ei leitud. Not posting metadata.");
+                return;
             }
 
             $order->add_meta_data('_selected_parcel_terminal_id_mdn', $selected_parcel_terminal, true);
             $order->save();
-            error_log('Selected parcel terminal metadata ' . $order->get_meta('_selected_parcel_terminal_id_mdn') . ' saved for order_id: ' . $order_id);
+            error_log('SUCCESS.. Selected parcel terminal metadata ' . $order->get_meta('_selected_parcel_terminal_id_mdn') . ' saved for order_id: ' . $order_id);
         }
     }
 
