@@ -32,12 +32,8 @@ function modena_init()
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-init-handler.php');
         $modena_plugin = new Modena_Init_Handler();
 
-        require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping.php');
-        $shipping_method = new Modena_Shipping();
-
         load_plugin_textdomain( 'mdn-translations', false, basename( dirname( __FILE__ ) ) . '/languages' );
     }
 
     $modena_plugin->run();
-    $shipping_method->init();
 }
