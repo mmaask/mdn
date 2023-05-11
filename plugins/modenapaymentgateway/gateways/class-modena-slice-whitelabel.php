@@ -31,7 +31,7 @@ class Modena_Slice_Payment_Whitelabel extends Modena_Base_Payment
                 'default_payment_button_description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
             ),
             'ru' => array(
-                'method_title' => 'Modena рассрочка',
+                'method_title' => 'Modena 3 платежа',
                 'default_alt' => 'Modena - Рассрочка до 3 месяцев',
                 'method_description' => '0€ первоначальный взнос, 0% процент, 0€ дополнительная плата. Просто платите позже.',
                 'title' => 'Modena рассрочка',

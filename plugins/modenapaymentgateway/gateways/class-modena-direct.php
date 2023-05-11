@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 
  class Modena_Direct_Payment extends Modena_Base_Payment {
 
-    protected $service_info_text;
+    protected $service_info;
 
     public function __construct() {
          $this->id      = 'modena_direct';
@@ -117,13 +117,13 @@ if (!defined('ABSPATH')) {
 
         Modena_Load_Checkout_Assets::getInstance();
 
-        return "{$description}{$this->getServiceInfoHtml()}";
+        return "$description{$this->getServiceInfoHtml()}";
     }
 
     private function getServiceInfoHtml()
     {
-        $linkLabel = $this->service_info_text;
-        return "<a class='mdn_service_info' href='https://modena.ee/makseteenused/' target='_blank'>{$linkLabel}</a>";
+        $linkLabel = $this->service_info;
+        return "<a class='mdn_service_info' href='https://modena.ee/makseteenused/' target='_blank'>$linkLabel</a>";
     }
      protected function postPaymentOrderInternal($request) {
          return $this->modena->postDirectPaymentOrder($request);

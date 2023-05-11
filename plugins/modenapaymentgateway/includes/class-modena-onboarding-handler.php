@@ -107,7 +107,7 @@ class Modena_Onboarding_Handler
     /**
      * Link to settings screen.
      * @param $gateway_id
-     * @return string|void
+     * @return string
      */
     public function get_admin_setting_link($gateway_id)
     {

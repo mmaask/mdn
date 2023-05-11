@@ -21,7 +21,7 @@ class Modena_Leasing extends Modena_Base_Payment
     {
         error_log("Finding locale: "  . $current_locale);
         $translations = array(
-            'en' => $array = array(
+            'en' =>  array(
                 'method_title' => __('Modena Business Leasing', 'mdn-translations'),
                 'default_alt' => __('Modena - Leasing up to 48 months', 'mdn-translations'),
                 'method_description' => __('Arrange installment plan for the company name. Pay for the purchase over 6-48 months.', 'modena'),

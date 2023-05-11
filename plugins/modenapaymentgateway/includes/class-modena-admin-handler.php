@@ -2,8 +2,8 @@
 
 class Modena_Admin_Handler
 {
-    private const KEY_COLUMN_PAYMENT_METHOD    = 'modena_payment_method';
-    private const KEY_COLUMN_MC_PAYMENT_METHOD = 'makecommerce_payment_method';
+    const KEY_COLUMN_PAYMENT_METHOD    = 'modena_payment_method';
+    const KEY_COLUMN_MC_PAYMENT_METHOD = 'makecommerce_payment_method';
 
     public function __construct()
     {
