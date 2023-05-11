@@ -151,22 +151,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 'default'     => 'no',
                 'class'       => 'modena-switch',
             ],
-            'payment_button_text'       => [
-                'title'       => __('Payment Button Text', 'modena'),
-                'type'        => 'text',
-                'description' => __('If you\'d like to display text instead of the payment method logo, fill in this field.',
-                    'modena'),
-                'default'     => '',
-                'css'         => 'width:25em',
-                'desc_tip'    => true,
-            ],
-            'payment_button_image_url'  => [
-                'title'       => __('Payment Button Image URL', 'modena'),
-                'type'        => 'text',
-                'description' => __('This controls the URL from which the payment button image is loaded.', 'modena'),
-                'default'     => $this->default_image,
-                'desc_tip'    => true,
-            ],
             'payment_button_max_height' => [
                 'title'       => __('Payment Button Max Height', 'modena'),
                 'type'        => 'number',
@@ -174,24 +158,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                     'modena'),
                 'default'     => 30,
                 'desc_tip'    => true,
-            ],
-            'payment_button_alt_text' => [
-                'title'       => __('Payment Button Alt Text', 'modena'),
-                'type'        => 'text',
-                'description' => __('If you\'d like to display alt text on the payment method logo, fill in this field.', 'modena'),
-                'default'     => '',
-                'css'         => 'width:25em',
-                'desc_tip'    => true,
-            ],
-            'payment_button_title_text' => [
-                'title'       => __('Payment Button Title Text', 'modena'),
-                'type'        => 'text',
-                'description' => __('If you\'d like to display title text on the payment method logo, fill in this field.',
-                    'modena'),
-                'default'     => $this->icon_title_text,
-                'css'         => 'width:25em',
-                'desc_tip'    => true,
-            ],
+            ]
         ];
     }
 

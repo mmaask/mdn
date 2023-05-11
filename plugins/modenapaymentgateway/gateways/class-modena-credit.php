@@ -73,14 +73,6 @@ class Modena_Credit_Payment extends Modena_Base_Payment
     {
         parent::init_form_fields();
 
-        $this->form_fields['description'] = [
-            'title'       => __('Payment Button Description', 'modena'),
-            'type'        => 'textarea',
-            'description' => __('This controls the description which the user sees during checkout.', 'modena'),
-            'default'     => __($this->default_payment_button_description, 'modena'),
-            'css'         => 'width:25em',
-            'desc_tip'    => true,
-        ];
 
         $this->form_fields['product_page_banner_enabled'] = [
             'title'       => __('Enable/Disable Product Page Banner', 'modena'),
