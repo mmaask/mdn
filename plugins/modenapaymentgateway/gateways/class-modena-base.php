@@ -15,6 +15,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     const PLUGIN_VERSION             = '2.7.0';
     const MODENA_META_KEY            = 'modena-application-id';
     const MODENA_SELECTED_METHOD_KEY = 'modena-payment-method';
+    const MODENA_SELECTED_BANK_METHOD = 'mdn_direct_payment_selected_bank';
     protected $client_id;
     protected $client_secret;
     protected $is_test_mode;
@@ -269,6 +270,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 $humanReadablePaymentMethod = "Modena - {$this->get_human_readable_selected_method($selectedOption)}";
                 $order->add_meta_data(self::MODENA_META_KEY, $response->getApplicationId(), true);
                 $order->add_meta_data(self::MODENA_SELECTED_METHOD_KEY, $humanReadablePaymentMethod, true);
+                $order->add_meta_data(self::MODENA_SELECTED_BANK_METHOD, $selectedOption);
+
                 $order->save_meta_data();
                 $order->save();
                 wp_redirect($response->getRedirectLocation());
@@ -284,46 +287,82 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     private function get_human_readable_selected_method($selectedOption): string
     {
-        if ($this instanceof Modena_Slice_Payment) {
-            if(get_locale() == "en_US") {
-                return __('Pay Later', 'modena');
-            } else {
-                return __('Maksa 3 osas', 'modena');
+        $translations = [
+            Modena_Slice_Payment::class => [
+                'ru_RU' => __('Оплатить позже', 'modena'),
+                'en_US' => __('Pay Later', 'modena'),
+                'default' => __('Maksa 3 osas', 'modena'),
+            ],
+            Modena_Slice_Payment_Whitelabel::class => [
+                'ru_RU' => __('Оплатить позже', 'modena'),
+                'en_US' => __('Pay Later', 'modena'),
+                'default' => __('Maksa 3 osas', 'modena'),
+            ],
+            Modena_Leasing::class => [
+                'ru_RU' => __('Modena бизнес лизинг', 'modena'),
+                'en_US' => __('Business Leasing', 'modena'),
+                'default' => __('Ärijärelmaks', 'modena'),
+            ],
+            Modena_Credit_Payment_Whitelabel::class => [
+                'ru_RU' => __('Рассрочка', 'modena'),
+                'en_US' => __('Credit', 'modena'),
+                'default' => __('Järelmaks', 'modena'),
+            ],
+            Modena_Credit_Payment::class => [
+                'ru_RU' => __('Рассрочка', 'modena'),
+                'en_US' => __('Credit', 'modena'),
+                'default' => __('Järelmaks', 'modena'),
+            ]
+        ];
+
+        $bankOptions = [
+            'HABAEE2X' => 'Swedbank',
+            'EEUHEE2X' => 'SEB',
+            'LHVBEE22' => 'LHV',
+            'NDEAEE2X' => 'Luminor',
+            'EKRDEE22' => 'COOP Pank',
+            'PARXEE22' => 'Citadele',
+            'CREDIT_CARD' => 'Visa / Mastercard',
+            'default' => 'Direct Bank Payment'
+        ];
+
+        foreach ($translations as $class => $translation) {
+            if ($this instanceof $class) {
+                $locale = get_locale();
+                return $translation[$locale] ?? $translation['default'];
             }
         }
 
-        if ($this instanceof Modena_Leasing) {
-            return __('Äri järelmaks', 'modena');
+        if (isset($bankOptions[$selectedOption])) {
+            return $bankOptions[$selectedOption];
         }
 
-        if ($this instanceof Modena_Slice_Payment_Whitelabel) {
-            return __('Maksa 3 osas WL', 'modena');
+        error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
+        return $bankOptions['default'];
+    }
+
+    private function get_bank_name($order) {
+
+        $selectedOption = $order->get_meta('mdn_direct_payment_selected_bank');
+
+        $bankOptions = [
+            'HABAEE2X' => 'Swedbank',
+            'EEUHEE2X' => 'SEB',
+            'LHVBEE22' => 'LHV',
+            'NDEAEE2X' => 'Luminor',
+            'EKRDEE22' => 'COOP Pank',
+            'PARXEE22' => 'Citadele',
+            'CREDIT_CARD' => 'Visa / Mastercard',
+            'default' => 'Direct Bank Payment'
+        ];
+
+        if (isset($bankOptions[$selectedOption])) {
+            return $bankOptions[$selectedOption];
         }
 
-        if ($this instanceof Modena_Credit_Payment_Whitelabel) {
-            return __('Järelmaks WL', 'modena');
-        }
+        error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
+        return $bankOptions['default'];
 
-        if ($this instanceof Modena_Credit_Payment) {
-            return __('Järelmaks', 'modena');
-        }
-
-        switch ($selectedOption) {
-            case 'HABAEE2X':
-                return 'Swedbank';
-            case 'EEUHEE2X':
-                return 'SEB';
-            case 'LHVBEE22':
-                return 'LHV';
-            case 'NDEAEE2X':
-                return 'Luminor';
-            case 'PARXEE22':
-                return 'Citadele';
-            case 'CREDIT_CARD':
-                return 'Visa / Mastercard';
-        }
-
-        return '';
     }
 
     public function modena_response()
@@ -355,7 +394,17 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             if ($order && $order->get_payment_method() === $this->id) {
                 if ($order->needs_payment()) {
                     $order->payment_complete();
-                    $order->add_order_note(sprintf(__('Order paid via %s', 'modena'), $this->method_title));
+
+                    //Can we get the bank which is paid with to show in the order note??
+                    //$order->add_order_note(sprintf(__('Order paid via %s', 'modena'), $this->method_title));
+
+                    $bank_name = $this->get_bank_name($order); // Assume this method exists and returns the bank name.
+
+                    $order->add_order_note(sprintf(
+                        __('Order paid via %s - %s', 'modena'),
+                        $this->method_title,
+                        $bank_name
+                    ));
                     $woocommerce->cart->empty_cart();
                 }
 
@@ -367,9 +416,10 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 } else {
                     $this->logger->error(
                         sprintf(
-                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
+                            'Payment is not successful, order is found but payment method mismatch: [method: %s, needs_payment: %s]' .  ' Order number: ' . $modenaResponse->getOrderId() . 'Payment method is: ' . $this->id,
                             $order->get_payment_method(),
                             $order->needs_payment()
+
                         )
                     );
                 }
@@ -437,7 +487,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 exit;
             } else {
                 $this->logger->error(sprintf(
-                    'Payment canceled, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
+                    'Payment is not successful, payment is cancelled. [method: %s, needs_payment: %s] ' .  'Order number: ' . $modenaResponse->getOrderId() . 'Payment method is: ' . $this->id,
+                    $order->get_payment_method(),
                     $order->get_payment_method(),
                     $order->needs_payment()
                 ));

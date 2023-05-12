@@ -20,7 +20,6 @@ if (!defined('ABSPATH')) {
 
      public function setNamesBasedOnLocales($current_locale)
      {
-         error_log("Finding locale: " . $current_locale);
          $translations = array(
              'en' => array(
                  'method_title' => __('Modena Bank & Card Payments', 'mdn-translations'),
@@ -35,7 +34,7 @@ if (!defined('ABSPATH')) {
              'ru' => array(
                  'method_title' => __('Modena банковские платежи и платежи картами', 'mdn-translations'),
                  'default_alt' => __('Банковские платежи / платежи картами', 'mdn-translations'),
-                 'method_description' => __('', 'modena'),
+                 'method_description' => __('Банковские платежи / платежи картами', 'modena'),
                  'title' => __('Интернетбанк или карта', 'mdn-translations'),
                  'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
                  'default_icon_title_text' => __('Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.', 'mdn-translations'),

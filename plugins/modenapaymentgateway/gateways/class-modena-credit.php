@@ -18,7 +18,6 @@ class Modena_Credit_Payment extends Modena_Base_Payment
 
     public function setNamesBasedOnLocales($current_locale)
     {
-        error_log("Finding locale: "  . $current_locale);
         $translations = array(
             'en' => array(
                 'method_title' => __('Modena Credit Payments', 'mdn-translations'),
