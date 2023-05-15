@@ -31,11 +31,11 @@ class Modena_Credit_Payment extends Modena_Base_Payment
             'ru' => array(
                 'method_title' => __('Modena рассрочка', 'mdn-translations'),
                 'default_alt' => __('Modena - Рассрочка до 48 месяцев', 'mdn-translations'),
-                'method_description' => __('', 'modena'),
+                'method_description' => __('Рассрочка до 48 месяцев. 0€ первоначальный взнос, 0€ административный сбор, 0€ плата за контракт. Удобно распределите свои платежи на период от 6 до 48 месяцев.', 'modena'),
                 'title' => __('Modena рассрочка', 'mdn-translations'),
                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_credit_alt_ee69576caf.png?15591391.9',
                 'default_icon_title_text' => __('Модена рассрочка предоставляется Modena Estonia OÜ.', 'mdn-translations'),
-                'default_payment_button_description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
+                'default_payment_button_description' => 'Рассрочка до 48 месяцев. 0€ первоначальный взнос, 0€ административный сбор, 0€ плата за контракт. Удобно распределите свои платежи на период от 6 до 48 месяцев.',
             ),
             'et' => array(
                 'method_title' => __('Modena järelmaks', 'mdn-translations'),

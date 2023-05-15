@@ -22,8 +22,8 @@ if (!defined('ABSPATH')) {
      {
          $translations = array(
              'en' => array(
-                 'method_title' => __('Modena Bank & Card Payments', 'mdn-translations'),
-                 'default_alt' => __('Modena - Credit up to 48 months', 'mdn-translations'),
+                 'method_title' => __('Modena - Bank & Card Payments', 'mdn-translations'),
+                 'default_alt' => __('Modena Bank & Card Payments', 'mdn-translations'),
                  'method_description' => __('Bank payments / card payments', 'mdn-translations'),
                  'title' => __('Bank & Card Payments', 'mdn-translations'),
                  'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
@@ -32,23 +32,23 @@ if (!defined('ABSPATH')) {
                  'service_info' => __('Service info'),
              ),
              'ru' => array(
-                 'method_title' => __('Modena банковские платежи и платежи картами', 'mdn-translations'),
+                 'method_title' => __('Modena - Банковские платежи и платежи картами', 'mdn-translations'),
                  'default_alt' => __('Банковские платежи / платежи картами', 'mdn-translations'),
                  'method_description' => __('Банковские платежи / платежи картами', 'modena'),
                  'title' => __('Интернетбанк или карта', 'mdn-translations'),
                  'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
                  'default_icon_title_text' => __('Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.', 'mdn-translations'),
-                 'default_payment_button_description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
+                 'default_payment_button_description' => 'Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.',
                  'service_info' => __('Сведения о сервисе'),
              ),
              'et' => array(
-                 'method_title' => __('Modena pangamaksed ja kaardimaksed', 'mdn-translations'),
-                 'default_alt' => __('Modena pangamaksed ja kaardimaksed', 'mdn-translations'),
-                 'method_description' => __('Pangamaksed / kaardimaksed', 'modena'),
+                 'method_title' => __('Modena - Panga- ja kaardimaksed', 'mdn-translations'),
+                 'default_alt' => __('Modena panga- ja kaardimaksed', 'mdn-translations'),
+                 'method_description' => __('Kiired pangamaksed ja kaardimaksed Eestis', 'modena'),
                  'title' => __('Panga- ja kaardimaksed', 'mdn-translations'),
                  'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
                  'default_icon_title_text' => __('Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.', 'mdn-translations'),
-                 'default_payment_button_description' => '0€ sissemakse, 0€ haldustasu, 0€ lepingutasu. Hajuta mugavalt maksed 6-48 kuu peale.',
+                 'default_payment_button_description' => 'Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.',
                  'service_info' => __('Teenuse info'),
              ),
          );

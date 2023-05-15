@@ -21,7 +21,7 @@ class Modena_Slice_Payment extends Modena_Base_Payment
     {
         $translations = array(
             'en' => array(
-                'method_title' => 'Modena Pay in 3',
+                'method_title' => 'Modena - Pay in 3',
                 'default_alt' => 'Modena - Installments up to 48 months',
                 'method_description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
                 'title' => 'Modena Pay Later',
@@ -30,16 +30,16 @@ class Modena_Slice_Payment extends Modena_Base_Payment
                 'default_payment_button_description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
             ),
             'ru' => array(
-                'method_title' => 'Modena 3 платежа',
-                'default_alt' => 'Modena - Рассрочка до 3 месяцев',
+                'method_title' => 'Modena - 3 платежа',
+                'default_alt' => 'Modena - Платежа до 3 месяцев',
                 'method_description' => '0€ первоначальный взнос, 0% процент, 0€ дополнительная плата. Просто платите позже.',
-                'title' => 'Modena рассрочка',
+                'title' => 'Modena - 3 платежа',
                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_alt_2dacff6e81.png?15560016.3',
-                'default_icon_title_text' => 'Модена рассрочка предоставляется Modena Estonia OÜ.',
+                'default_icon_title_text' => 'Модена 3 платежа предоставляется Modena Estonia OÜ.',
                 'default_payment_button_description' => '0€ первоначальный взнос, 0% процент, 0€ дополнительная плата. Просто платите позже.',
             ),
             'et' => array(
-                'method_title' => 'Modena Maksa 3 osas',
+                'method_title' => 'Modena - Maksa 3 osas',
                 'default_alt' => 'Maksa 3 osas, 0€ lisatasu',
                 'method_description' => 'Maksa 3 osas, 0€ lisatasu',
                 'title' => 'Maksa 3 osas',

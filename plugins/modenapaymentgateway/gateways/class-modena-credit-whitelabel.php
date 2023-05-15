@@ -21,22 +21,22 @@ class Modena_Credit_Payment_Whitelabel extends Modena_Base_Payment
     {
         $translations = array(
             'en' => array(
-                'method_title' => __('Modena Credit Payments Whitelabel', 'mdn-translations'),
+                'method_title' => __('Modena Credit Payments', 'mdn-translations'),
                 'default_alt' => __('Credit up to 48 months', 'mdn-translations'),
-                'method_description' => __('0€ down payment, 0€ administration fee, 0€ contract fee. Spread your payments conveniently over 6-48 months.', 'mdn-translations'),
+                'method_description' => __('Whitelabel by Modena. 0€ down payment, 0€ administration fee, 0€ contract fee. Spread your payments conveniently over 6-48 months.', 'mdn-translations'),
                 'title' => __('Credit', 'mdn-translations'),
                 //'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_credit_alt_ee69576caf.png?15591391.9',
                 'default_icon_title_text' => __('Credit is provided by Modena Estonia OÜ.', 'mdn-translations'),
                 'default_payment_button_description' => __('0€ down payment, 0% interest, 0€ extra charge. Simply pay later.', 'mdn-translations'),
             ),
             'ru' => array(
-                'method_title' => __('Modena рассрочка Whitelabel', 'mdn-translations'),
-                'default_alt' => __('Modena - Рассрочка до 48 месяцев', 'mdn-translations'),
-                'method_description' => __('', 'modena'),
+                'method_title' => __('Рассрочка', 'mdn-translations'),
+                'default_alt' => __('Рассрочка до 48 месяцев', 'mdn-translations'),
+                'method_description' => __('Приватная метка by Modena. Рассрочка до 48 месяцев ', 'modena'),
                 'title' => __('Modena рассрочка', 'mdn-translations'),
                 //'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_credit_alt_ee69576caf.png?15591391.9',
                 'default_icon_title_text' => __('Модена рассрочка предоставляется Modena Estonia OÜ.', 'mdn-translations'),
-                'default_payment_button_description' => __('0€ down payment, 0% interest, 0€ extra charge. Simply pay later.','mdn-translations'),
+                'default_payment_button_description' => __('Рассрочка до 48 месяцев. 0€ первоначальный взнос, 0€ административный сбор, 0€ плата за контракт. Удобно распределите свои платежи на период от 6 до 48 месяцев.','mdn-translations'),
             ),
             'et' => array(
                 'method_title' => __('Modena Maksa 3 osas Whitelabel', 'mdn-translations'),
