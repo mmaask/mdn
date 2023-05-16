@@ -25,18 +25,18 @@ class Modena_Leasing extends Modena_Base_Payment
                 'default_alt' => __('Modena - Leasing up to 48 months', 'mdn-translations'),
                 'method_description' => __('Arrange installment plan for the company name. Pay for the purchase over 6-48 months.', 'modena'),
                 'title' => __('Modena Leasing', 'mdn-translations'),
-                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808',
+                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_eng_0f8d5b1a5a.png?536007.8999999762',
                 'default_icon_title_text' => __('Modena Leasing is provided by Modena Estonia OÜ.', 'mdn-translations'),
-                'default_payment_button_description' => __('Installment payment option for businesses. Pay for your purchase in parts over 6 - 48 months.', 'mdn-translations')
+                'description' => __('Installment payment option for businesses. Pay for your purchase in parts over 6 - 48 months.', 'mdn-translations')
             ),
             'ru' => array(
                 'method_title' => __('Modena бизнес лизинг', 'mdn-translations'),
                 'default_alt' => __('Modena - бизнес лизинг до 48 месяцев', 'mdn-translations'),
                 'method_description' => __('Оформите рассрочку на имя компании. Оплатите покупку в течение 6-48 месяцев.', 'modena'),
                 'title' => __('Бизнес лизинг', 'mdn-translations'),
-                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808',
+                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_rus_f84c520f4a.png?76438.69999998808',
                 'default_icon_title_text' => __('Модена рассрочка предоставляется Modena Estonia OÜ.', 'mdn-translations'),
-                'default_payment_button_description' => __('Опция рассрочки для бизнеса. Оплачивайте свою покупку частями в течение 6 - 48 месяцев.', 'mdn-translations'),
+                'description' => __('Опция рассрочки для бизнеса. Оплачивайте свою покупку частями в течение 6 - 48 месяцев.', 'mdn-translations'),
             ),
             'et' => array(
                 'method_title' => __('Modena Äri järelmaks', 'mdn-translations'),
@@ -45,7 +45,7 @@ class Modena_Leasing extends Modena_Base_Payment
                 'title' => __('Modena ärikliendi järelmaks', 'mdn-translations'),
                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_62c8f2fa76.png?81164.69999998808',
                 'default_icon_title_text' => __('Modena äri järelmaksu võimaldab Modena Estonia OÜ.', 'mdn-translations'),
-                'default_payment_button_description' => 'Ettevõtetele mõeldud järelmaks. Tasu ostu eest osadena 6 - 48 kuu jooksul.',
+                'description' => 'Ettevõtetele mõeldud järelmaks. Tasu ostu eest osadena 6 - 48 kuu jooksul.',
             ),
         );
 

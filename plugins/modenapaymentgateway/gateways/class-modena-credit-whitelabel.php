@@ -27,7 +27,7 @@ class Modena_Credit_Payment_Whitelabel extends Modena_Base_Payment
                 'title' => __('Credit', 'mdn-translations'),
                 //'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_credit_alt_ee69576caf.png?15591391.9',
                 'default_icon_title_text' => __('Credit is provided by Modena Estonia OÜ.', 'mdn-translations'),
-                'default_payment_button_description' => __('0€ down payment, 0% interest, 0€ extra charge. Simply pay later.', 'mdn-translations'),
+                'description' => __('0€ down payment, 0% interest, 0€ extra charge. Simply pay later.', 'mdn-translations'),
             ),
             'ru' => array(
                 'method_title' => __('Рассрочка', 'mdn-translations'),
@@ -36,7 +36,7 @@ class Modena_Credit_Payment_Whitelabel extends Modena_Base_Payment
                 'title' => __('Modena рассрочка', 'mdn-translations'),
                 //'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_credit_alt_ee69576caf.png?15591391.9',
                 'default_icon_title_text' => __('Модена рассрочка предоставляется Modena Estonia OÜ.', 'mdn-translations'),
-                'default_payment_button_description' => __('Рассрочка до 48 месяцев. 0€ первоначальный взнос, 0€ административный сбор, 0€ плата за контракт. Удобно распределите свои платежи на период от 6 до 48 месяцев.','mdn-translations'),
+                'description' => __('Рассрочка до 48 месяцев. 0€ первоначальный взнос, 0€ административный сбор, 0€ плата за контракт. Удобно распределите свои платежи на период от 6 до 48 месяцев.','mdn-translations'),
             ),
             'et' => array(
                 'method_title' => __('Modena Maksa 3 osas Whitelabel', 'mdn-translations'),
@@ -45,7 +45,7 @@ class Modena_Credit_Payment_Whitelabel extends Modena_Base_Payment
                 'title' => __('Järelmaks', 'mdn-translations'),
                 //'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_credit_alt_ee69576caf.png?15591391.9',
                 'default_icon_title_text' => __('Järelmaksu võimaldab Modena Estonia OÜ.', 'mdn-translations'),
-                'default_payment_button_description' => __('0€ sissemakse, 0€ haldustasu, 0€ lepingutasu. Hajuta mugavalt maksed 6-48 kuu peale.', 'mdn-translations'),
+                'description' => __('0€ sissemakse, 0€ haldustasu, 0€ lepingutasu. Hajuta mugavalt maksed 6-48 kuu peale.', 'mdn-translations'),
             ),
         );
 

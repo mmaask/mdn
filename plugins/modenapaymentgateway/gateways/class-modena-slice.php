@@ -25,18 +25,18 @@ class Modena_Slice_Payment extends Modena_Base_Payment
                 'default_alt' => 'Modena - Installments up to 48 months',
                 'method_description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
                 'title' => 'Modena Pay Later',
-                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_alt_2dacff6e81.png?15560016.3',
+                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_eng_228d8b3eed.png?439267.59999996424',
                 'default_icon_title_text' => 'Modena installments is provided by Modena Estonia OÜ.',
-                'default_payment_button_description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
+                'description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
             ),
             'ru' => array(
                 'method_title' => 'Modena - 3 платежа',
                 'default_alt' => 'Modena - Платежа до 3 месяцев',
                 'method_description' => '0€ первоначальный взнос, 0% процент, 0€ дополнительная плата. Просто платите позже.',
                 'title' => 'Modena - 3 платежа',
-                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_alt_2dacff6e81.png?15560016.3',
+                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_rus_0c2a9fa2f7.png?378453.7999999523',
                 'default_icon_title_text' => 'Модена 3 платежа предоставляется Modena Estonia OÜ.',
-                'default_payment_button_description' => '0€ первоначальный взнос, 0% процент, 0€ дополнительная плата. Просто платите позже.',
+                'description' => '0€ первоначальный взнос, 0% процент, 0€ дополнительная плата. Просто платите позже.',
             ),
             'et' => array(
                 'method_title' => 'Modena - Maksa 3 osas',
@@ -45,7 +45,7 @@ class Modena_Slice_Payment extends Modena_Base_Payment
                 'title' => 'Maksa 3 osas',
                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_alt_2dacff6e81.png?15560016.3',
                 'default_icon_title_text' => 'Osamakseid võimaldab Modena Estonia OÜ.',
-                'default_payment_button_description' => '0€ sissemakse, 0% intress, 0€ lisatasu. Lihtsalt maksa hiljem.',
+                'description' => '0€ sissemakse, 0% intress, 0€ lisatasu. Lihtsalt maksa hiljem.',
             ),
         );
 

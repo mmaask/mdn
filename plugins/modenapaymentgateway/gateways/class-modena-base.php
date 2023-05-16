@@ -33,7 +33,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     protected $button_text;
     protected $icon_alt_text;
     protected $icon_title_text;
-    protected $default_payment_button_description;
 
     public function __construct()
     {
@@ -66,13 +65,13 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $this->is_test_mode
         );
 
-//        $this->button_text               = $this->get_option('payment_button_text');
-        $this->description               = $this->get_option('description');
+        //$this->description               = $this->get_option('description');
+        //$this->button_text               = $this->get_option('payment_button_text');
         $this->payment_button_max_height = 30;
-        $this->icon                      = $this->get_option('payment_button_image_url', $this->default_image);
-        $this->button_text               = $this->get_option('payment_button_text');
-        $this->icon_alt_text             = $this->get_option('payment_button_alt_text');
-        $this->icon_title_text           = $this->get_option('payment_button_title_text');
+        $this->icon                      = $this->default_image;
+
+        $this->icon_alt_text             = $this->default_alt;
+        $this->icon_title_text           = $this->default_icon_title_text;
 
         $this->init_form_fields();
 
@@ -523,7 +522,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     public function get_description()
     {
-        $description = $this->description;
+        $this->logger->error(get_locale());
+        $description = $this->description; // since description is not directly defined it sometimes will find random value assigned.
         if ($this->hide_title) {
             $description .= '<style>label[for=payment_method_' . $this->id . '] { font-size: 0 !important; }</style>';
         }
@@ -534,7 +534,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
         return apply_filters('woocommerce_gateway_description', $description, $this->id);
     }
-    public function get_icon_title(): string
+    public function get_icon_title()
     {
         if ($this->icon_title_text) {
             return $this->icon_title_text;
@@ -542,7 +542,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         return $this->default_icon_title_text;
     }
 
-    public function get_icon_alt(): string
+    public function get_icon_alt()
     {
         if ($this->icon_alt_text) {
             return $this->icon_alt_text;
@@ -550,7 +550,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         return $this->default_alt;
     }
 
-    public function get_title(): string
+    public function get_title()
     {
         if ($this->button_text) {
             return $this->button_text;
@@ -632,19 +632,19 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     private function get_order_payment_method_eng($method_id) {
         if ($method_id === 'modena_direct') {
-            error_log("method -id: " . $method_id);
+
             return __('Bank & Card Payments');
         }
         if ($method_id === 'modena_leasing') {
-            error_log("method -id: " . $method_id);
+
             return __('Modena Leasing');
         }
         if ($method_id === 'modena_slice') {
-            error_log("method -id: " . $method_id);
+
             return __('Modena Pay Later');
         }
         else {
-            error_log("method -id: " . $method_id);
+
             return __('Modena Credit');
         }
     }
