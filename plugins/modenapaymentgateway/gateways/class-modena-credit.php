@@ -26,7 +26,7 @@ class Modena_Credit_Payment extends Modena_Base_Payment
                 'title' => __('Modena Credit', 'mdn-translations'),
                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_credit_eng_6a1c94d9a2.png?504170.39999997616',
                 'default_icon_title_text' => __('Modena Credit is provided by Modena Estonia OÜ.', 'mdn-translations'),
-                'description' => '0€ down payment, 0% interest, 0€ extra charge. Simply pay later.',
+                'description' => '0€ down payment, 0€ management fee, 0€ contract fee. Spread your payments comfortably over 6-48 months.',
 
             ),
             'ru' => array(
