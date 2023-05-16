@@ -39,7 +39,7 @@ if (!defined('ABSPATH')) {
                  'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
                  'default_icon_title_text' => __('Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.', 'mdn-translations'),
                  'description' => 'Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.',
-                 'service_info' => __('Сведения о сервисе'),
+                 'service_info' => __('Сведения об услуге'),
              ),
              'et' => array(
                  'method_title' => __('Modena - Panga- ja kaardimaksed', 'mdn-translations'),

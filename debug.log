@@ -34,3 +34,5 @@
 [16-May-2023 10:08:48 UTC] et
 [16-May-2023 10:08:48 UTC] et
 [16-May-2023 10:08:48 UTC] et
+[16-May-2023 11:06:40 UTC] [16-May-2023 11:06:40 UTC] PHP 2: mysqli_real_connect(): (HY000/2002): No such file or directory in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wpdb.php on line 2019
+[16-May-2023 11:48:53 UTC] [16-May-2023 11:48:53 UTC] PHP 2: mysqli_real_connect(): (HY000/2002): No such file or directory in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wpdb.php on line 2019

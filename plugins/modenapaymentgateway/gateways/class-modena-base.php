@@ -465,7 +465,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 } else {
                     $this->logger->error(
                         sprintf(
-                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]'. $modenaResponse->getOrderId(),
+                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s] '. $modenaResponse->getOrderId(),
                             $order->get_payment_method(),
                             $order->needs_payment()
                         )
@@ -632,19 +632,15 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     private function get_order_payment_method_eng($method_id) {
         if ($method_id === 'modena_direct') {
-
             return __('Bank & Card Payments');
         }
         if ($method_id === 'modena_leasing') {
-
             return __('Modena Leasing');
         }
         if ($method_id === 'modena_slice') {
-
             return __('Modena Pay Later');
         }
         else {
-
             return __('Modena Credit');
         }
     }
@@ -652,7 +648,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     private function get_bank_name($order) {
 
         $selectedOption = $order->get_meta('mdn_direct_payment_selected_bank');
-
         $bankOptions = [
             'HABAEE2X' => 'Swedbank',
             'EEUHEE2X' => 'SEB',

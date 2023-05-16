@@ -167,8 +167,6 @@ class Modena_Init_Handler
         return $this->get_installment_price_whitelabel($this->get_slice_whitelabel_banner_text($active_price));
     }
 
-
-
     private function get_credit_whitelabel_banner_html($active_price): string
     {
         if (!$this->is_credit_whitelabel_enabled() || !$this->is_credit_whitelabel_product_banner_enabled()) {
@@ -243,54 +241,6 @@ class Modena_Init_Handler
             $this->get_installment_number($active_price * 0.0325));
     }
 
-    private function getLocaleForBannerTextForCredit() {
-        switch (get_locale()) {
-            case 'ru_RU':
-                return "Рассрочка от %s€ в месяц, без комиссии за договор.&ensp;";
-                break;
-            case 'en_GB':
-            case 'en_US':
-                return "Installment plan starting from %s€ / month, 0€ contract fee.&ensp;";
-                break;
-            default:
-                return "Järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;";
-                break;
-        }
-
-    }
-
-    private function getLocaleForBannerTextForSlice() {
-        switch (get_locale()) {
-            case 'ru_RU':
-                return "3 платежа по %s€ в месяц, без дополнительных комиссий.&ensp;";
-                break;
-            case 'en_GB':
-            case 'en_US':
-                return "3 payments of %s€ per month, without additional fees.&ensp;";
-                break;
-            default:
-                return "3 makset %s€ kuus, ilma lisatasudeta.&ensp;";
-                break;
-        }
-
-    }
-
-    private function getLocaleForBannerTextForLeasing() {
-        switch (get_locale()) {
-            case 'ru_RU':
-                return "Рассрочка для корпоративных клиентов от %s€ в месяц, без комиссии за договор.&ensp;";
-                break;
-            case 'en_GB':
-            case 'en_US':
-                return "Business customer installment payment starting from %s€ / month, 0€ contract fee.&ensp;";
-                break;
-            default:
-                return "Ärikliendi järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;";
-                break;
-        }
-
-    }
-
     private function get_installment_price_html($text): string
     {
         $icon = '<img src="' . WC_HTTPS::force_https_url('https://cdn.modena.ee/modena/assets/modena_logo_black_3f62f63466.png?1863664.3000000007') . '" alt="Modena" style="max-height: 16px; margin-bottom: -3px; vertical-align: baseline;"/>';
@@ -355,5 +305,50 @@ class Modena_Init_Handler
         }
 
         return $variation_data;
+    }
+
+    private function getLocaleForBannerTextForCredit() {
+        switch (get_locale()) {
+            case 'ru_RU':
+                return "Рассрочка от %s€ в месяц, без платы за договор.&ensp;";
+                break;
+            case 'en_GB':
+            case 'en_US':
+                return "Installment plan starting from %s€ / month, 0€ contract fee.&ensp;";
+                break;
+            default:
+                return "Järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;";
+                break;
+        }
+    }
+
+    private function getLocaleForBannerTextForSlice() {
+        switch (get_locale()) {
+            case 'ru_RU':
+                return "3 платежа по %s€ в месяц, без дополнительной комиссии.&ensp;";
+                break;
+            case 'en_GB':
+            case 'en_US':
+                return "3 payments of %s€ per month, without additional fees.&ensp;";
+                break;
+            default:
+                return "3 makset %s€ kuus, ilma lisatasudeta.&ensp;";
+                break;
+        }
+    }
+
+    private function getLocaleForBannerTextForLeasing() {
+        switch (get_locale()) {
+            case 'ru_RU':
+                return "Рассрочка для бизнес клиентов от %s€ в месяц, без платы за договор.&ensp;";
+                break;
+            case 'en_GB':
+            case 'en_US':
+                return "Business customer installment payment starting from %s€ / month, 0€ contract fee.&ensp;";
+                break;
+            default:
+                return "Ärikliendi järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;";
+                break;
+        }
     }
 }
