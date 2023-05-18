@@ -48,8 +48,6 @@ class Modena_Credit_Payment extends Modena_Base_Payment
                 'description' => '0€ sissemakse, 0€ haldustasu, 0€ lepingutasu. Hajuta mugavalt maksed 6-48 kuu peale.',
             ),
         );
-
-        // Set the locale key based on the current locale
         $locale_key = 'en';
 
         switch ($current_locale) {

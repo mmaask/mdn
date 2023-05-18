@@ -284,8 +284,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         exit;
     }
 
-
-
     public function modena_response()
     {
         global $woocommerce;
@@ -312,38 +310,13 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
             $order = wc_get_order($modenaResponse->getOrderId());
 
-            if ($order && $order->get_payment_method() === $this->id) {
-                if ($order->needs_payment()) {
-                    $order->payment_complete();
-
-                    //Can we get the bank which is paid with to show in the order note??
-                    //$order->add_order_note(sprintf(__('Order paid via %s', 'modena'), $this->method_title));
-                    if($order->get_payment_method() === 'modena_direct') {
-                        $bank_name = $this->get_bank_name($order); // Assume this method exists and returns the bank name.
-
-                        $order->add_order_note(sprintf(
-                            __('Order paid via %s - %s', 'modena'),
-                            $this->get_order_payment_method_eng($this->id),
-                            $bank_name
-                        ));
-                    } else {
-                        $order->add_order_note(sprintf(
-                            __('Order paid via %s', 'modena'),
-                            $this->get_order_payment_method_eng($this->id)
-                        ));
-                    }
-                    $woocommerce->cart->empty_cart();
-                }
-
-                wp_safe_redirect($this->get_return_url($order));
-                exit;
-            } else {
+            if (!$order || $order->get_payment_method() !== $this->id) {
                 if (!$order) {
                     $this->logger->error(sprintf('Order not found for id: %s', $modenaResponse->getOrderId()));
                 } else {
                     $this->logger->error(
                         sprintf(
-                            'Payment is not successful, order is found but payment method mismatch: [method: %s, needs_payment: %s]' .  ' Order number: ' . $modenaResponse->getOrderId() . 'Payment method is: ' . $this->id,
+                            'Payment is not successful, order is found but payment method mismatch: [method: %s, needs_payment: %s]' . ' Order number: ' . $modenaResponse->getOrderId() . 'Payment method is: ' . $this->id,
                             $order->get_payment_method(),
                             $order->needs_payment()
 
@@ -352,8 +325,31 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 }
                 wp_safe_redirect(wc_get_cart_url());
                 wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
-                exit;
+            } else {
+                if (!$order->needs_payment()) {
+                    return;
+                }
+                $order->payment_complete();
+
+                if ($order->get_payment_method() === 'modena_direct') {
+                    $bank_name = $this->get_bank_name($order);
+
+                    $order->add_order_note(sprintf(
+                        __('Order paid via %s - %s', 'modena'),
+                        $this->get_order_payment_method_eng($this->id),
+                        $bank_name
+                    ));
+                } else {
+                    $order->add_order_note(sprintf(
+                        __('Order paid via %s', 'modena'),
+                        $this->get_order_payment_method_eng($this->id)
+                    ));
+                }
+                $woocommerce->cart->empty_cart();
+
+                wp_safe_redirect($this->get_return_url($order));
             }
+            exit;
         } catch (Exception $e) {
             $this->logger->error('Exception occurred in payment response: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
@@ -403,7 +399,16 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $order          = wc_get_order($modenaResponse->getOrderId());
             $payment_method = $order->get_payment_method();
 
-            if ($payment_method === $this->id) {
+            if ($payment_method !== $this->id) {
+                $this->logger->error(sprintf(
+                    'Payment is not successful, payment is cancelled. [method: %s, needs_payment: %s] ' . 'Order number: ' . $modenaResponse->getOrderId() . 'Payment method is: ' . $this->id,
+                    $order->get_payment_method(),
+                    $order->get_payment_method(),
+                    $order->needs_payment()
+                ));
+                wp_redirect($this->site_url);
+                wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
+            } else {
                 foreach ($order->get_items() as $orderItem) {
                     $data = $orderItem->get_data();
                     WC()->cart->add_to_cart($data['product_id'], $data['quantity'], $data['variation_id']);
@@ -411,18 +416,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
                 wp_safe_redirect(wc_get_cart_url());
                 wc_add_notice(__('Payment canceled.', 'modena'));
-                exit;
-            } else {
-                $this->logger->error(sprintf(
-                    'Payment is not successful, payment is cancelled. [method: %s, needs_payment: %s] ' .  'Order number: ' . $modenaResponse->getOrderId() . 'Payment method is: ' . $this->id,
-                    $order->get_payment_method(),
-                    $order->get_payment_method(),
-                    $order->needs_payment()
-                ));
-                wp_redirect($this->site_url);
-                wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
-                exit;
             }
+            exit;
         } catch (Exception $e) {
             $this->logger->error('Exception occurred in payment cancel function: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
@@ -454,25 +449,21 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
             $order = wc_get_order($modenaResponse->getOrderId());
 
-            if ($order && $order->get_payment_method() === $this->id && $order->needs_payment()) {
-                $order->payment_complete();
-                $order->add_order_note(sprintf(__('Order paid via %s', 'modena'), $this->method_title));
-                $woocommerce->cart->empty_cart();
-                exit;
-            } else {
+            if (!$order || $order->get_payment_method() !== $this->id || !$order->needs_payment()) {
                 if (!$order) {
                     $this->logger->error('Order not found for id: ' . $modenaResponse->getOrderId());
                 } else {
-                    $this->logger->error(
-                        sprintf(
-                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s] '. $modenaResponse->getOrderId(),
-                            $order->get_payment_method(),
-                            $order->needs_payment()
+                    $this->logger->error(sprintf(
+                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s] ' . $modenaResponse->getOrderId(), $order->get_payment_method(), $order->needs_payment()
                         )
                     );
                 }
-                exit;
+            } else {
+                $order->payment_complete();
+                $order->add_order_note(sprintf(__('Order paid via %s', 'modena'), $this->method_title));
+                $woocommerce->cart->empty_cart();
             }
+            exit;
         } catch (Exception $e) {
             $this->logger->error('Exception occurred in payment response: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
@@ -608,7 +599,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 return __('Credit', 'modena');
             }
         }
-        error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
+        //error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
 
         switch ($selectedOption) {
             case 'HABAEE2X':
@@ -617,7 +608,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 return 'SEB';
             case 'LHVBEE22':
                 return 'LHV';
-            case 'NDEAEE2X':
+            case 'RIKOEE22':
                 return 'Luminor';
             case 'PARXEE22':
                 return 'Citadele';
@@ -626,7 +617,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             case 'CREDIT_CARD':
                 return 'Visa / Mastercard';
             default:
-                return '';
+                return 'Bank Payment';
         }
     }
 
@@ -652,18 +643,18 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             'HABAEE2X' => 'Swedbank',
             'EEUHEE2X' => 'SEB',
             'LHVBEE22' => 'LHV',
-            'NDEAEE2X' => 'Luminor',
+            'RIKOEE22' => 'Luminor',
             'EKRDEE22' => 'COOP',
             'PARXEE22' => 'Citadele',
             'CREDIT_CARD' => 'Visa / Mastercard',
-            'default' => 'Direct'
+            'default' => 'Bank Payment'
         ];
 
         if (isset($bankOptions[$selectedOption])) {
             return $bankOptions[$selectedOption];
         }
 
-        error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
+        //error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
         return $bankOptions['default'];
 
     }

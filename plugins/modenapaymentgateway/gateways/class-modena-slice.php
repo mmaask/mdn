@@ -34,7 +34,7 @@ class Modena_Slice_Payment extends Modena_Base_Payment
                 'default_alt' => 'Modena - Платежа до 3 месяцев',
                 'method_description' => '0€ первоначальный взнос, 0% интресс, 0€ дополнительная плата. Просто платите позже.',
                 'title' => 'Modena - 3 платежа',
-                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_rus_0c2a9fa2f7.png?378453.7999999523',
+                'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_slice_rus_4da0fdb806.png?747330.8000000119',
                 'default_icon_title_text' => 'Модена 3 платежа предоставляется Modena Estonia OÜ.',
                 'description' => '0€ первоначальный взнос, 0% интресс, 0€ дополнительная плата. Просто платите позже.',
             ),
