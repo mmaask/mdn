@@ -9,7 +9,6 @@ class Modena_Leasing extends Modena_Base_Payment
     public function __construct()
     {
         $this->id         = 'modena_leasing';
-        //$this->hide_title = true;
         $this->enabled    = $this->get_option('disabled');
         $this->maturity_in_months = 36;
         $this->logo_enabled    = $this->get_option('enabled');
@@ -20,9 +19,9 @@ class Modena_Leasing extends Modena_Base_Payment
     }
     public function setNamesBasedOnLocales($current_locale)
     {
-        $translations = array(
+        $this->mdn_translations = array(
             'en' =>  array(
-                'method_title' => __('Modena Business Leasing', 'mdn-translations'),
+                'method_title' => __('Modena - Business Leasing', 'mdn-translations'),
                 'default_alt' => __('Modena - Leasing up to 48 months', 'mdn-translations'),
                 'method_description' => __('Arrange installment plan for the company name. Pay for the purchase over 6-48 months.', 'modena'),
                 'title' => __('Modena Leasing', 'mdn-translations'),
@@ -31,7 +30,7 @@ class Modena_Leasing extends Modena_Base_Payment
                 'description' => __('Installment payment option for businesses. Pay for your purchase in parts over 6 - 48 months.', 'mdn-translations')
             ),
             'ru' => array(
-                'method_title' => __('Modena бизнес лизинг', 'mdn-translations'),
+                'method_title' => __('Modena - бизнес лизинг', 'mdn-translations'),
                 'default_alt' => __('Modena - бизнес лизинг до 48 месяцев', 'mdn-translations'),
                 'method_description' => __('Оформите рассрочку на имя компании. Оплатите покупку в течение 6-48 месяцев.', 'modena'),
                 'title' => __('Бизнес лизинг до 48 месяцев', 'mdn-translations'),
@@ -49,17 +48,15 @@ class Modena_Leasing extends Modena_Base_Payment
                 'description' => 'Ettevõtetele mõeldud järelmaks. Tasu ostu eest osadena 6 - 48 kuu jooksul.',
             ),
         );
-
-        // Set the locale key based on the current locale
         $locale_key = substr($current_locale, 0, 2);
-        if (!array_key_exists($locale_key, $translations)) {
+        if (!array_key_exists($locale_key, $this->mdn_translations)) {
             $locale_key = 'en'; // default to English if the locale does not exist in the translations array
         }
 
-        foreach ($translations[$locale_key] as $key => $value) {
+        foreach ($this->mdn_translations[$locale_key] as $key => $value) {
             if($key === 'default_image') {
                 if($this->get_option('logo_enabled') == 'no') {
-                    //error_log($this->get_option('logo_enabled'));
+                    //error_log($this->get_option('logo_enabled') . " " . $this->id);
                     $this->{$key} = '';
                 } else {
                     $this->{$key} = $value;
@@ -82,6 +79,8 @@ class Modena_Leasing extends Modena_Base_Payment
             'default'     => 'yes',
             'class'       => 'modena-switch',
         ];
+
+
     }
     protected function postPaymentOrderInternal($request) {
         return $this->modena->postBusinessLeasingPaymentOrder($request);

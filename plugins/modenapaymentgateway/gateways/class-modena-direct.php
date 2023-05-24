@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     public function __construct() {
          $this->id      = 'modena_direct';
          $this->enabled = $this->get_option('disabled');
-        $this->logo_enabled    = $this->get_option('disabled');
+         $this->logo_enabled    = $this->get_option('disabled');
          $this->maturity_in_months = 0;
          $this->default_alt = '';
         $this->setNamesBasedOnLocales(get_locale());
@@ -19,9 +19,8 @@ if (!defined('ABSPATH')) {
          parent::__construct();
      }
 
-     public function setNamesBasedOnLocales($current_locale)
-     {
-         $translations = array(
+     public function setNamesBasedOnLocales($current_locale) {
+         $this->mdn_translations = array(
              'en' => array(
                  'method_title' => __('Modena - Bank & Card Payments', 'mdn-translations'),
                  'default_alt' => __('Modena Bank & Card Payments', 'mdn-translations'),
@@ -29,7 +28,7 @@ if (!defined('ABSPATH')) {
                  'title' => __('Bank & Card Payments', 'mdn-translations'),
                  'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
                  'default_icon_title_text' => __('Modena Bank Payments is provided by Modena Estonia OÜ.', 'mdn-translations'),
-                 'description' => __('Payment services are provided by Modena Payments OÜ in cooperation with EveryPay AS', 'mdn-translations'),
+                 'Description' => __('Payment services are provided by Modena Payments OÜ in cooperation with EveryPay AS', 'mdn-translations'),
                  'service_info' => __('Service info'),
              ),
              'ru' => array(
@@ -39,7 +38,7 @@ if (!defined('ABSPATH')) {
                  'title' => __('Интернетбанк или карта', 'mdn-translations'),
                  'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
                  'default_icon_title_text' => __('Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.', 'mdn-translations'),
-                 'description' => 'Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.',
+                 'Description' => 'Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.',
                  'service_info' => __('Сведения об услуге'),
              ),
              'et' => array(
@@ -49,17 +48,17 @@ if (!defined('ABSPATH')) {
                  'title' => __('Panga- ja kaardimaksed', 'mdn-translations'),
                  'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
                  'default_icon_title_text' => __('Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.', 'mdn-translations'),
-                 'description' => 'Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.',
+                 'Description' => 'Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.',
                  'service_info' => __('Teenuse info'),
              ),
          );
-         // Set the locale key based on the current locale
+
          $locale_key = substr($current_locale, 0, 2);
-         if (!array_key_exists($locale_key, $translations)) {
+         if (!array_key_exists($locale_key, $this->mdn_translations)) {
              $locale_key = 'en'; // default to English if the locale does not exist in the translations array
          }
 
-         foreach ($translations[$locale_key] as $key => $value) {
+         foreach ($this->mdn_translations[$locale_key] as $key => $value) {
              if($key === 'default_image') {
                  if($this->get_option('logo_enabled') == 'no') {
                      //error_log($this->get_option('logo_enabled') . " " . $this->id);
@@ -130,4 +129,4 @@ if (!defined('ABSPATH')) {
      }
 
 
-}
+ }

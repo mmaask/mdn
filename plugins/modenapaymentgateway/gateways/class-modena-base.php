@@ -34,6 +34,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     protected $icon_alt_text;
     protected $icon_title_text;
     protected $logo_enabled;
+    protected $mdn_translations;
 
     public function __construct()
     {
@@ -519,17 +520,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         );
     }
 
-    public function get_icon()
-    {
-        if ($this->button_text) {
-            return '';
-        }
 
-        $marginLeft = $this->hide_title ? 'margin-left: 0 !important;' : '';
-        $icon       = '<img src="' . WC_HTTPS::force_https_url($this->icon) . '" title="' . esc_attr($this->get_icon_title()) . '" alt="' . esc_attr($this->get_icon_alt()) . '" style="max-height:' . strval($this->payment_button_max_height) . 'px;' . $marginLeft . '"/>';
-
-        return $this->icon ? apply_filters('woocommerce_gateway_icon', $icon, $this->id) : '';
-    }
 
     public function get_description()
     {
@@ -585,26 +576,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 return __('Äri järelmaks', 'modena');
             } else {
                 return __('Business Leasing', 'modena');
-            }
-        }
-
-        if ($this instanceof Modena_Slice_Payment_Whitelabel) {
-            if (get_locale() == "RU") {
-                return __("Оплатить позже: WL", 'modena');
-            } elseIF(get_locale() == "ET") {
-                return __('Maksa 3 osas: WL', 'modena');
-            } else {
-                return __('Pay Later: WL', 'modena');
-            }
-        }
-
-        if ($this instanceof Modena_Credit_Payment_Whitelabel) {
-            if (get_locale() == "RU") {
-                return __("Рассрочка", 'modena');
-            } elseIF(get_locale() == "ET") {
-                return __('Järelmaks', 'modena');
-            } else {
-                return __('Credit', 'modena');
             }
         }
 
@@ -677,7 +648,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     }
 
-    private function is_credit_checkout_logo_enabled() {
+    private function is_checkout_logo_enabled() {
         $logoEnabledOption = $this->get_option('logo_enabled');
         //error_log("get logo enabeld option " . $this->id . ": " . $logoEnabledOption);
         if(strtolower($logoEnabledOption) === 'yes') {
@@ -688,12 +659,25 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     }
 
     private function hide_checkout_gateway_logo() {
-        if($this->is_credit_checkout_logo_enabled()) {
+        if($this->is_checkout_logo_enabled()) {
             $this->hide_title = True;
         } else {
             //error_log("We dont hide the title and we remove the default_image. " . $this->id);
             $this->hide_title = False;
-            $this->default_image = '';
+            $this->button_text = $this->title;
         }
+    }
+
+    public function get_icon()
+    {
+        if ($this->button_text) {
+            return '';
+        }
+
+        $marginLeft = $this->hide_title ? 'margin-left: 0 !important;' : '';
+        $icon       = '<img src="' . WC_HTTPS::force_https_url($this->icon) . '" title="' . esc_attr($this->get_icon_title()) . '" alt="' . esc_attr($this->get_icon_alt()) . '" style="max-height:' . strval($this->payment_button_max_height) . 'px;' . $marginLeft . '"/>';
+        //$this->logger->error($this->hide_title . $this->icon . $this->title);
+
+        return $this->icon ? apply_filters('woocommerce_gateway_icon', $icon, $this->id) : '';
     }
 }

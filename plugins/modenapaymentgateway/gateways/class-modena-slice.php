@@ -8,7 +8,6 @@ class Modena_Slice_Payment extends Modena_Base_Payment
 {
     public function __construct() {
         $this->id         = 'modena_slice';
-        //$this->hide_title = true;
         $this->enabled    = $this->get_option('disabled');
         $this->maturity_in_months = 3;
         $this->logo_enabled    = $this->get_option('enabled');
@@ -20,7 +19,7 @@ class Modena_Slice_Payment extends Modena_Base_Payment
 
     public function setNamesBasedOnLocales($current_locale)
     {
-        $translations = array(
+        $this->mdn_translations = array(
             'en' => array(
                 'method_title' => 'Modena - Pay in 3',
                 'default_alt' => 'Modena - Installments up to 48 months',
@@ -49,18 +48,15 @@ class Modena_Slice_Payment extends Modena_Base_Payment
                 'description' => '0€ sissemakse, 0% intress, 0€ lisatasu. Lihtsalt maksa hiljem.',
             ),
         );
-
-
-        // Set the locale key based on the current locale
         $locale_key = substr($current_locale, 0, 2);
-        if (!array_key_exists($locale_key, $translations)) {
+        if (!array_key_exists($locale_key, $this->mdn_translations)) {
             $locale_key = 'en'; // default to English if the locale does not exist in the translations array
         }
 
-        foreach ($translations[$locale_key] as $key => $value) {
+        foreach ($this->mdn_translations[$locale_key] as $key => $value) {
             if($key === 'default_image') {
                 if($this->get_option('logo_enabled') == 'no') {
-                    //error_log($this->get_option('logo_enabled'));
+                    //error_log($this->get_option('logo_enabled') . " " . $this->id);
                     $this->{$key} = '';
                 } else {
                     $this->{$key} = $value;
@@ -83,6 +79,7 @@ class Modena_Slice_Payment extends Modena_Base_Payment
             'default'     => 'yes',
             'class'       => 'modena-switch',
         ];
+
     }
     protected function postPaymentOrderInternal($request) {
         return $this->modena->postSlicePaymentOrder($request);
