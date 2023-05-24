@@ -33,6 +33,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     protected $button_text;
     protected $icon_alt_text;
     protected $icon_title_text;
+    protected $logo_enabled;
 
     public function __construct()
     {
@@ -80,7 +81,10 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         if ($this->get_option('payment_button_max_height') >= 24 && $this->get_option('payment_button_max_height') <= 30) {
             $this->payment_button_max_height = $this->get_option('payment_button_max_height');
         }
+        $this->hide_checkout_gateway_logo();
 
+
+        //$this->hide_checkout_gateway_logo();
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
 
         add_action('woocommerce_api_redirect_to_modena_' . $this->id, [$this, 'redirect_to_modena']);
@@ -139,6 +143,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 'type'     => 'text',
                 'desc_tip' => true,
             ],
+
             'gateway_title'             => [
                 'type'  => 'title',
                 'class' => 'modena-header-css-class',
@@ -151,6 +156,14 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 'default'     => 'no',
                 'class'       => 'modena-switch',
             ],
+            'logo_enabled' => [
+                'title'       => __('Enable/Disable Checkout Logo', 'modena'),
+                'label'       => '<span class="modena-slider"></span>',
+                'type'        => 'checkbox',
+                'default'     => $this->hide_title,
+                'description' => '',
+                'class'       => 'modena-switch',
+            ],
             'payment_button_max_height' => [
                 'title'       => __('Payment Button Max Height', 'modena'),
                 'type'        => 'number',
@@ -158,9 +171,12 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                     'modena'),
                 'default'     => 30,
                 'desc_tip'    => true,
-            ]
+            ],
+
         ];
     }
+
+
 
     public function admin_options()
     {
@@ -284,6 +300,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         exit;
     }
 
+
+
     public function modena_response()
     {
         global $woocommerce;
@@ -327,6 +345,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
             } else {
                 if (!$order->needs_payment()) {
+                    wp_safe_redirect($this->get_return_url($order));
                     return;
                 }
                 $order->payment_complete();
@@ -358,6 +377,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             exit;
         }
     }
+
 
     private function validate_modena_response($modenaResponse)
     {
@@ -513,7 +533,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     public function get_description()
     {
-        $this->logger->error(get_locale());
+
         $description = $this->description; // since description is not directly defined it sometimes will find random value assigned.
         if ($this->hide_title) {
             $description .= '<style>label[for=payment_method_' . $this->id . '] { font-size: 0 !important; }</style>';
@@ -543,9 +563,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
     public function get_title()
     {
-        if ($this->button_text) {
-            return $this->button_text;
-        }
+
         return $this->title;
     }
 
@@ -657,5 +675,25 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         //error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
         return $bankOptions['default'];
 
+    }
+
+    private function is_credit_checkout_logo_enabled() {
+        $logoEnabledOption = $this->get_option('logo_enabled');
+        //error_log("get logo enabeld option " . $this->id . ": " . $logoEnabledOption);
+        if(strtolower($logoEnabledOption) === 'yes') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function hide_checkout_gateway_logo() {
+        if($this->is_credit_checkout_logo_enabled()) {
+            $this->hide_title = True;
+        } else {
+            //error_log("We dont hide the title and we remove the default_image. " . $this->id);
+            $this->hide_title = False;
+            $this->default_image = '';
+        }
     }
 }

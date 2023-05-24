@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) {
     public function __construct() {
          $this->id      = 'modena_direct';
          $this->enabled = $this->get_option('disabled');
+        $this->logo_enabled    = $this->get_option('disabled');
          $this->maturity_in_months = 0;
          $this->default_alt = '';
         $this->setNamesBasedOnLocales(get_locale());
@@ -53,22 +54,22 @@ if (!defined('ABSPATH')) {
              ),
          );
          // Set the locale key based on the current locale
-         $locale_key = 'en';
-
-         switch ($current_locale) {
-             case 'ru_RU':
-                 $locale_key = 'ru';
-                 break;
-             case 'en_GB':
-             case 'en_US':
-                 break;
-             default:
-                 $locale_key = 'et';
-                 break;
+         $locale_key = substr($current_locale, 0, 2);
+         if (!array_key_exists($locale_key, $translations)) {
+             $locale_key = 'en'; // default to English if the locale does not exist in the translations array
          }
 
          foreach ($translations[$locale_key] as $key => $value) {
-             $this->{$key} = $value;
+             if($key === 'default_image') {
+                 if($this->get_option('logo_enabled') == 'no') {
+                     //error_log($this->get_option('logo_enabled') . " " . $this->id);
+                     $this->{$key} = '';
+                 } else {
+                     $this->{$key} = $value;
+                 }
+             } else {
+                 $this->{$key} = $value;
+             }
          }
      }
 

@@ -210,7 +210,6 @@ class Modena_Init_Handler
 
         return $setting === 'yes';
     }
-
     private function get_slice_banner_text($active_price): string
     {
         return sprintf(__($this->getLocaleForBannerTextForSlice(), "woocommerce"),

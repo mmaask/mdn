@@ -9,9 +9,10 @@ class Modena_Leasing extends Modena_Base_Payment
     public function __construct()
     {
         $this->id         = 'modena_leasing';
-        $this->hide_title = true;
+        //$this->hide_title = true;
         $this->enabled    = $this->get_option('disabled');
         $this->maturity_in_months = 36;
+        $this->logo_enabled    = $this->get_option('enabled');
 
         $this->setNamesBasedOnLocales(get_locale());
 
@@ -33,13 +34,13 @@ class Modena_Leasing extends Modena_Base_Payment
                 'method_title' => __('Modena бизнес лизинг', 'mdn-translations'),
                 'default_alt' => __('Modena - бизнес лизинг до 48 месяцев', 'mdn-translations'),
                 'method_description' => __('Оформите рассрочку на имя компании. Оплатите покупку в течение 6-48 месяцев.', 'modena'),
-                'title' => __('Бизнес лизинг', 'mdn-translations'),
+                'title' => __('Бизнес лизинг до 48 месяцев', 'mdn-translations'),
                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_business_credit_rus_f84c520f4a.png?76438.69999998808',
                 'default_icon_title_text' => __('Модена рассрочка предоставляется Modena Estonia OÜ.', 'mdn-translations'),
                 'description' => __('Опция рассрочки для бизнеса. Оплачивайте за свою покупку частями в течение 6 - 48 месяцев.', 'mdn-translations'),
             ),
             'et' => array(
-                'method_title' => __('Modena Äri järelmaks', 'mdn-translations'),
+                'method_title' => __('Modena - Äri järelmaks', 'mdn-translations'),
                 'default_alt' => __('Modena - Järelmaks kuni 48 kuud', 'mdn-translations'),
                 'method_description' => __('Vormista järelmaks ettevõtte nimele. Tasu ostu eest 6-48 kuu jooksul.', 'modena'),
                 'title' => __('Modena ärikliendi järelmaks', 'mdn-translations'),
@@ -50,22 +51,22 @@ class Modena_Leasing extends Modena_Base_Payment
         );
 
         // Set the locale key based on the current locale
-        $locale_key = 'en';
-
-        switch ($current_locale) {
-            case 'ru_RU':
-                $locale_key = 'ru';
-                break;
-            case 'en_GB':
-            case 'en_US':
-                break;
-            default:
-                $locale_key = 'et';
-                break;
+        $locale_key = substr($current_locale, 0, 2);
+        if (!array_key_exists($locale_key, $translations)) {
+            $locale_key = 'en'; // default to English if the locale does not exist in the translations array
         }
 
         foreach ($translations[$locale_key] as $key => $value) {
-            $this->{$key} = $value;
+            if($key === 'default_image') {
+                if($this->get_option('logo_enabled') == 'no') {
+                    //error_log($this->get_option('logo_enabled'));
+                    $this->{$key} = '';
+                } else {
+                    $this->{$key} = $value;
+                }
+            } else {
+                $this->{$key} = $value;
+            }
         }
     }
 
