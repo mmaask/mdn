@@ -1,11 +1,11 @@
-=== Modena Payments ===
-Version: 3.0.0
+=== Modena Payment Gateway ===
+Version: 2.7.0
 Contributors: modenapayments
 Donate link: https://modena.ee/
 Tags: online payment, payment, payment gateway, payment_gateway, woocommerce, sales, hire-purchase, järelmaks, financing, credit intermediary, krediidivahendaja, modena
 Requires at least: 4.7
 Tested up to: 6.1
-Stable tag: 3.0.0
+Stable tag: 2.7.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -52,7 +52,7 @@ Any questions? Just send us an email at info@modena.ee.
 * Bugfixes
 
 = 2.7.0 =
-* Added Business Credit option for merchants
+* New Business Leasing payment option for merchants
 
 == Upgrade Notice ==
 
@@ -63,11 +63,7 @@ Any questions? Just send us an email at info@modena.ee.
 * Bugfixes
 
 = 2.7.0 =
-* Added Business Credit option for merchants
-
-= 3.0.0 =
-* Added Business Credit option for merchants
-* Added Itella Smartpost support
+* New Business Leasing payment option for merchants
 
 == Support ==
 More information about Modena products can be found on our website [website](https://www.modena.ee)

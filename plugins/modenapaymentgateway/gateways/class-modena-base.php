@@ -12,10 +12,9 @@ if (!defined('ABSPATH')) {
 
 abstract class Modena_Base_Payment extends WC_Payment_Gateway
 {
-    const PLUGIN_VERSION             = '3.0.0';
+    const PLUGIN_VERSION             = '2.7.0';
     const MODENA_META_KEY            = 'modena-application-id';
     const MODENA_SELECTED_METHOD_KEY = 'modena-payment-method';
-    const MODENA_SELECTED_BANK_METHOD = 'mdn_direct_payment_selected_bank';
     protected $client_id;
     protected $client_secret;
     protected $is_test_mode;
@@ -33,8 +32,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     protected $button_text;
     protected $icon_alt_text;
     protected $icon_title_text;
-    protected $logo_enabled;
-    protected $mdn_translations;
 
     public function __construct()
     {
@@ -67,13 +64,12 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $this->is_test_mode
         );
 
-        //$this->description               = $this->get_option('description');
-        //$this->button_text               = $this->get_option('payment_button_text');
+        $this->description               = $this->get_option('description');
         $this->payment_button_max_height = 30;
-        $this->icon                      = $this->default_image;
-
-        $this->icon_alt_text             = $this->default_alt;
-        $this->icon_title_text           = $this->default_icon_title_text;
+        $this->icon                      = $this->get_option('payment_button_image_url', $this->default_image);
+        $this->button_text               = $this->get_option('payment_button_text');
+        $this->icon_alt_text             = $this->get_option('payment_button_alt_text');
+        $this->icon_title_text           = $this->get_option('payment_button_title_text');
 
         $this->init_form_fields();
 
@@ -82,10 +78,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         if ($this->get_option('payment_button_max_height') >= 24 && $this->get_option('payment_button_max_height') <= 30) {
             $this->payment_button_max_height = $this->get_option('payment_button_max_height');
         }
-        $this->hide_checkout_gateway_logo();
 
-
-        //$this->hide_checkout_gateway_logo();
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, [$this, 'process_admin_options']);
 
         add_action('woocommerce_api_redirect_to_modena_' . $this->id, [$this, 'redirect_to_modena']);
@@ -144,7 +137,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 'type'     => 'text',
                 'desc_tip' => true,
             ],
-
             'gateway_title'             => [
                 'type'  => 'title',
                 'class' => 'modena-header-css-class',
@@ -157,13 +149,21 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 'default'     => 'no',
                 'class'       => 'modena-switch',
             ],
-            'logo_enabled' => [
-                'title'       => __('Enable/Disable Checkout Logo', 'modena'),
-                'label'       => '<span class="modena-slider"></span>',
-                'type'        => 'checkbox',
-                'default'     => $this->hide_title,
-                'description' => '',
-                'class'       => 'modena-switch',
+            'payment_button_text'       => [
+                'title'       => __('Payment Button Text', 'modena'),
+                'type'        => 'text',
+                'description' => __('If you\'d like to display text instead of the payment method logo, fill in this field.',
+                    'modena'),
+                'default'     => '',
+                'css'         => 'width:25em',
+                'desc_tip'    => true,
+            ],
+            'payment_button_image_url'  => [
+                'title'       => __('Payment Button Image URL', 'modena'),
+                'type'        => 'text',
+                'description' => __('This controls the URL from which the payment button image is loaded.', 'modena'),
+                'default'     => $this->default_image,
+                'desc_tip'    => true,
             ],
             'payment_button_max_height' => [
                 'title'       => __('Payment Button Max Height', 'modena'),
@@ -173,11 +173,25 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 'default'     => 30,
                 'desc_tip'    => true,
             ],
-
+            'payment_button_alt_text' => [
+                'title'       => __('Payment Button Alt Text', 'modena'),
+                'type'        => 'text',
+                'description' => __('If you\'d like to display alt text on the payment method logo, fill in this field.', 'modena'),
+                'default'     => '',
+                'css'         => 'width:25em',
+                'desc_tip'    => true,
+            ],
+            'payment_button_title_text' => [
+                'title'       => __('Payment Button Title Text', 'modena'),
+                'type'        => 'text',
+                'description' => __('If you\'d like to display title text on the payment method logo, fill in this field.',
+                    'modena'),
+                'default'     => $this->icon_title_text,
+                'css'         => 'width:25em',
+                'desc_tip'    => true,
+            ],
         ];
     }
-
-
 
     public function admin_options()
     {
@@ -231,6 +245,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     }
 
     abstract protected function postPaymentOrderInternal($request);
+
+    abstract protected function getPaymentApplicationStatus($request);
 
     public function redirect_to_modena()
     {
@@ -286,8 +302,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 $humanReadablePaymentMethod = "Modena - {$this->get_human_readable_selected_method($selectedOption)}";
                 $order->add_meta_data(self::MODENA_META_KEY, $response->getApplicationId(), true);
                 $order->add_meta_data(self::MODENA_SELECTED_METHOD_KEY, $humanReadablePaymentMethod, true);
-                $order->add_meta_data(self::MODENA_SELECTED_BANK_METHOD, $selectedOption);
-
                 $order->save_meta_data();
                 $order->save();
                 wp_redirect($response->getRedirectLocation());
@@ -301,7 +315,41 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         exit;
     }
 
+    private function get_human_readable_selected_method($selectedOption): string
+    {
+        if ($this instanceof Modena_Slice_Payment) {
+            return __('Maksa 3 osas', 'modena');
+        }
 
+        if ($this instanceof Modena_Business_Leasing) {
+            return __('Äri järelmaks', 'modena');
+        }
+
+        if ($this instanceof Modena_Credit_Payment) {
+            return __('Järelmaks', 'modena');
+        }
+
+        switch ($selectedOption) {
+            case 'HABAEE2X':
+                return 'Swedbank';
+            case 'EEUHEE2X':
+                return 'SEB';
+            case 'LHVBEE22':
+                return 'LHV';
+            case 'RIKOEE22':
+                return 'Luminor';
+            case 'MTASKU':
+                return 'mTasku';
+            case 'PARXEE22':
+                return 'Citadele';
+            case 'EKRDEE22':
+                return 'COOP';
+            case 'CREDIT_CARD':
+                return 'Visa / Mastercard';
+            default:
+                return 'Panga- ja kaardimaksed';
+        }
+    }
 
     public function modena_response()
     {
@@ -317,8 +365,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         }
 
         try {
-            $applicationStatus = $this->modena->getPaymentApplicationStatus($modenaResponse->getApplicationId(),
-                $this->id);
+            $applicationStatus = $this->getPaymentApplicationStatus($modenaResponse->getApplicationId());
 
             if ($applicationStatus !== 'SUCCESS') {
                 $this->logger->error('Invalid application status, expected: SUCCESS | received: ' . $applicationStatus);
@@ -329,47 +376,31 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
             $order = wc_get_order($modenaResponse->getOrderId());
 
-            if (!$order || $order->get_payment_method() !== $this->id) {
+            if ($order && $order->get_payment_method() === $this->id) {
+                if ($order->needs_payment()) {
+                    $order->payment_complete();
+                    $order->add_order_note(sprintf(__('Order paid via %s', 'modena'), $this->method_title));
+                    $woocommerce->cart->empty_cart();
+                }
+
+                wp_safe_redirect($this->get_return_url($order));
+                exit;
+            } else {
                 if (!$order) {
                     $this->logger->error(sprintf('Order not found for id: %s', $modenaResponse->getOrderId()));
                 } else {
                     $this->logger->error(
                         sprintf(
-                            'Payment is not successful, order is found but payment method mismatch: [method: %s, needs_payment: %s]' . ' Order number: ' . $modenaResponse->getOrderId() . 'Payment method is: ' . $this->id,
+                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
                             $order->get_payment_method(),
                             $order->needs_payment()
-
                         )
                     );
                 }
                 wp_safe_redirect(wc_get_cart_url());
                 wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
-            } else {
-                if (!$order->needs_payment()) {
-                    wp_safe_redirect($this->get_return_url($order));
-                    return;
-                }
-                $order->payment_complete();
-
-                if ($order->get_payment_method() === 'modena_direct') {
-                    $bank_name = $this->get_bank_name($order);
-
-                    $order->add_order_note(sprintf(
-                        __('Order paid via %s - %s', 'modena'),
-                        $this->get_order_payment_method_eng($this->id),
-                        $bank_name
-                    ));
-                } else {
-                    $order->add_order_note(sprintf(
-                        __('Order paid via %s', 'modena'),
-                        $this->get_order_payment_method_eng($this->id)
-                    ));
-                }
-                $woocommerce->cart->empty_cart();
-
-                wp_safe_redirect($this->get_return_url($order));
+                exit;
             }
-            exit;
         } catch (Exception $e) {
             $this->logger->error('Exception occurred in payment response: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
@@ -378,7 +409,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             exit;
         }
     }
-
 
     private function validate_modena_response($modenaResponse)
     {
@@ -406,8 +436,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         }
 
         try {
-            $applicationStatus = $this->modena->getPaymentApplicationStatus($modenaResponse->getApplicationId(),
-                $this->id);
+            $applicationStatus = $this->getPaymentApplicationStatus($modenaResponse->getApplicationId());
 
             if ($applicationStatus !== 'FAILED' && $applicationStatus !== 'REJECTED') {
                 $this->logger->error('Invalid application status, expected: FAILED or REJECTED | received: ' . $applicationStatus);
@@ -420,16 +449,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $order          = wc_get_order($modenaResponse->getOrderId());
             $payment_method = $order->get_payment_method();
 
-            if ($payment_method !== $this->id) {
-                $this->logger->error(sprintf(
-                    'Payment is not successful, payment is cancelled. [method: %s, needs_payment: %s] ' . 'Order number: ' . $modenaResponse->getOrderId() . 'Payment method is: ' . $this->id,
-                    $order->get_payment_method(),
-                    $order->get_payment_method(),
-                    $order->needs_payment()
-                ));
-                wp_redirect($this->site_url);
-                wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
-            } else {
+            if ($payment_method === $this->id) {
                 foreach ($order->get_items() as $orderItem) {
                     $data = $orderItem->get_data();
                     WC()->cart->add_to_cart($data['product_id'], $data['quantity'], $data['variation_id']);
@@ -437,8 +457,17 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
                 wp_safe_redirect(wc_get_cart_url());
                 wc_add_notice(__('Payment canceled.', 'modena'));
+                exit;
+            } else {
+                $this->logger->error(sprintf(
+                    'Payment canceled, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
+                    $order->get_payment_method(),
+                    $order->needs_payment()
+                ));
+                wp_redirect($this->site_url);
+                wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
+                exit;
             }
-            exit;
         } catch (Exception $e) {
             $this->logger->error('Exception occurred in payment cancel function: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
@@ -460,8 +489,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         }
 
         try {
-            $applicationStatus = $this->modena->getPaymentApplicationStatus($modenaResponse->getApplicationId(),
-                $this->id);
+            $applicationStatus = $this->getPaymentApplicationStatus($modenaResponse->getApplicationId());
 
             if ($applicationStatus !== 'SUCCESS') {
                 $this->logger->error('Invalid application status, expected: SUCCESS | received: ' . $applicationStatus);
@@ -470,21 +498,25 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
             $order = wc_get_order($modenaResponse->getOrderId());
 
-            if (!$order || $order->get_payment_method() !== $this->id || !$order->needs_payment()) {
-                if (!$order) {
-                    $this->logger->error('Order not found for id: ' . $modenaResponse->getOrderId());
-                } else {
-                    $this->logger->error(sprintf(
-                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s] ' . $modenaResponse->getOrderId(), $order->get_payment_method(), $order->needs_payment()
-                        )
-                    );
-                }
-            } else {
+            if ($order && $order->get_payment_method() === $this->id && $order->needs_payment()) {
                 $order->payment_complete();
                 $order->add_order_note(sprintf(__('Order paid via %s', 'modena'), $this->method_title));
                 $woocommerce->cart->empty_cart();
+                exit;
+            } else {
+                if (!$order) {
+                    $this->logger->error('Order not found for id: ' . $modenaResponse->getOrderId());
+                } else {
+                    $this->logger->error(
+                        sprintf(
+                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
+                            $order->get_payment_method(),
+                            $order->needs_payment()
+                        )
+                    );
+                }
+                exit;
             }
-            exit;
         } catch (Exception $e) {
             $this->logger->error('Exception occurred in payment response: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
@@ -520,154 +552,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         );
     }
 
-
-
-    public function get_description()
-    {
-
-        $description = $this->description; // since description is not directly defined it sometimes will find random value assigned.
-        if ($this->hide_title) {
-            $description .= '<style>label[for=payment_method_' . $this->id . '] { font-size: 0 !important; }</style>';
-        }
-        /*
-         * Using the singleton pattern we can ensure that the <link> or <script> tags get added to the site only once.
-         * */
-        Modena_Load_Checkout_Assets::getInstance();
-
-        return apply_filters('woocommerce_gateway_description', $description, $this->id);
-    }
-    public function get_icon_title()
-    {
-        if ($this->icon_title_text) {
-            return $this->icon_title_text;
-        }
-        return $this->default_icon_title_text;
-    }
-
-    public function get_icon_alt()
-    {
-        if ($this->icon_alt_text) {
-            return $this->icon_alt_text;
-        }
-        return $this->default_alt;
-    }
-
-    public function get_title()
-    {
-
-        return $this->title;
-    }
-
-    private function get_human_readable_selected_method($selectedOption) {
-        if ($this instanceof Modena_Slice_Payment) {
-            if (get_locale() == "RU") {
-                return __("Оплатить позже", 'modena');
-            } elseIF(get_locale() == "ET") {
-                return __('Maksa 3 osas', 'modena');
-            } else {
-                return __('Pay Later', 'modena');
-            }
-        }
-
-        if ($this instanceof Modena_Leasing) {
-            if (get_locale() == "RU") {
-                return __("Бизнес лизинг", 'modena');
-            } elseIF(get_locale() == "ET") {
-                return __('Äri järelmaks', 'modena');
-            } else {
-                return __('Business Leasing', 'modena');
-            }
-        }
-
-        if ($this instanceof Modena_Credit_Payment) {
-            if (get_locale() == "RU") {
-                return __("Рассрочка", 'modena');
-            } elseIF(get_locale() == "ET") {
-                return __('Järelmaks', 'modena');
-            } else {
-                return __('Credit', 'modena');
-            }
-        }
-        //error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
-
-        switch ($selectedOption) {
-            case 'HABAEE2X':
-                return 'Swedbank';
-            case 'EEUHEE2X':
-                return 'SEB';
-            case 'LHVBEE22':
-                return 'LHV';
-            case 'RIKOEE22':
-                return 'Luminor';
-            case 'PARXEE22':
-                return 'Citadele';
-            case 'EKRDEE22':
-                return 'COOP';
-            case 'CREDIT_CARD':
-                return 'Visa / Mastercard';
-            default:
-                return 'Bank Payment';
-        }
-    }
-
-    private function get_order_payment_method_eng($method_id) {
-        if ($method_id === 'modena_direct') {
-            return __('Bank & Card Payments');
-        }
-        if ($method_id === 'modena_leasing') {
-            return __('Modena Leasing');
-        }
-        if ($method_id === 'modena_slice') {
-            return __('Modena Pay Later');
-        }
-        else {
-            return __('Modena Credit');
-        }
-    }
-
-    private function get_bank_name($order) {
-
-        $selectedOption = $order->get_meta('mdn_direct_payment_selected_bank');
-        $bankOptions = [
-            'HABAEE2X' => 'Swedbank',
-            'EEUHEE2X' => 'SEB',
-            'LHVBEE22' => 'LHV',
-            'RIKOEE22' => 'Luminor',
-            'EKRDEE22' => 'COOP',
-            'PARXEE22' => 'Citadele',
-            'CREDIT_CARD' => 'Visa / Mastercard',
-            'default' => 'Bank Payment'
-        ];
-
-        if (isset($bankOptions[$selectedOption])) {
-            return $bankOptions[$selectedOption];
-        }
-
-        //error_log("This is the selected bank option: (" . $selectedOption . ') if empty then something went wrong with returning the correct bank name');
-        return $bankOptions['default'];
-
-    }
-
-    private function is_checkout_logo_enabled() {
-        $logoEnabledOption = $this->get_option('logo_enabled');
-        //error_log("get logo enabeld option " . $this->id . ": " . $logoEnabledOption);
-        if(strtolower($logoEnabledOption) === 'yes') {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private function hide_checkout_gateway_logo() {
-        if($this->is_checkout_logo_enabled()) {
-            $this->hide_title = True;
-        } else {
-            //error_log("We dont hide the title and we remove the default_image. " . $this->id);
-            $this->hide_title = False;
-            $this->button_text = $this->title;
-        }
-    }
-
     public function get_icon()
     {
         if ($this->button_text) {
@@ -676,8 +560,47 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
         $marginLeft = $this->hide_title ? 'margin-left: 0 !important;' : '';
         $icon       = '<img src="' . WC_HTTPS::force_https_url($this->icon) . '" title="' . esc_attr($this->get_icon_title()) . '" alt="' . esc_attr($this->get_icon_alt()) . '" style="max-height:' . strval($this->payment_button_max_height) . 'px;' . $marginLeft . '"/>';
-        //$this->logger->error($this->hide_title . $this->icon . $this->title);
 
         return $this->icon ? apply_filters('woocommerce_gateway_icon', $icon, $this->id) : '';
+    }
+
+    public function get_title()
+    {
+        if ($this->button_text) {
+            return $this->button_text;
+        }
+
+        return '';
+    }
+
+    public function get_description()
+    {
+        $description = $this->description;
+        if ($this->hide_title) {
+            $description .= '<style>label[for=payment_method_' . $this->id . '] { font-size: 0 !important; }</style>';
+        }
+
+        /*
+         * Using the singleton pattern we can ensure that the <link> or <script> tags get added to the site only once.
+         * */
+        Modena_Load_Checkout_Assets::getInstance();
+
+        return apply_filters('woocommerce_gateway_description', $description, $this->id);
+    }
+
+    public function get_icon_alt()
+    {
+        if ($this->icon_alt_text) {
+            return $this->icon_alt_text;
+        }
+
+        return '';
+    }
+    public function get_icon_title()
+    {
+        if ($this->button_text) {
+            return $this->button_text;
+        }
+        return $this->title;
     }
 }

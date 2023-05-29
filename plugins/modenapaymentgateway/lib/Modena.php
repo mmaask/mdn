@@ -8,7 +8,7 @@ use Modena\Payment\model\ModenaResponse;
 use Modena\Payment\model\ModenaRequest;
 
 class Modena {
-    const LIBRARY_VERSION          = '1.0.0';
+    const LIBRARY_VERSION          = '2.7.0';
     const HTTP_VERSION             = '1.1';
     const MAX_RETRIES              = 5;
     const RETRY_TIMEOUT_IN_SECONDS = 5;
@@ -21,16 +21,14 @@ class Modena {
     # SLICE PAYMENT
     const SCOPE_SLICE                  = 'slicepayment';
     const SLICE_PAYMENT_ORDER_URL      = 'modena/api/merchant/slice-payment-order';
-    const SLICE_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
     # CREDIT PAYMENT
     const SCOPE_CREDIT                  = 'creditpayment';
     const CREDIT_PAYMENT_ORDER_URL      = 'modena/api/merchant/credit-payment-order';
-    const CREDIT_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
-
     # BUSINESS LEASING PAYMENT
     const SCOPE_BUSINESS_LEASING                  = 'businessleasing';
     const BUSINESS_LEASING_PAYMENT_ORDER_URL      = 'modena/api/merchant/business-leasing-payment-order';
-    const BUSINESS_LEASING_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
+
+    const MODENA_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
 
     # DIRECT PAYMENT
     const SCOPE_DIRECT                  = 'directpayment';
@@ -240,46 +238,6 @@ class Modena {
     public function postBusinessLeasingPaymentOrder($request) {
         return $response = $this->sendPaymentOrderRequest(self::BUSINESS_LEASING_PAYMENT_ORDER_URL, $request, self::SCOPE_BUSINESS_LEASING);
     }
-    /**
-     * @param  ModenaRequest  $request
-     * @return ModenaOrderResponse
-     * @throws Exception
-     */
-    public function postSliceWhiteLabelPaymentOrder($request) {
-        return $response = $this->sendPaymentOrderRequest(self::SLICE_PAYMENT_ORDER_URL, $request, self::SCOPE_SLICE);
-    }
-    /**
-     * @param  ModenaRequest  $request
-     * @return ModenaOrderResponse
-     * @throws Exception
-     */
-    public function postCreditWhiteLabelPaymentOrder($request) {
-        return $response = $this->sendPaymentOrderRequest(self::CREDIT_PAYMENT_ORDER_URL, $request, self::SCOPE_CREDIT);
-    }
-
-
-    /**
-     * Try to filter payment application status request by scope
-     *
-     * @param  string  $applicationId
-     * @param  string  $scope
-     * @return string
-     * @throws Exception
-     */
-    public function getPaymentApplicationStatus($applicationId, $scope) {
-        $response = null;
-
-        if (stripos($scope, 'direct') !== false) {
-            $response = $this->getDirectPaymentApplicationStatus($applicationId);
-        } else if (stripos($scope, 'slice') !== false) {
-            $response = $this->getSlicePaymentApplicationStatus($applicationId);
-        } else if (stripos($scope, 'credit') !== false) {
-            $response = $this->getCreditPaymentApplicationStatus($applicationId);
-        } else if (stripos($scope, 'leasing') !== false) {
-            $response = $this->getBusinessLeasingPaymentApplicationStatus($applicationId);
-        }
-        return $response;
-    }
 
     /**
      * @param  string  $applicationId
@@ -297,7 +255,7 @@ class Modena {
      * @throws Exception
      */
     public function getSlicePaymentApplicationStatus($applicationId) {
-        return $this->sendApplicationStatusRequest(self::SLICE_APPLICATION_STATUS_URL, $applicationId,
+        return $this->sendApplicationStatusRequest(self::MODENA_APPLICATION_STATUS_URL, $applicationId,
             self::SCOPE_SLICE);
     }
 
@@ -307,7 +265,7 @@ class Modena {
      * @throws Exception
      */
     public function getCreditPaymentApplicationStatus($applicationId) {
-        return $this->sendApplicationStatusRequest(self::CREDIT_APPLICATION_STATUS_URL, $applicationId,
+        return $this->sendApplicationStatusRequest(self::MODENA_APPLICATION_STATUS_URL, $applicationId,
             self::SCOPE_CREDIT);
     }
 
@@ -317,7 +275,7 @@ class Modena {
      * @throws Exception
      */
     public function getBusinessLeasingPaymentApplicationStatus($applicationId) {
-        return $this->sendApplicationStatusRequest(self::BUSINESS_LEASING_APPLICATION_STATUS_URL, $applicationId,
+        return $this->sendApplicationStatusRequest(self::MODENA_APPLICATION_STATUS_URL, $applicationId,
             self::SCOPE_BUSINESS_LEASING);
     }
 

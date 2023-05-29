@@ -65,7 +65,7 @@ class Modena_Onboarding_Handler
         );
 
         // Save credentials to settings API
-        $gateways = ['slice', 'credit', 'direct', 'businessleasing'];
+        $gateways = ['slice', 'credit', 'direct', 'business_leasing'];
 
         foreach ($gateways as $gateway) {
             $settings_array = (array) get_option('woocommerce_modena_' . $gateway . '_settings', array());
@@ -107,7 +107,7 @@ class Modena_Onboarding_Handler
     /**
      * Link to settings screen.
      * @param $gateway_id
-     * @return string
+     * @return string|void
      */
     public function get_admin_setting_link($gateway_id)
     {

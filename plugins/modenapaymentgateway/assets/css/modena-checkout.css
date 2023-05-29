@@ -41,9 +41,7 @@
 }
 
 .payment_method_modena_slice label,
-.payment_method_modena_leasing label,
-.payment_method_modena_slice_whitelabel label,
-.payment_method_modena_credit_whitelabel label,
+.payment_method_modena_business_leasing label,
 .payment_method_modena_credit label {
     display: inline-block;
     vertical-align: middle;
@@ -52,9 +50,7 @@
 
 .payment_method_modena_direct label img,
 .payment_method_modena_slice label img,
-.payment_method_modena_slice_whitelabel label img,
-.payment_method_modena_credit_whitelabel label img,
-.payment_method_modena_leasing label img,
+.payment_method_modena_business_leasing label img,
 .payment_method_modena_credit label img {
     margin-left: 0 !important;
 }

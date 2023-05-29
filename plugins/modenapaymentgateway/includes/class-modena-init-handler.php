@@ -13,9 +13,7 @@ class Modena_Init_Handler
         'Modena_Direct_Payment' => 'direct',
         'Modena_Slice_Payment'  => 'slice',
         'Modena_Credit_Payment' => 'credit',
-        'Modena_Leasing' => 'leasing',
-        /*'Modena_Slice_Payment_Whitelabel' => 'slice-whitelabel',
-        'Modena_Credit_Payment_Whitelabel' => 'credit-whitelabel',*/
+        'Modena_Business_Leasing' => 'business-leasing',
     ];
 
     public function run()
@@ -77,37 +75,22 @@ class Modena_Init_Handler
 
         return array_merge($plugin_links, $links);
     }
-    private function is_slice_enabled(): bool
+    private function is_slice_enabled()
     {
         $setting = get_option('woocommerce_modena_slice_settings')['enabled'] ?? false;
 
         return $setting === 'yes';
     }
 
-    private function is_slice_whitelabel_enabled(): bool
-    {
-        $setting = get_option('woocommerce_modena_slice_whitelabel_settings')['enabled'] ?? false;
-
-        return $setting === 'yes';
-    }
-
-    private function is_credit_enabled(): bool
+    private function is_credit_enabled()
     {
         $setting = get_option('woocommerce_modena_credit_settings')['enabled'] ?? false;
 
         return $setting === 'yes';
     }
-
-    private function is_credit_whitelabel_enabled(): bool
+    private function is_leasing_enabled()
     {
-        $setting = get_option('woocommerce_modena_credit_whitelabel_settings')['enabled'] ?? false;
-
-        return $setting === 'yes';
-    }
-
-    private function is_leasing_enabled(): bool
-    {
-        $setting = get_option('woocommerce_modena_leasing_settings')['enabled'] ?? false;
+        $setting = get_option('woocommerce_modena_business_leasing_settings')['enabled'] ?? false;
 
         return $setting === 'yes';
     }
@@ -126,12 +109,10 @@ class Modena_Init_Handler
 
         echo $this->get_slice_banner_html($active_price);
         echo $this->get_credit_banner_html($active_price);
-        //echo $this->get_credit_whitelabel_banner_html($active_price);
-        //echo $this->get_slice_whitelabel_banner_html($active_price);
         echo $this->get_leasing_banner_html($active_price);
     }
 
-    private function get_slice_banner_html($active_price): string
+    private function get_slice_banner_html($active_price)
     {
         if (!$this->is_slice_enabled() || !$this->is_slice_product_banner_enabled()) {
             return '';
@@ -157,25 +138,6 @@ class Modena_Init_Handler
 
         return $this->get_installment_price_html($this->get_leasing_banner_text($active_price));
     }
-
-    private function get_slice_whitelabel_banner_html($active_price): string
-    {
-        if (!$this->is_slice_whitelabel_enabled() || !$this->is_slice_whitelabel_product_banner_enabled()) {
-            return '';
-        }
-
-        return $this->get_installment_price_whitelabel($this->get_slice_whitelabel_banner_text($active_price));
-    }
-
-    private function get_credit_whitelabel_banner_html($active_price): string
-    {
-        if (!$this->is_credit_whitelabel_enabled() || !$this->is_credit_whitelabel_product_banner_enabled()) {
-            return '';
-        }
-
-        return $this->get_installment_price_whitelabel($this->get_credit_whitelabel_banner_text($active_price));
-    }
-
     private function is_slice_product_banner_enabled(): bool
     {
         $setting = get_option('woocommerce_modena_slice_settings')['product_page_banner_enabled'] ?? false;
@@ -192,51 +154,26 @@ class Modena_Init_Handler
 
     private function is_leasing_product_banner_enabled(): bool
     {
-        $setting = get_option('woocommerce_modena_leasing_settings')['product_page_banner_enabled'] ?? false;
+        $setting = get_option('woocommerce_modena_business_leasing_settings')['product_page_banner_enabled'] ?? false;
 
         return $setting === 'yes';
     }
 
-    private function is_slice_whitelabel_product_banner_enabled(): bool
-    {
-        $setting = get_option('woocommerce_modena_slice_whitelabel_settings')['product_page_banner_enabled'] ?? false;
-
-        return $setting === 'yes';
-    }
-
-    private function is_credit_whitelabel_product_banner_enabled(): bool
-    {
-        $setting = get_option('woocommerce_modena_credit_whitelabel_settings')['product_page_banner_enabled'] ?? false;
-
-        return $setting === 'yes';
-    }
     private function get_slice_banner_text($active_price): string
     {
-        return sprintf(__($this->getLocaleForBannerTextForSlice(), "woocommerce"),
+        return sprintf(__("3 makset %s€ kuus, ilma lisatasudeta.&ensp;", "woocommerce"),
             $this->get_installment_number($active_price / 3.0));
     }
 
     private function get_credit_banner_text($active_price): string
     {
-        return sprintf(__($this->getLocaleForBannerTextForCredit(), "woocommerce"),
-            $this->get_installment_number($active_price * 0.0325));
-    }
-
-    private function get_slice_whitelabel_banner_text($active_price): string
-    {
-        return sprintf(__($this->getLocaleForBannerTextForSlice(), "woocommerce"),
-            $this->get_installment_number($active_price / 3.0));
-    }
-
-    private function get_credit_whitelabel_banner_text($active_price): string
-    {
-        return sprintf(__($this->getLocaleForBannerTextForCredit(), "woocommerce"),
+        return sprintf(__("Järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;", "woocommerce"),
             $this->get_installment_number($active_price * 0.0325));
     }
 
     private function get_leasing_banner_text($active_price): string
     {
-        return sprintf(__($this->getLocaleForBannerTextForLeasing(), "woocommerce"),
+        return sprintf(__("Ärikliendi järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;", "woocommerce"),
             $this->get_installment_number($active_price * 0.0325));
     }
 
@@ -247,16 +184,6 @@ class Modena_Init_Handler
         return '<p id="mdn-slice-product-page-display" style="margin: 0.5rem 0 1.5rem 0;">'
             . $text
             . $icon
-            . '</p>';
-    }
-
-    private function get_installment_price_whitelabel($text): string
-    {
-//        $icon = '<img src="' . WC_HTTPS::force_https_url('') . '" id="mdn-slice-product-page-display-whitelabel-img" alt="Modena" style="max-height: 16px; margin-bottom: -3px; vertical-align: baseline;"/>';
-
-        return '<p id="mdn-slice-product-page-display-whitelabel" style="margin: 0.5rem 0 1.5rem 0;">'
-            . $text
-
             . '</p>';
     }
 
@@ -275,20 +202,13 @@ class Modena_Init_Handler
         $sliceBannerHtml  = $this->get_slice_banner_html($active_price);
         $creditBannerHtml = $this->get_credit_banner_html($active_price);
         $leasingBannerHtml = $this->get_leasing_banner_html($active_price);
-        $sliceWhitelabelBannerHtml  = $this->get_slice_whitelabel_banner_html($active_price);
-        $creditWhitelabelBannerHtml = $this->get_credit_whitelabel_banner_html($active_price);
 
-
-        if ($sliceBannerHtml || $creditBannerHtml || $leasingBannerHtml || $sliceWhitelabelBannerHtml || $creditWhitelabelBannerHtml) {
+        if ($sliceBannerHtml || $creditBannerHtml) {
             $variation_data['price_html'] .= '<br>';
         }
 
         if ($sliceBannerHtml) {
             $variation_data['price_html'] .= $sliceBannerHtml;
-        }
-
-        if ($sliceWhitelabelBannerHtml) {
-            $variation_data['price_html'] .= $sliceWhitelabelBannerHtml;
         }
 
         if ($creditBannerHtml) {
@@ -299,55 +219,6 @@ class Modena_Init_Handler
             $variation_data['price_html'] .= $leasingBannerHtml;
         }
 
-        if ($creditWhitelabelBannerHtml) {
-            $variation_data['price_html'] .= $creditWhitelabelBannerHtml;
-        }
-
         return $variation_data;
-    }
-
-    private function getLocaleForBannerTextForCredit() {
-        switch (get_locale()) {
-            case 'ru_RU':
-                return "Рассрочка от %s€ в месяц, без платы за договор.&ensp;";
-                break;
-            case 'en_GB':
-            case 'en_US':
-                return "Installment plan starting from %s€ / month, 0€ contract fee.&ensp;";
-                break;
-            default:
-                return "Järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;";
-                break;
-        }
-    }
-
-    private function getLocaleForBannerTextForSlice() {
-        switch (get_locale()) {
-            case 'ru_RU':
-                return "3 платежа по %s€ в месяц, без дополнительной комиссии.&ensp;";
-                break;
-            case 'en_GB':
-            case 'en_US':
-                return "3 payments of %s€ per month, without additional fees.&ensp;";
-                break;
-            default:
-                return "3 makset %s€ kuus, ilma lisatasudeta.&ensp;";
-                break;
-        }
-    }
-
-    private function getLocaleForBannerTextForLeasing() {
-        switch (get_locale()) {
-            case 'ru_RU':
-                return "Рассрочка для бизнес клиентов от %s€ в месяц, без платы за договор.&ensp;";
-                break;
-            case 'en_GB':
-            case 'en_US':
-                return "Business customer installment payment starting from %s€ / month, 0€ contract fee.&ensp;";
-                break;
-            default:
-                return "Ärikliendi järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;";
-                break;
-        }
     }
 }

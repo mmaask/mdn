@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Modena Payment Gateway
  * Plugin URI: https://developer.modena.ee/en/developer-integration-woocommerce
- * Description: WooCommerce cards, banks and credit payment solution from Modena.
+ * Description: WooCommerce all inclusive payment solution from Modena.
  * Author: Modena Estonia OÜ
  * Author URI: https://modena.ee/
  * Version: 2.7.0
@@ -31,8 +31,6 @@ function modena_init()
     if (!isset($modena_plugin)) {
         require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-init-handler.php');
         $modena_plugin = new Modena_Init_Handler();
-
-        load_plugin_textdomain( 'mdn-translations', false, basename( dirname( __FILE__ ) ) . '/languages' );
     }
 
     $modena_plugin->run();

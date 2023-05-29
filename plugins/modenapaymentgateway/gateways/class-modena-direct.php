@@ -4,73 +4,25 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
- class Modena_Direct_Payment extends Modena_Base_Payment {
+ class Modena_Direct_Payment extends Modena_Base_Payment
+{
+    public function __construct()
+    {
+        $this->id      = 'modena_direct';
+        $this->title   = __('Panga- ja kaardimaksed', 'modena');
+        $this->enabled = $this->get_option('enabled');
 
-    protected $service_info;
+        $this->method_title       = 'Modena Direct';
+        $this->method_description = __('Pangamaksed / kaardimaksed', 'modena');
 
-    public function __construct() {
-         $this->id      = 'modena_direct';
-         $this->enabled = $this->get_option('disabled');
-         $this->logo_enabled    = $this->get_option('disabled');
-         $this->maturity_in_months = 0;
-         $this->default_alt = '';
-        $this->setNamesBasedOnLocales(get_locale());
+        $this->maturity_in_months = 0;
 
-         parent::__construct();
-     }
+        $this->default_image = 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963';
+        $this->default_alt             = '';
+        $this->default_icon_title_text = 'Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.';
 
-     public function setNamesBasedOnLocales($current_locale) {
-         $this->mdn_translations = array(
-             'en' => array(
-                 'method_title' => __('Modena - Bank & Card Payments', 'mdn-translations'),
-                 'default_alt' => __('Modena Bank & Card Payments', 'mdn-translations'),
-                 'method_description' => __('Bank payments / card payments', 'mdn-translations'),
-                 'title' => __('Bank & Card Payments', 'mdn-translations'),
-                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
-                 'default_icon_title_text' => __('Modena Bank Payments is provided by Modena Estonia OÜ.', 'mdn-translations'),
-                 'Description' => __('Payment services are provided by Modena Payments OÜ in cooperation with EveryPay AS', 'mdn-translations'),
-                 'service_info' => __('Service info'),
-             ),
-             'ru' => array(
-                 'method_title' => __('Modena - Банковские платежи / платежи картами', 'mdn-translations'),
-                 'default_alt' => __('Банковские платежи / платежи картами', 'mdn-translations'),
-                 'method_description' => __('Банковские платежи / платежи картами', 'modena'),
-                 'title' => __('Интернетбанк или карта', 'mdn-translations'),
-                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
-                 'default_icon_title_text' => __('Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.', 'mdn-translations'),
-                 'Description' => 'Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.',
-                 'service_info' => __('Сведения об услуге'),
-             ),
-             'et' => array(
-                 'method_title' => __('Modena - Panga- ja kaardimaksed', 'mdn-translations'),
-                 'default_alt' => __('Modena panga- ja kaardimaksed', 'mdn-translations'),
-                 'method_description' => __('Kiired pangamaksed ja kaardimaksed Eestis', 'modena'),
-                 'title' => __('Panga- ja kaardimaksed', 'mdn-translations'),
-                 'default_image' => 'https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png?47448.59999999963',
-                 'default_icon_title_text' => __('Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.', 'mdn-translations'),
-                 'Description' => 'Makseteenuseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.',
-                 'service_info' => __('Teenuse info'),
-             ),
-         );
-
-         $locale_key = substr($current_locale, 0, 2);
-         if (!array_key_exists($locale_key, $this->mdn_translations)) {
-             $locale_key = 'en'; // default to English if the locale does not exist in the translations array
-         }
-
-         foreach ($this->mdn_translations[$locale_key] as $key => $value) {
-             if($key === 'default_image') {
-                 if($this->get_option('logo_enabled') == 'no') {
-                     //error_log($this->get_option('logo_enabled') . " " . $this->id);
-                     $this->{$key} = '';
-                 } else {
-                     $this->{$key} = $value;
-                 }
-             } else {
-                 $this->{$key} = $value;
-             }
-         }
-     }
+        parent::__construct();
+    }
 
     public function get_description()
     {
@@ -111,22 +63,51 @@ if (!defined('ABSPATH')) {
 
         /*
          * Using the singleton pattern we can ensure that the <link> or <script> tags get added to the site only once.
-         *
          * */
-
         Modena_Load_Checkout_Assets::getInstance();
 
-        return "$description{$this->getServiceInfoHtml()}";
+        return "{$description}{$this->getServiceInfoHtml()}";
     }
 
     private function getServiceInfoHtml()
     {
-        $linkLabel = $this->service_info;
-        return "<a class='mdn_service_info' href='https://modena.ee/makseteenused/' target='_blank'>$linkLabel</a>";
+        $linkLabel = __('Teenuse info', 'modena');
+
+        return "<a class='mdn_service_info' href='https://modena.ee/makseteenused/' target='_blank'>{$linkLabel}</a>";
     }
+
+    public function get_title()
+    {
+        if ($this->button_text) {
+            return $this->button_text;
+        }
+
+        return $this->title;
+    }
+    public function get_icon_alt()
+    {
+        if ($this->icon_alt_text) {
+            return $this->icon_alt_text;
+        }
+
+        return $this->default_alt;
+    }
+
+    public function get_icon_title()
+    {
+        if ($this->icon_title_text) {
+            return $this->icon_title_text;
+        }
+
+        return $this->default_icon_title_text;
+    }
+
      protected function postPaymentOrderInternal($request) {
          return $this->modena->postDirectPaymentOrder($request);
      }
 
-
+     protected function getPaymentApplicationStatus($applicationId)
+     {
+         return $this->modena->getDirectPaymentApplicationStatus($applicationId);
+     }
  }
