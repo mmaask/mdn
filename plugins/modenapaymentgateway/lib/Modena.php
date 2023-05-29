@@ -28,6 +28,10 @@ class Modena {
     const SCOPE_BUSINESS_LEASING                  = 'businessleasing';
     const BUSINESS_LEASING_PAYMENT_ORDER_URL      = 'modena/api/merchant/business-leasing-payment-order';
 
+    # TRY NOW PAY LATER PAYMENT
+    const SCOPE_CLICK                 = 'clickpayment';
+    const CLICK_PAYMENT_ORDER_URL      = 'modena/api/merchant/click-payment-order';
+
     const MODENA_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
 
     # DIRECT PAYMENT
@@ -227,6 +231,14 @@ class Modena {
      * @return ModenaOrderResponse
      * @throws Exception
      */
+    public function postClickPaymentOrder($request) {
+        return $response = $this->sendPaymentOrderRequest(self::CLICK_PAYMENT_ORDER_URL, $request, self::SCOPE_CLICK);
+    }
+    /**
+     * @param  ModenaRequest  $request
+     * @return ModenaOrderResponse
+     * @throws Exception
+     */
     public function postCreditPaymentOrder($request) {
         return $response = $this->sendPaymentOrderRequest(self::CREDIT_PAYMENT_ORDER_URL, $request, self::SCOPE_CREDIT);
     }
@@ -277,6 +289,16 @@ class Modena {
     public function getBusinessLeasingPaymentApplicationStatus($applicationId) {
         return $this->sendApplicationStatusRequest(self::MODENA_APPLICATION_STATUS_URL, $applicationId,
             self::SCOPE_BUSINESS_LEASING);
+    }
+
+    /**
+     * @param  string  $applicationId
+     * @return string
+     * @throws Exception
+     */
+    public function getClickPaymentApplicationStatus($applicationId) {
+        return $this->sendApplicationStatusRequest(self::MODENA_APPLICATION_STATUS_URL, $applicationId,
+            self::SCOPE_CLICK);
     }
 
     /**

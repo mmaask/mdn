@@ -1,6 +1,7 @@
 fieldset label[for="woocommerce_modena_slice_enabled"],
 fieldset label[for="woocommerce_modena_direct_enabled"],
 fieldset label[for="woocommerce_modena_business_leasing_enabled"],
+fieldset label[for="woocommerce_modena_click_enabled"],
 fieldset label[for="woocommerce_modena_credit_enabled"],
 fieldset label[for="woocommerce_modena_slice_product_page_banner_enabled"],
 fieldset label[for="woocommerce_modena_direct_product_page_banner_enabled"],
@@ -15,9 +16,11 @@ fieldset label[for="woocommerce_modena_credit_product_page_banner_enabled"] {
 fieldset label[for="woocommerce_modena_slice_enabled"] input,
 fieldset label[for="woocommerce_modena_direct_enabled"] input,
 fieldset label[for="woocommerce_modena_business_leasing_enabled"] input,
+fieldset label[for="woocommerce_modena_click_enabled"] input,
 fieldset label[for="woocommerce_modena_credit_enabled"] input,
 fieldset label[for="woocommerce_modena_slice_product_page_banner_enabled"] input,
 fieldset label[for="woocommerce_modena_business_leasing_product_page_banner_enabled"] input,
+fieldset label[for="woocommerce_modena_click_product_page_banner_enabled"] input,
 fieldset label[for="woocommerce_modena_direct_product_page_banner_enabled"] input,
 fieldset label[for="woocommerce_modena_credit_product_page_banner_enabled"] input {
     opacity: 0;

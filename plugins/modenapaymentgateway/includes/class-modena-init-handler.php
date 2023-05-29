@@ -14,6 +14,7 @@ class Modena_Init_Handler
         'Modena_Slice_Payment'  => 'slice',
         'Modena_Credit_Payment' => 'credit',
         'Modena_Business_Leasing' => 'business-leasing',
+        'Modena_Click_Payment' => 'click',
     ];
 
     public function run()
@@ -94,6 +95,12 @@ class Modena_Init_Handler
 
         return $setting === 'yes';
     }
+    private function is_click_enabled()
+    {
+        $setting = get_option('woocommerce_modena_click_settings')['enabled'] ?? false;
+
+        return $setting === 'yes';
+    }
     public function display_product_installments()
     {
         global $product;
@@ -110,6 +117,7 @@ class Modena_Init_Handler
         echo $this->get_slice_banner_html($active_price);
         echo $this->get_credit_banner_html($active_price);
         echo $this->get_leasing_banner_html($active_price);
+        echo $this->get_click_banner_html($active_price);
     }
 
     private function get_slice_banner_html($active_price)
@@ -138,6 +146,14 @@ class Modena_Init_Handler
 
         return $this->get_installment_price_html($this->get_leasing_banner_text($active_price));
     }
+    private function get_click_banner_html($active_price): string
+    {
+        if (!$this->is_click_enabled() || !$this->is_click_product_banner_enabled()) {
+            return '';
+        }
+
+        return $this->get_installment_price_html($this->get_click_banner_text($active_price));
+    }
     private function is_slice_product_banner_enabled(): bool
     {
         $setting = get_option('woocommerce_modena_slice_settings')['product_page_banner_enabled'] ?? false;
@@ -155,6 +171,12 @@ class Modena_Init_Handler
     private function is_leasing_product_banner_enabled(): bool
     {
         $setting = get_option('woocommerce_modena_business_leasing_settings')['product_page_banner_enabled'] ?? false;
+
+        return $setting === 'yes';
+    }
+    private function is_click_product_banner_enabled(): bool
+    {
+        $setting = get_option('woocommerce_modena_click_settings')['product_page_banner_enabled'] ?? false;
 
         return $setting === 'yes';
     }
@@ -176,7 +198,11 @@ class Modena_Init_Handler
         return sprintf(__("Ärikliendi järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;", "woocommerce"),
             $this->get_installment_number($active_price * 0.0325));
     }
-
+    private function get_click_banner_text($active_price): string
+    {
+        return sprintf(__("Telli tooted koju proovimiseks. Lisatasudeta. ", "woocommerce"),
+            $this->get_installment_number($active_price * 0.0325));
+    }
     private function get_installment_price_html($text): string
     {
         $icon = '<img src="' . WC_HTTPS::force_https_url('https://cdn.modena.ee/modena/assets/modena_logo_black_3f62f63466.png?1863664.3000000007') . '" alt="Modena" style="max-height: 16px; margin-bottom: -3px; vertical-align: baseline;"/>';
@@ -202,6 +228,7 @@ class Modena_Init_Handler
         $sliceBannerHtml  = $this->get_slice_banner_html($active_price);
         $creditBannerHtml = $this->get_credit_banner_html($active_price);
         $leasingBannerHtml = $this->get_leasing_banner_html($active_price);
+        $clickBannerHtml = $this->get_click_banner_html($active_price);
 
         if ($sliceBannerHtml || $creditBannerHtml) {
             $variation_data['price_html'] .= '<br>';
@@ -216,6 +243,10 @@ class Modena_Init_Handler
         }
 
         if ($leasingBannerHtml) {
+            $variation_data['price_html'] .= $leasingBannerHtml;
+        }
+
+        if ($clickBannerHtml) {
             $variation_data['price_html'] .= $leasingBannerHtml;
         }
 
