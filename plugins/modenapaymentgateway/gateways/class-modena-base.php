@@ -328,58 +328,34 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     public function modena_response()
     {
         global $woocommerce;
-
         $modenaResponse = $this->modena->getOrderResponseFromRequest($_POST);
-
-        if (!$this->validate_modena_response($modenaResponse)) {
-            $this->logger->error('Modena response is invalid: ' . json_encode($modenaResponse));
-            wp_redirect($this->site_url);
-            wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
-            exit;
-        }
 
         try {
             $applicationStatus = $this->getPaymentApplicationStatus($modenaResponse->getApplicationId());
+            $order = wc_get_order($modenaResponse->getOrderId());
 
-            if ($applicationStatus !== 'SUCCESS') {
-                $this->logger->error('Invalid application status, expected: SUCCESS | received: ' . $applicationStatus);
+            if ($applicationStatus !== 'SUCCESS' || !$order || !$this->validate_modena_response($modenaResponse)) {
+                $this->logger->error('Order number ' . wc_get_order($modenaResponse->getOrderId()) . '. Invalid application status, expected: SUCCESS | received: ' . $applicationStatus) . '. Modena response is invalid: ' . json_encode($modenaResponse);
                 wp_redirect($this->site_url);
-                wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
+                wc_add_notice(__('Tekkis tõrge tellimuse kinnitamisel. Palume tellimuse kinnitamise kohta küsida lisainfot e-poe klienditoelt.', 'modena'));
                 exit;
             }
 
-            $order = wc_get_order($modenaResponse->getOrderId());
-
-            if ($order && $order->get_payment_method() === $this->id) {
+            if ($order->get_payment_method() === $this->id) {
                 if ($order->needs_payment()) {
                     $order->payment_complete();
-                    $order->add_order_note(sprintf(__('Tellimuse eest tasutud: %s', 'modena'), $this->title));
+                    $order->add_order_note(sprintf(__('Tellimuse eest tasutud: %s.', 'modena'), $this->title));
                     $woocommerce->cart->empty_cart();
                 }
 
                 wp_safe_redirect($this->get_return_url($order));
                 exit;
-            } else {
-                if (!$order) {
-                    $this->logger->error(sprintf('Order not found for id: %s', $modenaResponse->getOrderId()));
-                } else {
-                    $this->logger->error(
-                        sprintf(
-                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
-                            $order->get_payment_method(),
-                            $order->needs_payment()
-                        )
-                    );
-                }
-                wp_safe_redirect(wc_get_cart_url());
-                wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
-                exit;
             }
         } catch (Exception $e) {
-            $this->logger->error('Exception occurred in payment response: ' . $e->getMessage());
+            $this->logger->error('Order number ' . wc_get_order($modenaResponse->getOrderId()) . '. Exception occurred in payment response: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
             wp_redirect($this->site_url);
-            wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
+            wc_add_notice(__('Tekkis tõrge tellimuse kinnitamisel. Palume tellimuse kinnitamise kohta küsida lisainfot e-poe klienditoelt.', 'modena'));
             exit;
         }
     }
@@ -403,9 +379,9 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         $modenaResponse = $this->modena->getOrderResponseFromRequest($_POST);
 
         if (!$this->validate_modena_response($modenaResponse)) {
-            $this->logger->error('Modena cancel response is invalid: ' . json_encode($modenaResponse));
+            $this->logger->error('Order number ' . wc_get_order($modenaResponse->getOrderId()) . '. Modena cancel response is invalid: ' . json_encode($modenaResponse));
             wp_redirect($this->site_url);
-            wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
+            wc_add_notice(__('Tekkis tehniline tõrge tellimuse kinnitamisel. Palume ühendust võtta e-poe klienditoega.', 'modena'));
             exit;
         }
 
@@ -413,9 +389,9 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $applicationStatus = $this->getPaymentApplicationStatus($modenaResponse->getApplicationId());
 
             if ($applicationStatus !== 'FAILED' && $applicationStatus !== 'REJECTED') {
-                $this->logger->error('Invalid application status, expected: FAILED or REJECTED | received: ' . $applicationStatus);
+                $this->logger->error('Order number ' . wc_get_order($modenaResponse->getOrderId()) . '. Invalid application status, expected: FAILED or REJECTED | received: ' . $applicationStatus);
                 wp_redirect($this->site_url);
-                wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
+                wc_add_notice(__('Tekkis tehniline tõrge tellimuse kinnitamisel. Palume ühendust võtta e-poe klienditoega.', 'modena'));
                 exit;
             }
 
@@ -434,7 +410,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 exit;
             } else {
                 $this->logger->error(sprintf(
-                    'Payment canceled, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
+                    'Order number ' . wc_get_order($modenaResponse->getOrderId()) . '. Payment canceled, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
                     $order->get_payment_method(),
                     $order->needs_payment()
                 ));
@@ -443,10 +419,10 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                 exit;
             }
         } catch (Exception $e) {
-            $this->logger->error('Exception occurred in payment cancel function: ' . $e->getMessage());
+            $this->logger->error('Order number ' . wc_get_order($modenaResponse->getOrderId()) . '. Exception occurred in payment cancel function: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
             wp_redirect($this->site_url);
-            wc_add_notice(__('Something went wrong, please try again later.', 'modena'));
+            wc_add_notice(__('Tekkis tehniline tõrge tellimuse kinnitamisel. Palume ühendust võtta e-poe klienditoega.', 'modena'));
             exit;
         }
     }
@@ -457,42 +433,26 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
         $modenaResponse = $this->modena->getOrderResponseFromRequest($_POST);
 
-        if (!$this->validate_modena_response($modenaResponse)) {
-            $this->logger->error('Modena response is invalid: ' . json_encode($modenaResponse));
-            exit;
-        }
-
         try {
             $applicationStatus = $this->getPaymentApplicationStatus($modenaResponse->getApplicationId());
+            $order = wc_get_order($modenaResponse->getOrderId());
 
-            if ($applicationStatus !== 'SUCCESS') {
-                $this->logger->error('Invalid application status, expected: SUCCESS | received: ' . $applicationStatus);
+            if ($applicationStatus !== 'SUCCESS' || !$order || !$this->validate_modena_response($modenaResponse)) {
+                $this->logger->error('Order number ' . wc_get_order($modenaResponse->getOrderId()) . '. Invalid application status, expected: SUCCESS | received: ' . $applicationStatus) . '. Modena response is invalid: ' . json_encode($modenaResponse);
                 exit;
             }
 
-            $order = wc_get_order($modenaResponse->getOrderId());
-
-            if ($order && $order->get_payment_method() === $this->id && $order->needs_payment()) {
-                $order->payment_complete();
-                $order->add_order_note(sprintf(__('Tellimuse eest tasutud: %s', 'modena'), $this->title));
-                $woocommerce->cart->empty_cart();
-                exit;
-            } else {
-                if (!$order) {
-                    $this->logger->error('Order not found for id: ' . $modenaResponse->getOrderId());
-                } else {
-                    $this->logger->error(
-                        sprintf(
-                            'Payment successful, but the order not found or payment method mismatch or order already paid. [method: %s, needs_payment: %s]',
-                            $order->get_payment_method(),
-                            $order->needs_payment()
-                        )
-                    );
+            if ($order->get_payment_method() === $this->id) {
+                if ($order->needs_payment()) {
+                    $order->payment_complete();
+                    $order->add_order_note(sprintf(__('Tellimuse eest tasutud: %s.', 'modena'), $this->title));
+                    $woocommerce->cart->empty_cart();
                 }
+
                 exit;
             }
         } catch (Exception $e) {
-            $this->logger->error('Exception occurred in payment response: ' . $e->getMessage());
+            $this->logger->error('Order number ' . wc_get_order($modenaResponse->getOrderId()) . '. Exception occurred in payment response: ' . $e->getMessage());
             $this->logger->error($e->getTraceAsString());
             exit;
         }

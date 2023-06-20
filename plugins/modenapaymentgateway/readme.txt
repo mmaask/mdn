@@ -14,7 +14,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-Modena is a full checkout solution for all of your e-commerce needs. We cover all popular payment methods. Modena can help you get started with everything you need to start your online store checkout in Estonia.
+Modena is a full checkout solution for all of your e-commerce needs. We cover all popular payment methods. Modena can help you get started with everything you need to start your online store checkout in Estonia. Let us know your needs by phone +372 6604144 or mail us at info@modena.ee.
 
 === BANK LINKS AND CARD PAYMENTS===
 We help you cover all major banks in Estonia to collect your payments. All transactions are immediate. In addition we can provide your e-commerce site with card payments.
