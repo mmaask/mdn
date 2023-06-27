@@ -47,8 +47,6 @@
     display: inline-block;
     vertical-align: middle;
     max-width: calc(100% - 33px);
-    font-size: 0;
-    color: transparent;
 }
 
 .payment_method_modena_direct label img,
@@ -57,4 +55,21 @@
 .payment_method_modena_click label img,
 .payment_method_modena_credit label img {
     margin-left: 0 !important;
+}
+
+/*
+    removing one of the labels on the list below
+    will unhide the payment gateway text.
+    comment out the desired selector with comment tag
+    like this paragraph. Then remove the default_image url
+    from the class in /gateway/class-modena-your_method.php and update default_alt
+    according to desired results.
+ */
+
+.payment_method_modena_slice label,
+.payment_method_modena_business_leasing label,
+.payment_method_modena_click label,
+.payment_method_modena_credit label {
+    font-size: 0;
+    color: transparent;
 }

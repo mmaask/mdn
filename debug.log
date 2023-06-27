@@ -1,27 +1,14 @@
-[27-Jun-2023 09:35:39 UTC] ru_RU
-[27-Jun-2023 09:35:40 UTC] ru_RU
-[27-Jun-2023 09:36:34 UTC] ru_RU
-[27-Jun-2023 09:36:35 UTC] ru_RU
-[27-Jun-2023 09:36:46 UTC] ru_RU
-[27-Jun-2023 09:36:47 UTC] ru_RU
-[27-Jun-2023 09:37:01 UTC] ru_RU
-[27-Jun-2023 09:37:05 UTC] ru_RU
-[27-Jun-2023 09:37:06 UTC] ru_RU
-[27-Jun-2023 09:38:53 UTC] ru_RU
-[27-Jun-2023 09:38:54 UTC] ru_RU
-[27-Jun-2023 09:38:54 UTC] ru_RU
-[27-Jun-2023 09:38:54 UTC] ru_RU
-[27-Jun-2023 09:38:54 UTC] ru_RU
-[27-Jun-2023 09:38:54 UTC] ru_RU
-[27-Jun-2023 09:38:54 UTC] ru_RU
-[27-Jun-2023 09:38:54 UTC] ru_RU
-[27-Jun-2023 09:39:19 UTC] ru_RU
-[27-Jun-2023 09:39:20 UTC] ru_RU
-[27-Jun-2023 09:40:09 UTC] ru_RU
-[27-Jun-2023 09:40:09 UTC] ru_RU
-[27-Jun-2023 11:14:50 UTC] ru_RU
-[27-Jun-2023 11:14:51 UTC] ru_RU
-[27-Jun-2023 11:15:09 UTC] ru_RU
-[27-Jun-2023 11:15:09 UTC] ru_RU
-[27-Jun-2023 11:32:22 UTC] ru_RU
-[27-Jun-2023 11:32:23 UTC] ru_RU
+[27-Jun-2023 12:53:04 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ';' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-init-handler.php on line 218
+[27-Jun-2023 12:55:05 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ';' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-init-handler.php on line 218
+[27-Jun-2023 12:56:11 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ';' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-init-handler.php on line 218
+[27-Jun-2023 12:57:12 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ';' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-init-handler.php on line 218
+[27-Jun-2023 12:58:13 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ';' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-init-handler.php on line 218
+[27-Jun-2023 12:58:39 UTC] PHP Parse error:  syntax error, unexpected '}', expecting ';' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-init-handler.php on line 218
+[27-Jun-2023 12:58:39 UTC] [27-Jun-2023 12:58:39 UTC] PHP 1024: Функция is_embed вызвана <strong>неправильно</strong>. Условные теги не работают, пока не разобран запрос. До этого момента они всегда возвращают false. Дополнительную информацию можно найти на странице <a href="https://ru.wordpress.org/support/article/debugging-in-wordpress/">&laquo;Отладка в WordPress&raquo;</a>. (Это сообщение было добавлено в версии 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
+[27-Jun-2023 12:58:39 UTC] [27-Jun-2023 12:58:39 UTC] PHP 1024: Функция is_search вызвана <strong>неправильно</strong>. Условные теги не работают, пока не разобран запрос. До этого момента они всегда возвращают false. Дополнительную информацию можно найти на странице <a href="https://ru.wordpress.org/support/article/debugging-in-wordpress/">&laquo;Отладка в WordPress&raquo;</a>. (Это сообщение было добавлено в версии 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
+[27-Jun-2023 13:07:04 UTC] PHP Parse error:  syntax error, unexpected 'modena' (T_STRING), expecting ')' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-init-handler.php on line 237
+[27-Jun-2023 13:07:04 UTC] [27-Jun-2023 13:07:04 UTC] PHP 1024: Функция is_embed вызвана <strong>неправильно</strong>. Условные теги не работают, пока не разобран запрос. До этого момента они всегда возвращают false. Дополнительную информацию можно найти на странице <a href="https://ru.wordpress.org/support/article/debugging-in-wordpress/">&laquo;Отладка в WordPress&raquo;</a>. (Это сообщение было добавлено в версии 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
+[27-Jun-2023 13:07:04 UTC] [27-Jun-2023 13:07:04 UTC] PHP 1024: Функция is_search вызвана <strong>неправильно</strong>. Условные теги не работают, пока не разобран запрос. До этого момента они всегда возвращают false. Дополнительную информацию можно найти на странице <a href="https://ru.wordpress.org/support/article/debugging-in-wordpress/">&laquo;Отладка в WordPress&raquo;</a>. (Это сообщение было добавлено в версии 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
+[27-Jun-2023 13:07:04 UTC] PHP Parse error:  syntax error, unexpected 'modena' (T_STRING), expecting ')' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-init-handler.php on line 237
+[27-Jun-2023 13:07:04 UTC] [27-Jun-2023 13:07:04 UTC] PHP 1024: Функция is_embed вызвана <strong>неправильно</strong>. Условные теги не работают, пока не разобран запрос. До этого момента они всегда возвращают false. Дополнительную информацию можно найти на странице <a href="https://ru.wordpress.org/support/article/debugging-in-wordpress/">&laquo;Отладка в WordPress&raquo;</a>. (Это сообщение было добавлено в версии 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
+[27-Jun-2023 13:07:04 UTC] [27-Jun-2023 13:07:04 UTC] PHP 1024: Функция is_search вызвана <strong>неправильно</strong>. Условные теги не работают, пока не разобран запрос. До этого момента они всегда возвращают false. Дополнительную информацию можно найти на странице <a href="https://ru.wordpress.org/support/article/debugging-in-wordpress/">&laquo;Отладка в WordPress&raquo;</a>. (Это сообщение было добавлено в версии 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865

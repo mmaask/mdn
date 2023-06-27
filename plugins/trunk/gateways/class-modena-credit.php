@@ -48,6 +48,7 @@ class Modena_Credit_Payment extends Modena_Base_Payment
         $this->description                                  = $translations[get_locale()]['description'] ?? $translations['en_US']['description'];
         $this->default_icon_title_text                      = $translations[get_locale()]['default_icon_title_text'] ?? $translations['en_US']['default_icon_title_text'];
         $this->method_description                           = $this->description;
+        $this->title                                        = $this->default_alt;
     }
 
     public function init_form_fields()
