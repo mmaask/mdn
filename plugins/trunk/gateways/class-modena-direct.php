@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 
  class Modena_Direct_Payment extends Modena_Base_Payment
 {
-     protected $service_info;
+    protected $service_info;
 
     public function __construct()
     {

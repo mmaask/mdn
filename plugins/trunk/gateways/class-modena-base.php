@@ -67,10 +67,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $userAgent,
             $this->is_test_mode
         );
-
-        $this->description               = $this->get_option('description');
         $this->payment_button_max_height = 30;
-        $this->icon                      = $this->get_option('payment_button_image_url', $this->default_image);
+        $this->icon                      = $this->default_image;
 
         $this->init_form_fields();
 

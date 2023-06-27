@@ -15,7 +15,6 @@ class Modena_Slice_Payment extends Modena_Base_Payment
         $this->title                                        = __('Modena - Maksa 3 osas', 'modena');
         $this->method_title                                 = __('Modena Pay in 3', 'modena');
 
-        error_log(get_locale());
         $this->initialize_variables_with_translations();
 
         parent::__construct();
