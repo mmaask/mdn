@@ -89,6 +89,10 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         add_action('woocommerce_api_modena_cancel_' . $this->id, [$this, 'modena_cancel']);
 
         add_action('admin_enqueue_scripts', array($this, 'admin_scripts'));
+
+        add_filter('woocommerce_available_payment_gateways', array($this, 'show_hide_mdn_payment_based_billing'));
+
+        Modena_Load_Checkout_Assets::getInstance();
     }
 
     public function init_form_fields()
@@ -142,6 +146,14 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             ],
             'enabled'                   => [
                 'title'       => sprintf(__('%s Payment Gateway', 'modena'), $this->get_method_title()),
+                'label'       => '<span class="modena-slider"></span>',
+                'type'        => 'checkbox',
+                'description' => '',
+                'default'     => 'no',
+                'class'       => 'modena-switch',
+            ],
+            'is_only_estonia'                   => [
+                'title'       => __('Show only with Estonian billing country.', 'modena'),
                 'label'       => '<span class="modena-slider"></span>',
                 'type'        => 'checkbox',
                 'description' => '',
@@ -537,4 +549,28 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             'en_US' => 'It seems that there has been a problem confirming your order. Please contact the customer support for verification of your order.',
         );
     }
+
+
+     public function show_hide_mdn_payment_based_billing($available_gateways) {
+
+                if (!is_admin()) {
+                    // Get the current user's country from their billing address
+
+                    if(!is_checkout()) {
+                        return $available_gateways;
+                    }
+
+                    if(empty(WC()->customer->get_billing_country())) {
+                        return $available_gateways;
+                    }
+                    $billing_country = WC()->customer->get_billing_country();
+                    // If the billing country is not Estonia, unset your gateway
+                    if($billing_country != 'EE' && isset($available_gateways[$this->id]) && $this->get_option('is_only_estonia') === 'yes')  {
+                        //error_log("Found: " . $this->id . " currently option is: " . $this->get_option('is_only_estonia'));
+                        unset($available_gateways[$this->id]);
+                    }
+                }
+
+                return $available_gateways;
+            }
 }
