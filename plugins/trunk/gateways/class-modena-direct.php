@@ -19,6 +19,8 @@ if (!defined('ABSPATH')) {
 
         $this->initialize_variables_with_translations();
 
+        add_filter('woocommerce_get_order_item_totals', array($this, 'customize_payment_method_order_totals'), 10, 3);
+
         parent::__construct();
     }
 
@@ -117,4 +119,19 @@ if (!defined('ABSPATH')) {
      {
          return $this->modena->getDirectPaymentApplicationStatus($applicationId);
      }
+
+     function customize_payment_method_order_totals($total_rows, $order, $tax_display) {
+         foreach ($total_rows as $key => $total) {
+             if ($key == 'payment_method') {
+                 $payment_method_id = $order->get_payment_method();
+                 if ($payment_method_id === 'modena_direct') {
+                     $total_rows[$key]['label'] = $total['label'];
+                     $total_rows[$key]['value'] = $total['value'] . ' via ' . $order->get_meta(self::MODENA_SELECTED_METHOD_KEY);
+                 }
+             }
+         }
+
+         return $total_rows;
+     }
+
  }

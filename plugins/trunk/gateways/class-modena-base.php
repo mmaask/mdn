@@ -15,6 +15,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     const PLUGIN_VERSION             = '2.8.1';
     const MODENA_META_KEY            = 'modena-application-id';
     const MODENA_SELECTED_METHOD_KEY = 'modena-payment-method';
+    const MODENA_SELECTED_BANK_METHOD_KEY = 'modena-bank-payment-method';
+
     protected $client_id;
     protected $client_secret;
     protected $is_test_mode;
@@ -89,6 +91,11 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         add_action('woocommerce_api_modena_cancel_' . $this->id, [$this, 'modena_cancel']);
 
         add_filter('woocommerce_available_payment_gateways', array($this, 'show_hide_mdn_payment_based_billing'));
+
+
+
+
+
 
         Modena_Load_Checkout_Assets::getInstance();
     }
@@ -354,7 +361,14 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             if ($order->get_payment_method() === $this->id) {
                 if ($order->needs_payment()) {
                     $order->payment_complete();
-                    $order->add_order_note(sprintf(__('Order paid by %s.', 'modena'), $this->title));
+
+                    if ($order->get_payment_method() === 'modena_direct') {
+                        $order->add_order_note(sprintf(__('Order paid by %s via %s.', 'modena'), $this->title, $order->get_meta(self::MODENA_SELECTED_METHOD_KEY)));
+
+                    } else {
+                        $order->add_order_note(sprintf(__('Order paid by %s.', 'modena'), $this->title));
+                    }
+
                     $woocommerce->cart->empty_cart();
                 }
 
@@ -563,4 +577,5 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
         return $available_gateways;
     }
+
 }
