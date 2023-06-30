@@ -88,8 +88,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
 
         add_action('woocommerce_api_modena_cancel_' . $this->id, [$this, 'modena_cancel']);
 
-        add_action('admin_enqueue_scripts', array($this, 'admin_scripts'));
-
         add_filter('woocommerce_available_payment_gateways', array($this, 'show_hide_mdn_payment_based_billing'));
 
         Modena_Load_Checkout_Assets::getInstance();
@@ -146,27 +144,26 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             ],
             'enabled'                   => [
                 'title'       => sprintf(__('%s Payment Gateway', 'modena'), $this->get_method_title()),
-                'label'       => '<span class="modena-slider"></span>',
                 'type'        => 'checkbox',
-                'description' => '',
+                'description' => 'Enable or disable the payment method in checkout. Customers will not be able to see the payment method if disabled.',
                 'default'     => 'no',
-                'class'       => 'modena-switch',
             ],
-            'is_only_estonia'                   => [
-                'title'       => __('Show only with Estonian billing country.', 'modena'),
-                'label'       => '<span class="modena-slider"></span>',
-                'type'        => 'checkbox',
-                'description' => '',
-                'default'     => 'no',
-                'class'       => 'modena-switch',
+            'billing_country_restrictions' => [
+                'title'       => __('Billing country restrictions', 'modena'),
+                'type'        => 'select',
+                'description' => __('This will show/hide the payment method in checkout based on the billing country.', 'modena'),
+                'default'     => 'none',
+                'options'     => [
+                    'none' => __('No restrictions', 'modena'),
+                    'is_only_estonia' => __('Show only with Estonian billing country', 'modena'),
+                    'is_scandinavia' => __('Show only with Scandinavian & Baltic billing country', 'modena'),
+                ],
             ],
             'payment_button_max_height' => [
                 'title'       => __('Payment Button Logo Max Height', 'modena'),
                 'type'        => 'number',
-                'description' => __('Maximum height of the payment logo in pixels. Default is: 30',
-                    'modena'),
+                'description' => __('Maximum height of the payment logo in pixels. Default is: 30', 'modena'),
                 'default'     => 30,
-                'css'         => 'width:29em',
                 'desc_tip'    => false,
             ],
         ];
@@ -215,12 +212,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             });
         ");
         parent::admin_options();
-    }
-
-    public function admin_scripts()
-    {
-        wp_register_style('modena-admin-style', MODENA_PLUGIN_URL . 'assets/css/modena-admin-style.css');
-        wp_enqueue_style('modena-admin-style');
     }
 
     abstract protected function postPaymentOrderInternal($request);
@@ -288,7 +279,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
         } catch (Exception $exception) {
             $this->logger->error('Exception occurred when redirecting to modena: ' . $exception->getMessage());
             $this->logger->error($exception->getTraceAsString());
-            wp_safe_redirect(get_home_url());
+            wp_safe_redirect($this->site_url);
         }
 
         exit;
@@ -423,7 +414,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
                     WC()->cart->add_to_cart($data['product_id'], $data['quantity'], $data['variation_id']);
                 }
 
-                wp_safe_redirect(wc_get_cart_url());
+                wp_safe_redirect($this->site_url);
                 wc_add_notice(__('Payment canceled.', 'modena'));
                 exit;
             } else {
@@ -520,11 +511,6 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
             $description .= '<style>label[for=payment_method_' . $this->id . '] { font-size: 0 !important; }</style>';
         }
 
-        /*
-         * Using the singleton pattern we can ensure that the <link> or <script> tags get added to the site only once.
-         * */
-        Modena_Load_Checkout_Assets::getInstance();
-
         return apply_filters('woocommerce_gateway_description', $description, $this->id);
     }
 
@@ -551,26 +537,30 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway
     }
 
 
-     public function show_hide_mdn_payment_based_billing($available_gateways) {
-
-                if (!is_admin()) {
-                    // Get the current user's country from their billing address
-
-                    if(!is_checkout()) {
-                        return $available_gateways;
-                    }
-
-                    if(empty(WC()->customer->get_billing_country())) {
-                        return $available_gateways;
-                    }
-                    $billing_country = WC()->customer->get_billing_country();
-                    // If the billing country is not Estonia, unset your gateway
-                    if($billing_country != 'EE' && isset($available_gateways[$this->id]) && $this->get_option('is_only_estonia') === 'yes')  {
-                        //error_log("Found: " . $this->id . " currently option is: " . $this->get_option('is_only_estonia'));
-                        unset($available_gateways[$this->id]);
-                    }
-                }
-
+    public function show_hide_mdn_payment_based_billing($available_gateways) {
+        if (!is_admin()) {
+            if(!is_checkout()) {
                 return $available_gateways;
             }
+
+            if(empty(WC()->customer->get_billing_country())) {
+                return $available_gateways;
+            }
+            $billing_country = WC()->customer->get_billing_country();
+            $billing_option = $this->get_option('billing_country_restrictions');
+
+            if($billing_option === 'is_scandinavia'  && isset($available_gateways[$this->id])) {
+                if($billing_country != 'EE' && $billing_country != 'FI' && $billing_country != 'LT' && $billing_country != 'LV' && $billing_country != 'NO' && $billing_country != 'SE') {
+                    unset($available_gateways[$this->id]);
+                }
+            }
+            if($billing_option === 'is_only_estonia' && isset($available_gateways[$this->id]))  {
+                if($billing_country != 'EE') {
+                    unset($available_gateways[$this->id]);
+                }
+            }
+        }
+
+        return $available_gateways;
+    }
 }

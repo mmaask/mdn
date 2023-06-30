@@ -17,17 +17,7 @@ class Modena_Admin_Handler
             return $columns;
         }
 
-        switch (get_locale()) {
-            case 'ru':
-                $columns[self::KEY_COLUMN_PAYMENT_METHOD] = __('Способ оплаты', 'modena');
-                break;
-            case 'et':
-                $columns[self::KEY_COLUMN_PAYMENT_METHOD] = __('Maksemeetod', 'modena');
-                break;
-            default:
-                $columns[self::KEY_COLUMN_PAYMENT_METHOD] = __('Payment Method', 'modena');
-                break;
-        }
+        $columns[self::KEY_COLUMN_PAYMENT_METHOD] = __('Payment Method', 'modena');
 
         return $columns;
     }

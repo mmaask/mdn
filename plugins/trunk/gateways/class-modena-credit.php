@@ -48,7 +48,6 @@ class Modena_Credit_Payment extends Modena_Base_Payment
         $this->description                                  = $translations[get_locale()]['description'] ?? $translations['en_US']['description'];
         $this->default_icon_title_text                      = $translations[get_locale()]['default_icon_title_text'] ?? $translations['en_US']['default_icon_title_text'];
         $this->method_description                           = $this->description;
-        $this->title                                        = $this->default_alt;
     }
 
     public function init_form_fields()
@@ -57,11 +56,9 @@ class Modena_Credit_Payment extends Modena_Base_Payment
 
         $this->form_fields['product_page_banner_enabled'] = [
             'title'       => __('Enable/Disable Product Page Banner', 'modena'),
-            'label'       => '<span class="modena-slider"></span>',
             'type'        => 'checkbox',
             'description' => '',
             'default'     => 'yes',
-            'class'       => 'modena-switch',
         ];
     }
 

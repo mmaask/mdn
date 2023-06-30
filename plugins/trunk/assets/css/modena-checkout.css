@@ -73,3 +73,17 @@
     font-size: 0;
     color: transparent;
 }
+
+/*
+    uncomment code to hide Mtasku,
+    Visa and Mastercard card payments
+    in checkout
+*/
+
+/*
+
+#mdn_bl_option_MTASKU, #mdn_bl_option_MASTERCARD, #mdn_bl_option_VISA {
+    display: none;
+}
+
+*/

@@ -22,34 +22,48 @@ if (!defined('MODENA_PLUGIN_PATH')) {
     define('MODENA_PLUGIN_PATH', plugin_dir_path(__FILE__));
 }
 
-add_action('plugins_loaded', 'modena_init');
+$php = '7.4';
 
-if (!function_exists('modena_init')) {
-    function modena_init()
-    {
-        static $modena_plugin;
+if (version_compare(PHP_VERSION, $php, '<')) {
+    deactivate_plugins(plugin_basename(__FILE__));
+    exit(sprintf('This plugin requires PHP %s or higher.', $php));
+}
 
-        if (!isset($modena_plugin)) {
+$wp = '5.5';
+
+if (version_compare(get_bloginfo('version'), $wp, '<')) {
+    deactivate_plugins(plugin_basename(__FILE__));
+    exit(sprintf('This plugin requires WordPress %s or higher.', $wp));
+}
+
+$wc = '6.6';
+
+
+if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
+    deactivate_plugins(plugin_basename(__FILE__));
+    exit('This plugin requires Woocommerce.');
+}
+
+register_activation_hook( __FILE__, 'modena_check_before_activation' );
+
+function modena_check_before_activation() {
+    if (class_exists('Modena_Init_Handler') && function_exists('modena_init')) {
+        deactivate_plugins( plugin_basename( __FILE__ ) );
+    }
+}
+
+function modena_init()
+{
+    static $modena_plugin;
+
+    if (!isset($modena_plugin)) {
+        if (!class_exists('Modena_Init_Handler')) {
             require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-init-handler.php');
             $modena_plugin = new Modena_Init_Handler();
         }
-
-        $modena_plugin->run();
     }
-} else {
-    add_action('woocommerce_init', function() {
-        if (class_exists('WC_Logger')) {
-            $this->logger = new WC_Logger(array(new Modena_Log_Handler()));
-            $this->logger->error('Function modena_init has already been declared. Please delete deprecated versions of Modena plugin from this site and retry
-             reinstalling from the Wordpress Plugin store. modena_init is initialized already: ' . function_exists('modena_init'));
-        }
-    });
 
-    add_action('admin_notices', function() {
-        ?>
-        <div class="notice notice-error">
-            <p><?php _e('Function modena_init has already been declared. Please delete deprecated versions of Modena plugin from this site and retry reinstalling from the Wordpress Plugin store.', 'modena'); ?></p>
-        </div>
-        <?php
-    });
+    $modena_plugin->run();
 }
+
+add_action('plugins_loaded', 'modena_init');
