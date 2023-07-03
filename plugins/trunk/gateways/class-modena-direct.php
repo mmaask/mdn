@@ -14,39 +14,12 @@ if (!defined('ABSPATH')) {
         $this->maturity_in_months                   = 0;
         $this->enabled                              = $this->get_option('enabled');
         $this->method_title                         = __('Modena Direct', 'modena');
-        $this->default_alt                          = __(' ', 'modena');
-        $this->default_image                        = __('https://cdn.modena.ee/modena/assets/modena_woocommerce_direct_01511526fd.png', 'modena');
-
-        $this->initialize_variables_with_translations();
+        $this->initialize_variables_with_translations($this->id);
 
         add_filter('woocommerce_get_order_item_totals', array($this, 'customize_payment_method_order_totals'), 10, 3);
 
+
         parent::__construct();
-    }
-
-    public function initialize_variables_with_translations() {
-        $translations = array(
-            'et' => array(
-                'service_info'                      => __('Teenuse info', 'modena'),
-                'title'                             => __('Panga- ja kaardimaksed', 'modena'),
-                'default_icon_title_text'           => __('Panga- ja kaardimakseid pakub Modena Payments OÜ koostöös EveryPay AS-iga.', 'modena'),
-            ),
-            'ru_RU' => array(
-                'service_info'                      => __('Сервисная информация', 'modena'),
-                'title'                             => __('Интернетбанк или карта', 'modena'),
-                'default_icon_title_text'           => __('Платежные услуги предоставляются Modena Payments OÜ в сотрудничестве с EveryPay AS.', 'modena'),
-            ),
-            'en_US' => array(
-                'service_info'                      => __('Service Info', 'modena'),
-                'title'                             => __('Bank & Card Payments', 'modena'),
-                'default_icon_title_text'           => __('Modena Bank Payments is provided by Modena Estonia OÜ.', 'modena'),
-            ),
-        );
-
-        $this->service_info                         = $translations[get_locale()]['service_info'] ?? $translations['en_US']['service_info'];
-        $this->title                                = $translations[get_locale()]['title'] ?? $translations['en_US']['title'];
-        $this->default_icon_title_text              = $translations[get_locale()]['default_icon_title_text'] ?? $translations['en_US']['default_icon_title_text'];
-        $this->method_description                   = $this->title;
     }
 
     public function get_description()
@@ -125,12 +98,10 @@ if (!defined('ABSPATH')) {
              if ($key == 'payment_method') {
                  $payment_method_id = $order->get_payment_method();
                  if ($payment_method_id === 'modena_direct') {
-                     $total_rows[$key]['label'] = $total['label'];
                      $total_rows[$key]['value'] = $total['value'] . ' via ' . $order->get_meta(self::MODENA_SELECTED_METHOD_KEY);
                  }
              }
          }
-
          return $total_rows;
      }
 
