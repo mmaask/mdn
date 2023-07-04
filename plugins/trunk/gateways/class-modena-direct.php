@@ -98,7 +98,7 @@ if (!defined('ABSPATH')) {
              if ($key == 'payment_method') {
                  $payment_method_id = $order->get_payment_method();
                  if ($payment_method_id === 'modena_direct') {
-                     $total_rows[$key]['value'] = $total['value'] . ' via ' . $order->get_meta(self::MODENA_SELECTED_METHOD_KEY);
+                     $total_rows[$key]['value'] = $total['value'] . ' (' . $order->get_meta(self::MODENA_SELECTED_METHOD_KEY). ')';
                  }
              }
          }

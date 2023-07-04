@@ -6,9 +6,11 @@ if (!defined('ABSPATH')) {
 
 require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-admin-handler.php');
 require_once(MODENA_PLUGIN_PATH . 'includes/class-home-url.php');
+require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-translations.php');
 
 class Modena_Init_Handler
 {
+
     const PAYMENT_GATEWAYS = [
         'Modena_Direct_Payment'     => 'direct',
         'Modena_Slice_Payment'      => 'slice',
@@ -20,6 +22,7 @@ class Modena_Init_Handler
     public function run()
     {
         new Modena_Admin_Handler();
+
         add_action('plugins_loaded', [$this, 'maybe_init'], 99);
     }
     public function maybe_init()
@@ -187,14 +190,14 @@ class Modena_Init_Handler
     private function get_slice_banner_text($active_price): string
     {
         $modena_payment_method_name = 'slice';
-        return sprintf(__($this->get_modena_banner_text($modena_payment_method_name), "woocommerce"),
+        return sprintf(__(Modena_Translations::get_modena_banner_text($modena_payment_method_name), "woocommerce"),
             $this->get_installment_number($active_price / 3.0));
     }
 
     private function get_credit_banner_text($active_price): string
     {
         $modena_payment_method_name = 'credit';
-        return sprintf(__($this->get_modena_banner_text($modena_payment_method_name), "woocommerce"),
+        return sprintf(__(Modena_Translations::get_modena_banner_text($modena_payment_method_name), "woocommerce"),
             $this->get_installment_number($active_price * 0.0325));
     }
 
@@ -202,42 +205,13 @@ class Modena_Init_Handler
     {
         $modena_payment_method_name = 'leasing';
 
-        return sprintf(__($this->get_modena_banner_text($modena_payment_method_name), "woocommerce"),
+        return sprintf(__(Modena_Translations::get_modena_banner_text($modena_payment_method_name), "woocommerce"),
             $this->get_installment_number($active_price * 0.0325));
     }
     private function get_click_banner_text($active_price): string
     {
         $modena_payment_method_name = 'click';
-        return __($this->get_modena_banner_text($modena_payment_method_name), "modena");
-    }
-
-
-    private function get_modena_banner_text($modena_payment_method_name) {
-
-        $translations = array(
-            'et' => array(
-                'slice'                  => __('3 makset %s€ kuus, ilma lisatasudeta.&ensp;', 'modena'),
-                'credit'                 => __('Järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;', 'modena'),
-                'leasing'                => __('Ärikliendi järelmaks alates %s€ / kuu, 0€ lepingutasu.&ensp;', 'modena'),
-                'click'                  => __('Telli tooted koju proovimiseks. Lisatasudeta.&ensp;', 'modena'),
-
-            ),
-            'ru_RU' => array(
-                'slice'                  => __('3 платежа %s€ в месяц без дополнительных комиссий.&ensp;', 'modena'),
-                'credit'                 => __('Оплата кредита, начиная с %s € / месяц, 0 € плата за договор.&ensp;', 'modena'),
-                'leasing'                => __('Оплата бизнес-кредита, начиная с %s € / месяц, плата за договор 0 €.&ensp;', 'modena'),
-                'click'                  => __('Закажите товары, чтобы попробовать их дома. Никаких наценок.&ensp;', 'modena'),
-            ),
-            'en_US' => array(
-                'slice'                  => __('3 payments %s€ per month, without additional fees.&ensp;', 'modena'),
-                'credit'                 => __('Credit payment starting at %s€ / month, 0€ contract fee.&ensp;', 'modena'),
-                'leasing'                => __('Business client credit payment starting at %s€ / month, 0€ contract fee.&ensp;', 'modena'),
-                'click'                  => __('Order products to try at home. No additional charges.&ensp;', 'modena'),
-            ),
-        );
-
-        return __($translations[get_locale()][$modena_payment_method_name] ?? $translations['en_US'][$modena_payment_method_name]);
-
+        return __(Modena_Translations::get_modena_banner_text($modena_payment_method_name), "modena");
     }
 
     private function get_installment_price_html($text): string
