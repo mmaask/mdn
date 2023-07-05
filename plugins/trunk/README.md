@@ -8,10 +8,10 @@
 This plugin uses a very vanilla/default WordPress setup with WooCommerce and Storefront as a theme for
 testing/development purposes.
 
-
 Dev site @ https://dev.modena.codelight.ninja/
 
-If you want to see changes propagated to the dev server, you will have to manually SSH in and do git pull in the plugin folder.
+If you want to see changes propagated to the dev server, you will have to manually SSH in and do git pull in the plugin
+folder.
 
 1. Get all the site files from dev server `/srv/modena/app/` and create new local site using Laragon / Valet.
 2. Set up appropriate local DB connection details in `wp-config.php`. You will need to make a new database beforehand.

@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . '/lib/Modena.php';
 require_once __DIR__ . '/lib/model/ModenaBaseModel.php';
 require_once __DIR__ . '/lib/model/ModenaApplication.php';
