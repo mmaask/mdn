@@ -1,0 +1,89 @@
+.mdn_banklinks {
+    display: flex !important;
+    flex-direction: row !important;
+    align-content: center !important;
+    flex-wrap: wrap !important;
+    justify-content: center;
+}
+
+.mdn_banklink_img {
+    box-sizing: border-box !important;
+    min-width: 75px !important;
+    width: 75px !important;
+    max-width: 75px !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 5px !important;
+    cursor: pointer;
+    border-radius: 14px !important;
+    border: thin solid #eeeeee !important;
+    transition: all 150ms ease-out;
+}
+
+.mdn_banklink_img:hover {
+    background: #f2f2f2 !important;
+}
+
+.mdn_checked {
+    border: solid #20dfac 4px !important;
+}
+
+.mdn_service_info {
+    margin-left: 24px;
+    font-size: 12px;
+    color: #aaaaaa;
+    text-decoration: none;
+}
+
+.payment_method_modena_direct label {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.payment_method_modena_slice label,
+.payment_method_modena_business_leasing label,
+.payment_method_modena_click label,
+.payment_method_modena_credit label {
+    display: inline-block;
+    vertical-align: middle;
+    max-width: calc(100% - 33px);
+}
+
+.payment_method_modena_direct label img,
+.payment_method_modena_slice label img,
+.payment_method_modena_business_leasing label img,
+.payment_method_modena_click label img,
+.payment_method_modena_credit label img {
+    margin-left: 0 !important;
+}
+
+/*
+    removing one of the labels on the list below
+    will unhide the payment gateway text.
+    comment out the desired selector with comment tag
+    like this paragraph. Then remove the default_image url
+    from the class in /gateway/class-modena-your_method.php and update default_alt
+    according to desired results.
+ */
+
+.payment_method_modena_slice label,
+.payment_method_modena_business_leasing label,
+.payment_method_modena_click label,
+.payment_method_modena_credit label {
+    font-size: 0;
+    color: transparent;
+}
+
+/*
+    uncomment code to hide Mtasku,
+    Visa and Mastercard card payments
+    in checkout
+*/
+
+/*
+
+#mdn_bl_option_MTASKU, #mdn_bl_option_MASTERCARD, #mdn_bl_option_VISA {
+    display: none;
+}
+
+*/
