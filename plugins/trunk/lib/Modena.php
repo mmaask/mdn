@@ -8,43 +8,43 @@ use Modena\Payment\model\ModenaResponse;
 use Modena\Payment\model\ModenaRequest;
 
 class Modena {
-  const LIBRARY_VERSION = '2.8.1';
-  const HTTP_VERSION = '1.1';
-  const MAX_RETRIES = 5;
+  const LIBRARY_VERSION          = '2.8.1';
+  const HTTP_VERSION             = '1.1';
+  const MAX_RETRIES              = 5;
   const RETRY_TIMEOUT_IN_SECONDS = 5;
   # DEV ENVIRONMENT PARAMS
-  const DEV_API_URL = 'https://api-dev.modena.ee';
+  const DEV_API_URL   = 'https://api-dev.modena.ee';
   const DEV_TOKEN_URL = 'https://login-dev.modena.ee/oauth2/token';
   # LIVE ENVIRONMENT PARAMS
-  const LIVE_API_URL = 'https://api.modena.ee';
+  const LIVE_API_URL   = 'https://api.modena.ee';
   const LIVE_TOKEN_URL = 'https://login.modena.ee/oauth2/token';
   # SLICE PAYMENT
-  const SCOPE_SLICE = 'slicepayment';
+  const SCOPE_SLICE             = 'slicepayment';
   const SLICE_PAYMENT_ORDER_URL = 'modena/api/merchant/slice-payment-order';
   # CREDIT PAYMENT
-  const SCOPE_CREDIT = 'creditpayment';
+  const SCOPE_CREDIT             = 'creditpayment';
   const CREDIT_PAYMENT_ORDER_URL = 'modena/api/merchant/credit-payment-order';
   # BUSINESS LEASING PAYMENT
-  const SCOPE_BUSINESS_LEASING = 'businessleasing';
+  const SCOPE_BUSINESS_LEASING             = 'businessleasing';
   const BUSINESS_LEASING_PAYMENT_ORDER_URL = 'modena/api/merchant/business-leasing-payment-order';
   # TRY NOW PAY LATER PAYMENT
-  const SCOPE_CLICK = 'clickandtrypayment';
-  const CLICK_PAYMENT_ORDER_URL = 'modena/api/merchant/click-and-try-payment-order';
+  const SCOPE_CLICK                   = 'clickandtrypayment';
+  const CLICK_PAYMENT_ORDER_URL       = 'modena/api/merchant/click-and-try-payment-order';
   const MODENA_APPLICATION_STATUS_URL = 'modena/api/merchant/applications/%s/status';
   # DIRECT PAYMENT
-  const SCOPE_DIRECT = 'directpayment';
-  const DIRECT_PAYMENT_ORDER_URL = 'direct/api/partner-direct-payments/payment-order';
+  const SCOPE_DIRECT                  = 'directpayment';
+  const DIRECT_PAYMENT_ORDER_URL      = 'direct/api/partner-direct-payments/payment-order';
   const DIRECT_APPLICATION_STATUS_URL = 'direct/api/partner-direct-payments/%s/status';
-  const DIRECT_PAYMENT_OPTION_URL = 'direct/api/payment-options';
+  const DIRECT_PAYMENT_OPTION_URL     = 'direct/api/payment-options';
   const DEFAULT_ARGS
-     = array(
+                                      = array(
         'httpversion' => self::HTTP_VERSION,
-        'sslverify' => false,
+        'sslverify'   => false,
         'redirection' => 0,
-        'headers' => array(
+        'headers'     => array(
            'Accept' => 'application/json'
         ),
-        'cookies' => array(),
+        'cookies'     => array(),
      );
   protected $clientId;
   protected $clientSecret;
@@ -76,12 +76,12 @@ class Modena {
   private function getToken($scope) {
 
     $headers = array(
-       'Content-Type' => 'application/x-www-form-urlencoded',
+       'Content-Type'  => 'application/x-www-form-urlencoded',
        'Authorization' => 'Basic ' . base64_encode(sprintf('%s:%s', $this->clientId, $this->clientSecret))
     );
     $data = array(
        'grant_type' => 'client_credentials',
-       'scope' => $scope
+       'scope'      => $scope
     );
     $response = $this->sendRequest($this->tokenUrl, $data, $headers, 'POST');
 
@@ -102,10 +102,11 @@ class Modena {
     $defaultArgs = self::DEFAULT_ARGS;
     $defaultArgs['user-agent'] = sprintf('Modena-Library/%s %s', self::LIBRARY_VERSION, $this->pluginUserAgentData);
     $combinedHeaders = array_replace($defaultArgs['headers'], $headers);
-    $args = array_replace($defaultArgs, array(
-       'body' => $body,
+    $args = array_replace(
+       $defaultArgs, array(
+       'body'    => $body,
        'headers' => $combinedHeaders,
-       'method' => $requestType
+       'method'  => $requestType
     ));
     $response = wp_remote_request($requestUrl, $args);
     if (is_wp_error($response)) {
@@ -141,7 +142,7 @@ class Modena {
 
     $token = $this->getToken($scope);
     $headers = array(
-       'Content-Type' => 'application/json',
+       'Content-Type'  => 'application/json',
        'Authorization' => 'Bearer ' . $token
     );
     $response
@@ -169,7 +170,7 @@ class Modena {
 
     $token = $this->getToken($scope);
     $headers = array(
-       'Content-Type' => 'application/json',
+       'Content-Type'  => 'application/json',
        'Authorization' => 'Bearer ' . $token
     );
     $response = $this->sendRequest($this->getServiceURL($serviceUrl), $request->getAsPOSTFields(), $headers, 'POST');

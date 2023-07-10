@@ -78,7 +78,8 @@ class Modena_Onboarding_Handler {
 
     if (!is_array($error_msg)) {
       $messages = array(array('error' => $error_msg));
-    } else {
+    }
+    else {
       $messages = $error_msg;
     }
     add_option('woo_pp_admin_error', $messages);
@@ -107,8 +108,8 @@ class Modena_Onboarding_Handler {
   public function get_autoconfig_url($gateway_id, $is_test_mode = true) {
 
     $query_args = array(
-       'redirect' => urlencode($this->get_redirect_url($gateway_id, $is_test_mode)),
-      /* phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode */
+       'redirect'   => urlencode($this->get_redirect_url($gateway_id, $is_test_mode)),
+       /* phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode */
        'merchantId' => md5(site_url('/') . time()),
     );
 
@@ -127,9 +128,10 @@ class Modena_Onboarding_Handler {
    */
   public function get_redirect_url($gateway_id, $is_test_mode) {
 
-    return add_query_arg(array(
-       'wc_modena_admin_nonce' => wp_create_nonce('wc_modena'),
-    ), $this->get_admin_setting_link($gateway_id) . '&environment=' . ($is_test_mode ? 'sandbox' : 'live'));
+    return add_query_arg(
+       array(
+          'wc_modena_admin_nonce' => wp_create_nonce('wc_modena'),
+       ), $this->get_admin_setting_link($gateway_id) . '&environment=' . ($is_test_mode ? 'sandbox' : 'live'));
   }
 
   /**

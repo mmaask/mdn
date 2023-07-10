@@ -1,11 +1,11 @@
 === Modena Payment Gateway ===
-Version: 2.8.1
+Version: 2.9.0.1
 Contributors: modenapayments
 Donate link: https://modena.ee/
 Tags: online payment, payment, payment gateway, payment_gateway, woocommerce, sales, hire-purchase, järelmaks, financing, credit intermediary, krediidivahendaja, modena
 Requires at least: 4.7
 Tested up to: 6.2.2
-Stable tag: 2.8.1
+Stable tag: 2.9.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -58,8 +58,11 @@ Any questions? Just send us an email at info@modena.ee.
 = 2.8.0 =
 * Bug Fixes, Admin optimisations and new Pay & Order payment option for merchants.
 
-= 2.8.1 =
+= 2.9.0 =
 * Added minor bug fixes and improvements.
+
+= 2.9.0.1 =
+* Fixed minor bug with Woo Discount Rules.
 
 == Upgrade Notice ==
 
@@ -75,8 +78,11 @@ Any questions? Just send us an email at info@modena.ee.
 = 2.8.0 =
 * Bug Fixes, Admin optimisations and new Pay & Order payment option for merchants.
 
-= 2.8.1 =
+= 2.9.0 =
 * Added minor bug fixes and improvements.
+
+= 2.9.0.1 =
+* Fixed minor bug with Woo Discount Rules.
 
 == Support ==
 More information about Modena products can be found on our website [website](https://www.modena.ee)

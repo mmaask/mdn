@@ -11,8 +11,8 @@ if (!defined('ABSPATH')) {
 }
 
 abstract class Modena_Base_Payment extends WC_Payment_Gateway {
-  const PLUGIN_VERSION = '2.8.1';
-  const MODENA_META_KEY = 'modena-application-id';
+  const PLUGIN_VERSION             = '2.9.0.1';
+  const MODENA_META_KEY            = 'modena-application-id';
   const MODENA_SELECTED_METHOD_KEY = 'modena-payment-method';
   protected $client_id;
   protected $client_secret;
@@ -41,7 +41,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
     $this->is_test_mode = $this->environment === 'sandbox';
     if (!empty(wc_get_checkout_url())) {
       $this->site_url = wc_get_checkout_url();
-    } else {
+    }
+    else {
       $this->site_url = get_home_url();
     }
     $this->logger = new WC_Logger(array(new Modena_Log_Handler()));
@@ -69,75 +70,75 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
   public function init_form_fields() {
 
     $this->form_fields = [
-       'credentials_title_line' => [
-          'type' => 'title',
+       'credentials_title_line'       => [
+          'type'  => 'title',
           'class' => 'modena-header-css-class',
        ],
-       'credentials_title' => array(
-          'title' => __('Technical Support: +372 6604144 & info@modena.ee', 'modena'),
-          'type' => 'title',
+       'credentials_title'            => array(
+          'title'       => __('Technical Support: +372 6604144 & info@modena.ee', 'modena'),
+          'type'        => 'title',
           'description' => __('Select Live mode to accept payments and Sandbox mode to test payments.', 'modena'),
        ),
-       'environment' => array(
-          'title' => __('Environment', 'modena'),
-          'type' => 'select',
-          'class' => 'wc-enhanced-select',
-          'options' => array(
+       'environment'                  => array(
+          'title'       => __('Environment', 'modena'),
+          'type'        => 'select',
+          'class'       => 'wc-enhanced-select',
+          'options'     => array(
              'sandbox' => __('Sandbox mode', 'modena'),
-             'live' => __('Live mode', 'modena'),
+             'live'    => __('Live mode', 'modena'),
           ),
           'description' => __('<div id="environment_alert_desc"></div>', 'modena'),
-          'default' => 'sandbox',
-          'desc_tip' => __(
+          'default'     => 'sandbox',
+          'desc_tip'    => __(
              'Choose Sandbox mode to test payment using test API keys. Switch to live mode to accept payments with Modena using live API keys.', 'modena'),
        ),
-       'sandbox_client_id' => [
-          'title' => __('Sandbox Client ID', 'modena'),
-          'type' => 'text',
+       'sandbox_client_id'            => [
+          'title'    => __('Sandbox Client ID', 'modena'),
+          'type'     => 'text',
           'desc_tip' => true,
        ],
-       'sandbox_client_secret' => [
-          'title' => __('Sandbox Client Secret', 'modena'),
-          'type' => 'text',
+       'sandbox_client_secret'        => [
+          'title'    => __('Sandbox Client Secret', 'modena'),
+          'type'     => 'text',
           'desc_tip' => true,
        ],
-       'live_client_id' => [
-          'title' => __('Live Client ID', 'modena'),
-          'type' => 'text',
+       'live_client_id'               => [
+          'title'    => __('Live Client ID', 'modena'),
+          'type'     => 'text',
           'desc_tip' => true,
        ],
-       'live_client_secret' => [
-          'title' => __('Live Client Secret', 'modena'),
-          'type' => 'text',
+       'live_client_secret'           => [
+          'title'    => __('Live Client Secret', 'modena'),
+          'type'     => 'text',
           'desc_tip' => true,
        ],
-       'gateway_title' => [
-          'type' => 'title',
+       'gateway_title'                => [
+          'type'  => 'title',
           'class' => 'modena-header-css-class',
        ],
-       'enabled' => [
-          'title' => sprintf(__('%s Payment Gateway', 'modena'), $this->get_method_title()),
-          'type' => 'checkbox',
+       'enabled'                      => [
+          'title'       => sprintf(__('%s Payment Gateway', 'modena'), $this->get_method_title()),
+          'type'        => 'checkbox',
           'description' => 'Enable or disable the payment method in checkout. Customers will not be able to see the payment method if disabled.',
-          'default' => 'no',
+          'default'     => 'no',
        ],
        'billing_country_restrictions' => [
-          'title' => __('Billing country restrictions', 'modena'),
-          'type' => 'select',
+          'title'       => __('Billing country restrictions', 'modena'),
+          'type'        => 'select',
           'description' => __('This will show/hide the payment method in checkout based on the billing country.', 'modena'),
-          'default' => 'none',
-          'options' => [
-             'none' => __('No restrictions', 'modena'),
+          'default'     => 'none',
+          'options'     => [
+             'none'            => __('No restrictions', 'modena'),
              'is_only_estonia' => __('Show only with Estonian billing country', 'modena'),
-             'is_scandinavia' => __('Show only with Scandinavian & Baltic billing country', 'modena'),
+             'is_scandinavia'  => __('Show only with Scandinavian & Baltic billing country', 'modena'),
           ],
        ],
-       'payment_button_max_height' => [
-          'title' => __('Payment Button Logo Max Height', 'modena'),
-          'type' => 'number',
+       'payment_button_max_height'    => [
+          'title'       => __('Payment Button Logo Max Height', 'modena'),
+          'type'        => 'number',
           'description' => __('Maximum height of the payment logo in pixels. Default is: 30', 'modena'),
-          'default' => 30,
-          'desc_tip' => false,
+          'default'     => 30,
+          'desc_tip'    => false,
        ],
     ];
   }
@@ -192,7 +193,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
     $orderItems = [];
     $order = wc_get_order(sanitize_text_field($_GET['id']));
     $customer = new ModenaCustomer(
-       $order->get_billing_first_name(), $order->get_billing_last_name(), $order->get_billing_email(), $order->get_billing_phone(), join(', ', [
+       $order->get_billing_first_name(), $order->get_billing_last_name(), $order->get_billing_email(), $order->get_billing_phone(), join(
+       ', ', [
        $order->get_billing_address_1(),
        $order->get_billing_address_2(),
        $order->get_billing_city(),
@@ -201,7 +203,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
     foreach ($order->get_items(['line_item', 'fee', 'shipping']) as $orderItem) {
       $orderItems[] = new ModenaOrderItem(
          $orderItem->get_name(), $orderItem->get_total()
-         + $orderItem->get_total_tax(), $orderItem->get_quantity(), get_woocommerce_currency());
+                               + $orderItem->get_total_tax(), $orderItem->get_quantity(), get_woocommerce_currency());
     }
     $maturityInMonths = isset($_GET['maturityInMonths']) ? sanitize_text_field($_GET['maturityInMonths']) : null;
     $selectedOption = isset($_GET['selectedOption']) ? sanitize_text_field($_GET['selectedOption']) : null;
@@ -290,7 +292,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
             $order->add_order_note(
                sprintf(
                   __('Order paid by %s via %s.', 'modena'), $this->method_title, $order->get_meta(self::MODENA_SELECTED_METHOD_KEY)));
-          } else {
+          }
+          else {
             $order->add_order_note(sprintf(__('Order paid by %s.', 'modena'), $this->method_title));
           }
           $woocommerce->cart->empty_cart();
@@ -352,7 +355,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
         wp_safe_redirect($this->site_url);
         wc_add_notice(__('Payment canceled.', 'modena'));
         exit;
-      } else {
+      }
+      else {
         $this->logger->error(
            sprintf(
               'Order number ' . wc_get_order($modenaResponse->getOrderId())
@@ -410,7 +414,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
     $order->save();
 
     return array(
-       'result' => 'success',
+       'result'   => 'success',
        'redirect' => $this->create_redirect_url(
           $order_id, $this->maturity_in_months, isset($_POST['MDN_OPTION']) ? sanitize_text_field($_POST['MDN_OPTION'])
           : null),
@@ -469,7 +473,8 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
       $billing_country = WC()->customer->get_billing_country();
       $billing_option = $this->get_option('billing_country_restrictions');
       if ($billing_option === 'is_scandinavia' && isset($available_gateways[$this->id])) {
-        if ($billing_country != 'EE'
+        if (
+           $billing_country != 'EE'
            && $billing_country != 'FI'
            && $billing_country != 'LT'
            && $billing_country != 'LV'

@@ -39,7 +39,8 @@ class ModenaResponse {
     }
     if ($this->getBodyValue('error')) {
       return sprintf('Error: %s | Message: %s', $this->getBodyValue('error', 'N/A'), $this->getBodyValue('error_description', '--EMPTY--'));
-    } else {
+    }
+    else {
       return sprintf('Error header: %s | body: %s', json_encode($this->header), json_encode($this->body));
     }
   }

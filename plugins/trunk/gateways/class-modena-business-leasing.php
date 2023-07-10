@@ -19,10 +19,10 @@ class Modena_Business_Leasing extends Modena_Base_Payment {
 
     parent::init_form_fields();
     $this->form_fields['product_page_banner_enabled'] = [
-       'title' => __('Enable Product Page Banner', 'modena'),
-       'type' => 'checkbox',
+       'title'       => __('Enable Product Page Banner', 'modena'),
+       'type'        => 'checkbox',
        'description' => '',
-       'default' => 'yes',
+       'default'     => 'yes',
     ];
   }
 
