@@ -109,6 +109,23 @@ class Modena_Init_Handler {
     return $setting === 'yes';
   }
 
+  public function display_product_installments() {
+
+    global $product;
+
+    if ($product->is_type('variable')) {
+      return;
+    }
+
+    $sale_price = $product->get_price();
+    $active_price = apply_filters('advanced_woo_discount_rules_get_product_discount_price', $sale_price, $product);
+
+    echo $this->get_slice_banner_html($active_price);
+    echo $this->get_credit_banner_html($active_price);
+    echo $this->get_leasing_banner_html($active_price);
+    echo $this->get_click_banner_html();
+  }
+
   private function get_slice_banner_html($active_price): string {
 
     if (!$this->is_slice_enabled() || !$this->is_slice_product_banner_enabled()) {
@@ -136,13 +153,13 @@ class Modena_Init_Handler {
     return $this->get_installment_price_html($this->get_leasing_banner_text($active_price));
   }
 
-  private function get_click_banner_html($active_price): string {
+  private function get_click_banner_html(): string {
 
     if (!$this->is_click_enabled() || !$this->is_click_product_banner_enabled()) {
       return '';
     }
 
-    return $this->get_installment_price_html($this->get_click_banner_text($active_price));
+    return $this->get_installment_price_html($this->get_click_banner_text());
   }
 
   private function is_slice_product_banner_enabled(): bool {
@@ -200,7 +217,7 @@ class Modena_Init_Handler {
        $active_price * 0.0325));
   }
 
-  private function get_click_banner_text($active_price): string {
+  private function get_click_banner_text(): string {
 
     $modena_payment_method_name = 'click';
 
@@ -221,32 +238,6 @@ class Modena_Init_Handler {
     return number_format($number, 2, '.', '');
   }
 
-  public function display_product_installments() {
-
-    global $product;
-
-    if ($product->is_type('variable')) {
-      return;
-    }
-
-    $sale_price = $product->get_price();
-
-    /**
-     * Get the discount price of a product
-     * @param $sale_price float|integer
-     * @param $product object[wc_get_product($product_id))]|integer
-     * @return float|integer
-     * https://docs.flycart.org/en/articles/7907342-developer-documentation
-     */
-
-    $active_price = apply_filters('advanced_woo_discount_rules_get_product_discount_price', $sale_price, $product);
-
-    echo $this->get_slice_banner_html($active_price);
-    echo $this->get_credit_banner_html($active_price);
-    echo $this->get_leasing_banner_html($active_price);
-    echo $this->get_click_banner_html($active_price);
-  }
-
   public function display_variation_installments($variation_data): array {
     $variation_id = $variation_data['variation_id'];
     $variation = wc_get_product($variation_id);
@@ -261,6 +252,8 @@ class Modena_Init_Handler {
     $sliceBannerHtml = $this->get_slice_banner_html($active_price);
     $creditBannerHtml = $this->get_credit_banner_html($active_price);
     $leasingBannerHtml = $this->get_leasing_banner_html($active_price);
+    $clickBannerHtml = $this->get_click_banner_html();
+
     if ($sliceBannerHtml || $creditBannerHtml) {
       $variation_data['price_html'] .= '<br>';
     }
@@ -273,7 +266,9 @@ class Modena_Init_Handler {
     if ($leasingBannerHtml) {
       $variation_data['price_html'] .= $leasingBannerHtml;
     }
-
+    if ($clickBannerHtml) {
+      $variation_data['price_html'] .= $clickBannerHtml;
+    }
     return $variation_data;
   }
 }

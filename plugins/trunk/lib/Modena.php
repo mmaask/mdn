@@ -8,7 +8,6 @@ use Modena\Payment\model\ModenaResponse;
 use Modena\Payment\model\ModenaRequest;
 
 class Modena {
-  const LIBRARY_VERSION          = '2.8.1';
   const HTTP_VERSION             = '1.1';
   const MAX_RETRIES              = 5;
   const RETRY_TIMEOUT_IN_SECONDS = 5;
@@ -100,7 +99,7 @@ class Modena {
   private function sendRequest($requestUrl, $body, $headers, $requestType = 'GET') {
 
     $defaultArgs = self::DEFAULT_ARGS;
-    $defaultArgs['user-agent'] = sprintf('Modena-Library/%s %s', self::LIBRARY_VERSION, $this->pluginUserAgentData);
+    $defaultArgs['user-agent'] = __($this->pluginUserAgentData);
     $combinedHeaders = array_replace($defaultArgs['headers'], $headers);
     $args = array_replace(
        $defaultArgs, array(

@@ -1,7 +1,7 @@
 function selectModenaBanklink(id, value) {
     unselectAllModenaBanklinks();
     document.getElementById('mdn_bl_option_' + id).classList.add('mdn_checked');
-    document.getElementById('mdn_selected_banklink').value = value;
+    document.getElementById('modena_selected_payment_method').value = value;
 }
 
 function unselectAllModenaBanklinks() {

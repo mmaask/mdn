@@ -1,7 +1,0 @@
-{
-  "name": "modena/modena-woocommerce",
-  "type": "wordpress-plugin",
-  "require": {
-    "php": ">=7.3"
-  }
-}

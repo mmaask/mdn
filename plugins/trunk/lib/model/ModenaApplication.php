@@ -4,10 +4,6 @@ namespace Modena\Payment\model;
 
 class ModenaApplication extends ModenaBaseModel {
   /**
-   * @var int
-   */
-  public $maturityInMonths;
-  /**
    * @var string
    */
   public $selectedOption;
@@ -37,7 +33,6 @@ class ModenaApplication extends ModenaBaseModel {
   public $currency;
 
   /**
-   * @param int $maturityInMonths
    * @param string $selectedOption
    * @param string $orderId
    * @param float $totalAmount
@@ -47,16 +42,13 @@ class ModenaApplication extends ModenaBaseModel {
    * @param string $currency
    */
   public function __construct(
-     $maturityInMonths,
-     $selectedOption,
+      $selectedOption,
      $orderId,
      $totalAmount,
      $orderItems,
      $customer,
      $timestamp,
      $currency = 'EUR') {
-
-    $this->maturityInMonths = $maturityInMonths;
     $this->selectedOption = $selectedOption;
     $this->orderId = $orderId;
     $this->totalAmount = $totalAmount;
