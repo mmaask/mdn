@@ -39,7 +39,6 @@ class Modena_Init_Handler {
 
   public function init() {
 
-    add_filter('plugin_action_links_modena/modena.php', array($this, 'modena_plugin_action_links'));
     $this->modena_gateways_init();
     add_action(
        'woocommerce_single_product_summary', [
@@ -69,16 +68,6 @@ class Modena_Init_Handler {
   function add_modena_payment_gateways($methods) {
 
     return array_merge($methods, array_keys(self::PAYMENT_GATEWAYS));
-  }
-
-  function modena_plugin_action_links($links) {
-
-    $plugin_links = array(
-       '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout') . '">' . __('Settings', 'modena') . '</a>',
-       '<a href="https://developer.modena.ee" target="_blank">' . __('Support', 'modena') . '</a>',
-    );
-
-    return array_merge($plugin_links, $links);
   }
 
   private function is_slice_enabled(): bool {
@@ -127,39 +116,39 @@ class Modena_Init_Handler {
   }
 
   private function get_slice_banner_html($active_price): string {
-
+    $modena_gateway = 'slice';
     if (!$this->is_slice_enabled() || !$this->is_slice_product_banner_enabled()) {
       return '';
     }
 
-    return $this->get_installment_price_html($this->get_slice_banner_text($active_price));
+    return $this->get_installment_price_html($modena_gateway, $this->get_slice_banner_text($active_price));
   }
 
   private function get_credit_banner_html($active_price): string {
-
+    $modena_gateway = 'credit';
     if (!$this->is_credit_enabled() || !$this->is_credit_product_banner_enabled()) {
       return '';
     }
 
-    return $this->get_installment_price_html($this->get_credit_banner_text($active_price));
+    return $this->get_installment_price_html($modena_gateway, $this->get_credit_banner_text($active_price));
   }
 
   private function get_leasing_banner_html($active_price): string {
-
+    $modena_gateway = 'leasing';
     if (!$this->is_leasing_enabled() || !$this->is_leasing_product_banner_enabled()) {
       return '';
     }
 
-    return $this->get_installment_price_html($this->get_leasing_banner_text($active_price));
+    return $this->get_installment_price_html($modena_gateway, $this->get_leasing_banner_text($active_price));
   }
 
   private function get_click_banner_html(): string {
-
+    $modena_gateway = 'click';
     if (!$this->is_click_enabled() || !$this->is_click_product_banner_enabled()) {
       return '';
     }
 
-    return $this->get_installment_price_html($this->get_click_banner_text());
+    return $this->get_installment_price_html($modena_gateway, $this->get_click_banner_text());
   }
 
   private function is_slice_product_banner_enabled(): bool {
@@ -224,13 +213,13 @@ class Modena_Init_Handler {
     return __(Modena_Translations::get_modena_banner_text($modena_payment_method_name), "modena");
   }
 
-  private function get_installment_price_html($text): string {
+  private function get_installment_price_html($modena_gateway, $text): string {
 
     $icon = '<img src="'
        . WC_HTTPS::force_https_url('https://cdn.modena.ee/modena/assets/modena_logo_black_3f62f63466.png?1863664.3000000007')
-       . '" alt="Modena" style="max-height: 16px; margin-bottom: -3px; vertical-align: baseline;"/>';
+       . '" alt="Modena-logo" style="max-height: 16px; margin-bottom: -3px; vertical-align: baseline;"/>';
 
-    return '<p id="mdn-slice-product-page-display" style="margin: 0.5rem 0 1.5rem 0;">' . $text . $icon . '</p>';
+    return '<p id="modena-' . $modena_gateway . '-product-page-display" style="margin: 0.5rem 0 1.5rem 0;">' . $text . $icon . '</p>';
   }
 
   private function get_installment_number($number): float {
