@@ -50,6 +50,8 @@ class Modena_Init_Handler {
        $this,
        'display_variation_installments'
     ], apply_filters('modena_variation_installments_priority', 10));
+
+    $this->run_modena_shipping();
   }
 
   function modena_gateways_init() {
@@ -258,6 +260,23 @@ class Modena_Init_Handler {
     if ($clickBannerHtml) {
       $variation_data['price_html'] .= $clickBannerHtml;
     }
+
     return $variation_data;
+  }
+
+  public function run_modena_shipping() {
+    add_filter('woocommerce_shipping_methods', array($this, 'load_modena_shipping_methods'));
+    add_action('woocommerce_shipping_init', array($this, 'modena_shipping_init'));
+  }
+
+  public function load_modena_shipping_methods(array $methods): array {
+    $methods['modena-shipping-itella-terminals'] = 'Modena_Shipping_Itella_Smartpost';
+
+    return $methods;
+  }
+
+  public function modena_shipping_init() {
+    require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping.php');
+    require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-itella-smartpost.php');
   }
 }
