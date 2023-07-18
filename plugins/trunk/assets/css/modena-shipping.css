@@ -20,3 +20,7 @@
 .select2-container {
     margin-top: 5px !important;
 }
+
+.select2-selection__clear {
+ margin-top: -11px;
+}

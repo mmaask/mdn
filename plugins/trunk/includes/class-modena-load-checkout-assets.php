@@ -29,8 +29,8 @@ class Modena_Load_Checkout_Assets {
       wp_enqueue_script('jquery');
     }
 
-    wp_enqueue_style('modena_shipping_style', MODENA_PLUGIN_URL . '/assets/modena-shipping.css');
-    wp_enqueue_script('modena_shipping_script', MODENA_PLUGIN_URL . '/assets/modena-shipping.js', array('jquery'), '6.2', true);
+    wp_enqueue_style('modena_shipping_style', MODENA_PLUGIN_URL . '/assets/css/modena-shipping.css');
+    wp_enqueue_script('modena_shipping_script', MODENA_PLUGIN_URL . '/assets/js/modena-shipping.js', array('jquery'), '6.2', true);
 
     $translations = array(
        'please_choose_parcel_terminal' => __($this->getParcelTerminalDefaultTextTranslation(), 'modena')
@@ -39,8 +39,8 @@ class Modena_Load_Checkout_Assets {
 
     wp_localize_script('modena_shipping_script', 'mdnTranslations', $translations);
 
-    wp_register_style('select2', 'assets/select2/select2.min.css');
-    wp_register_script('select2', 'assets/select2/select2.min.js', array('jquery'), true);
+    wp_register_style('select2', MODENA_PLUGIN_URL . '/assets/select2/select2.min.css');
+    wp_register_script('select2', MODENA_PLUGIN_URL .'/assets/select2/select2.min.js', array('jquery'), true);
 
     wp_enqueue_style('select2');
     wp_enqueue_script('select2');

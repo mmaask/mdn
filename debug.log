@@ -1,0 +1,6 @@
+[18-Jul-2023 14:18:51 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function Modena_Shipping_Itella_Smartpost::getParcelTerminals(), 0 passed in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php on line 35 and exactly 1 expected in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php:67
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(35): Modena_Shipping_Itella_Smartpost->getParcelTerminals()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php(308): Modena_Shipping_Itella_Smartpost->renderParcelTerminalSelectBox('')
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php(332): WP_Hook->apply_filters('', Array)
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/plugin.php(517): WP_Hook- in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php on line 67
