@@ -4,3 +4,88 @@ Stack trace:
 #1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php(308): Modena_Shipping_Itella_Smartpost->renderParcelTerminalSelectBox('')
 #2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php(332): WP_Hook->apply_filters('', Array)
 #3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/plugin.php(517): WP_Hook- in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php on line 67
+[19-Jul-2023 07:10:40 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No such file or directory in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wpdb.php on line 2019
+[19-Jul-2023 08:00:00 UTC] PHP Fatal error:  Uncaught Error: Object of class Modena_Shipping_Itella_Smartpost could not be converted to string in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php:56
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zones.php(36): WC_Shipping_Zone->get_shipping_methods(false, 'admin')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/packages/woocommerce-blocks/src/Shipping/ShippingController.php(315): WC_Shipping_Zones::get_zones('admin')
+#4 /Users/stenuuesoo/Local Sites/jeans in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php on line 56
+[19-Jul-2023 08:20:00 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method Modena_Shipping_Method_Settings::get_title() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:40
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php(6): Modena_Shipping_Method_Settings->init_form_fields()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(36): Modena_Shipping_Method_Settings->__construct()
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 40
+[19-Jul-2023 08:23:50 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function Modena_Shipping_Method::init(), 0 passed in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php on line 29 and exactly 1 expected in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php:35
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(29): Modena_Shipping_Method->init()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/c in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php on line 35
+[19-Jul-2023 08:23:51 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function Modena_Shipping_Method::init(), 0 passed in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php on line 29 and exactly 1 expected in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php:35
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(29): Modena_Shipping_Method->init()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/c in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php on line 35
+[19-Jul-2023 08:27:10 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method Modena_Shipping_Method_Settings::get_method_title() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:58
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php(10): Modena_Shipping_Method_Settings->init_form_fields()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(30): Modena_Shipping_Method_Settings->__construct('', 0)
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct(0)
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping.php(199): Modena_Shipping_Itella_Smartpost->__construct()
+#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/publi in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 58
+[19-Jul-2023 08:27:13 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method Modena_Shipping_Method_Settings::get_method_title() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:58
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php(10): Modena_Shipping_Method_Settings->init_form_fields()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(30): Modena_Shipping_Method_Settings->__construct('', 0)
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#4 /Users/stenuuesoo/Local Sites/jeans-potio in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 58
+[19-Jul-2023 08:29:02 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method Modena_Shipping_Method_Settings::get_method_title() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:88
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php(10): Modena_Shipping_Method_Settings->init_form_fields()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(30): Modena_Shipping_Method_Settings->__construct('', 0)
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#4 /Users/stenuuesoo/Local Sites/jeans-potio in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 88
+[19-Jul-2023 08:29:03 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method Modena_Shipping_Method_Settings::get_method_title() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:88
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php(10): Modena_Shipping_Method_Settings->init_form_fields()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(30): Modena_Shipping_Method_Settings->__construct('', 0)
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#4 /Users/stenuuesoo/Local Sites/jeans-potio in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 88
+[19-Jul-2023 08:36:47 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function get_title() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:49
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(30): Modena_Shipping_Method_Settings::init_form_fields()
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zones.php(36): WC_Shipping_Zone->get_shipping_methods(false, 'admin')
+#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerc in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 49
+[19-Jul-2023 08:38:08 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function get_title() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:36
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(30): Modena_Shipping_Method_Settings::init_form_fields('', 0)
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zones.php(36): WC_Shipping_Zone->get_shipping_methods(false, 'admin')
+#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/wooco in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 36
+[19-Jul-2023 08:38:31 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function get_cost() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:44
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(30): Modena_Shipping_Method_Settings::init_form_fields('', 0)
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zones.php(36): WC_Shipping_Zone->get_shipping_methods(false, 'admin')
+#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocom in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 44
+[19-Jul-2023 08:39:07 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function get_cost() in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php:44
+Stack trace:
+#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method.php(30): Modena_Shipping_Method_Settings::init_form_fields('', 0)
+#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-itella-smartpost.php(9): Modena_Shipping_Method->__construct('71')
+#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zone.php(185): Modena_Shipping_Itella_Smartpost->__construct('71')
+#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping-zones.php(36): WC_Shipping_Zone->get_shipping_methods(false, 'admin')
+#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocom in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/class-modena-shipping-method-settings.php on line 44
+[19-Jul-2023 08:52:58 UTC] PHP Notice:  Undefined property: Modena_Shipping::$id in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/lib/modena-shipping.php on line 80
+[19-Jul-2023 08:53:31 UTC] PHP Notice:  Undefined property: Modena_Shipping::$id in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/lib/modena-shipping.php on line 80
