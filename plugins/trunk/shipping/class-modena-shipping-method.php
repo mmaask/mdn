@@ -22,15 +22,10 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     parent::__construct($instance_id);
 
     $this->instance_id = absint($instance_id);
-    $this->supports = array(
-       'shipping-zones',
-       'instance-settings',
-       'instance-settings-modal',
-    );
+    $this->supports = array('shipping-zones', 'instance-settings', 'instance-settings-modal',);
 
     require_once MODENA_PLUGIN_PATH . 'autoload.php';
     require ABSPATH . WPINC . '/version.php';
-
 
     $this->init();
     $this->init_form_fields();
@@ -61,7 +56,10 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     //   'deactivate_modena_shipping_if_cart_larger_than_spec'
     //));
     //add_action('woocommerce_checkout_update_order_review', array($this, 'deactivate_modena_shipping_no_measurements'));
+    //add_action('woocommerce_get_order_item_totals', array($this, 'add_shipping_to_checkout_details'));
     //add_action('woocommerce_thankyou', array($this, 'process_modena_shipping_request'));
+    //add_filter('woocommerce_order_actions', array($this, 'add_print_label_custom_order_action'));
+    //add_action('woocommerce_admin_order_data_after_shipping_address', array($this, 'render_shipping_destination_in_admin_order_view'));
   }
 
 
@@ -131,20 +129,12 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
   public function calculate_shipping($package = array()) {
     if ($this->get_modena_shipping_method_free_shipping_setting() || $this->get_quantity_based_modena_shipping_setting()) {
       if ($this->get_modena_shipping_method_free_shipping_treshold() <= $this->get_cost() || $this->get_quantity_based_shipping_treshold() < $this->get_quantity_of_products_per_modena_cart()) {
-        $rate = array(
-           'id'    => $this->id,
-           'label' => $this->title,
-           'cost'  => 0,
-        );
+        $rate = array('id' => $this->id, 'label' => $this->title, 'cost' => 0,);
         $this->add_rate($rate);
       }
     }
     else {
-      $rate = array(
-         'id'    => $this->id,
-         'label' => $this->title,
-         'cost'  => $this->cost,
-      );
+      $rate = array('id' => $this->id, 'label' => $this->title, 'cost' => $this->cost,);
       $this->add_rate($rate);
     }
   }
@@ -202,15 +192,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     $weight = $result['total_weight'];
     $packageContent = $result['packageContent'];
 
-    return array(
-       'orderReference'           => $order->get_order_number(),
-       'packageContent'           => $packageContent,
-       'weight'                   => $weight,
-       'recipient_name'           => $order->get_billing_first_name() . " " . $order->get_billing_last_name(),
-       'recipient_phone'          => $order->get_billing_phone(),
-       'recipientEmail'           => $order->get_billing_email(),
-       '$wcOrderParcelTerminalID' => $order->get_meta('_selected_parcel_terminal_id_mdn'),
-    );
+    return array('orderReference' => $order->get_order_number(), 'packageContent' => $packageContent, 'weight' => $weight, 'recipient_name' => $order->get_billing_first_name() . " " . $order->get_billing_last_name(), 'recipient_phone' => $order->get_billing_phone(), 'recipientEmail' => $order->get_billing_email(), '$wcOrderParcelTerminalID' => $order->get_meta('_selected_parcel_terminal_id_mdn'),);
   }
 
   public function process_modena_shipping_status($rates) {
@@ -231,17 +213,153 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
   public function process_modena_shipping_request($order_id) {
     try {
       $modena_shipping_response = $this->modena_shipping->get_modena_shipping_barcode_id($this->compile_data_for_modena_shipping_request($order_id));
-      $this->add_barcode_meta_data_to_order($modena_shipping_response, $order_id);
+      $this->add_label_url_to_order_meta_data($modena_shipping_response, $order_id);
     } catch (Exception $exception) {
       $this->shipping_logger->error('Exception occurred when processing data: ' . $exception->getMessage());
       $this->shipping_logger->error($exception->getTraceAsString());
     }
   }
 
-  public function add_barcode_meta_data_to_order($parcelLabelBarcodeID, $order_id) {
+  public function add_shipping_to_checkout_details($totals, $order_id) {
     $order = wc_get_order($order_id);
-    $order->add_meta_data('_barcode_id_mdn', $parcelLabelBarcodeID, true);
+    if (!$this->has_order_got_package_point_meta_data($order))
+      return $totals;
+    if ($this->parse_shipping_methods($this->id, $order_id)) {
+      $parcel_terminal = $this->get_selected_shipping_destination($order);
+
+      foreach ($totals as $key => $total) {
+        if ($key === 'shipping') {
+          $totals['shipping']['value'] = $totals['shipping']['value'] . " (" . $parcel_terminal . ")";
+        }
+      }
+
+    }
+
+    return $totals;
+  }
+
+  public function parse_shipping_methods($shippingMethodID, $order_id) {
+    $order = wc_get_order($order_id);
+    $shipping_methods = $order->get_shipping_methods();
+
+    if (empty($shipping_methods)) {
+      //error_log("Metadata not saved since order no shipping method: ");
+      return False;
+    }
+
+    $first_shipping_method = reset($shipping_methods);
+    $orderShippingMethodID = $first_shipping_method->get_method_id();
+
+    //error_log("Comparing methods... " . $shippingMethodID . " with:  " . $orderShippingMethodID);
+
+    if (empty($orderShippingMethodID)) {
+      //error_log("Metadata not saved since order no shipping method with id: " . $orderShippingMethodID);
+      return False;
+    }
+
+    if ($orderShippingMethodID == $shippingMethodID) {
+      //error_log("win, because methods are same named. saned.");
+      return True;
+    }
+    else {
+      //error_log("Metadata not saved: " . $shippingMethodID);
+      return False;
+    }
+  }
+
+  public function has_order_got_package_point_meta_data($order) {
+    if (empty($this->get_selected_shipping_destination_barcode_id())) {
+      error_log("oh no, order does not yet have a terminal.");
+
+      return False;
+    }
+    else {
+      return True;
+    }
+  }
+
+
+  public function add_label_url_to_order_meta_data($label_url, $order_id) {
+    $order = wc_get_order($order_id);
+    $order->add_meta_data('_selected_modena_shipping_label_url', $label_url, true);
     $order->save();
+  }
+
+  public function add_print_label_custom_order_action($actions) {
+    error_log("Create label print custom action: " . $this->id);
+    $actions['custom_order_action'] = __($this->get_placeholderPrintLabelInAdmin(), 'woocommerce');
+
+    return $actions;
+  }
+
+  public function process_print_label_custom_order_action($order) {
+    $order_note = $this->get_placeholderPrintLabelInAdmin() . " " . $this->get_selected_shipping_destination($order) . ".";
+    $order->add_order_note($order_note);
+    error_log("this is the url to the label: " . $this->get_selected_shipping_label_url($order));
+    $this->modena_shipping->save_modena_shipping_label_PDF_in_User($this->get_selected_shipping_destination_barcode_id($order));
+  }
+
+  public function render_shipping_destination_in_admin_order_view($order_id) {
+    //error_log("Trying to run into admin orders");
+
+    $order = wc_get_order($order_id);
+
+    if ($this->is_order_pending($order))
+      return;
+
+    if ($this->parse_shipping_methods($this->id, $order_id)) {
+
+      ?>
+        <tr class="selected-terminal">
+            <th>
+                <h3>
+                  <?php
+                  echo $this->title ?>
+                </h3>
+            </th>
+            <td>
+                <p>
+                  <?php
+                  echo $this->get_selected_shipping_destination(); ?>
+
+                </p>
+                <button id="buttonForClicking" onClick="startUpdatingOrderParcel()" class="button grant-access"><?php
+                  _e($this->get_placeholderPrintLabelInAdmin()) ?></button>
+
+                <script>
+                    document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
+
+                    function startUpdatingOrderParcel() {
+
+
+                      <?php
+                      //todo implement download correctly
+                      //$this->updateParcelTerminalForOrder($order, $order_id);
+                      ?>
+                    }
+                </script>
+            </td>
+        </tr>
+      <?php
+    }
+  }
+
+  public function is_order_pending($order) {
+    if ($order->get_status() == 'pending') {
+      return True;
+    }
+    else {
+      return False;
+    }
+  }
+
+  public function sanitize_costs($shippingMethodCost): float {
+    $sanitizedshippingMethodCost = floatval($shippingMethodCost);
+    if ($sanitizedshippingMethodCost < 0) {
+      $sanitizedshippingMethodCost = $shippingMethodCost;
+    }
+
+    return $sanitizedshippingMethodCost;
   }
 
   public function get_modena_shipping_method_id() {
@@ -304,111 +422,21 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     return __('New parcel terminal has been selected for the order: ');
   }
 
+  public function get_selected_shipping_destination_barcode_id($order) {
+    return $this->$order->get_meta('_selected_modena_shipping_destination_barcode_id');
+  }
+
+  public function get_selected_shipping_destination($order) {
+    return $this->$order->get_meta('_selected_modena_shipping_destination_id');
+  }
+
+  public function get_selected_shipping_label_url($order) {
+    return $this->$order->get_meta('_selected_modena_shipping_label_url');
+  }
+
   public function init_form_fields() {
     parent::init_form_fields();
-    $this->form_fields = [
-       'credentials_title_line'                     => [
-          'type'        => 'title',
-          'description' => 'Technical Support: +372 6604144 & info@modena.ee'
-       ],
-       'environment'                                => array(
-          'title'       => __('Environment', 'modena'),
-          'type'        => 'select',
-          'options'     => array(
-             'sandbox' => __('Sandbox mode', 'modena'),
-             'live'    => __('Live mode', 'modena'),
-          ),
-          'description' => __('<div id="environment_alert_desc"></div>', 'modena'),
-          'default'     => 'sandbox',
-          'desc_tip'    => __(
-             'Choose Sandbox mode to test payment using test API keys. Switch to live mode to accept payments with Modena using live API keys.', 'modena'),
-       ),
-       'client_id'                                  => [
-          'title'    => __('Client ID', 'modena'),
-          'type'     => 'text',
-          'desc_tip' => true,
-       ],
-       'client_secret'                              => [
-          'title'    => __('Client Secret', 'modena'),
-          'type'     => 'text',
-          'desc_tip' => true,
-       ],
-       'title'                                      => [
-          'title'    => __('Shipping Method Title', 'modena'),
-          'type'     => 'text',
-          'default'  => $this->get_title(),
-          'desc_tip' => true,
-       ],
-       'cost'                                       => [
-          'title'             => __('Shipping Method Cost'),
-          'type'              => 'float',
-          'placeholder'       => '',
-          'description'       => 'Shipping Method Cost',
-          'default'           => $this->get_cost(),
-          'desc_tip'          => true,
-          'sanitize_callback' => array($this, 'sanitizeshippingMethodCost'),
-       ],
-       'modena_free_shipping_treshold'              => [
-          'title'    => __('Enable or disable free shipping treshold.', 'modena'),
-          'type'     => 'checkbox',
-          'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.',
-          'default'  => 'no',
-       ],
-       'modena_free_shipping_treshold_sum'          => [
-          'title'             => __('Free shipping treshold'),
-          'type'              => 'float',
-          'placeholder'       => '',
-          'description'       => 'Select amount that this shipping method is free.',
-          'default'           => 50,
-          'desc_tip'          => true,
-          'sanitize_callback' => array($this, 'sanitizeshippingMethodCost'),
-       ],
-       'modena_quantity_free_shipping_treshold'     => [
-          'title'    => __('Enable or disable quantity free shipping.', 'modena'),
-          'type'     => 'checkbox',
-          'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.',
-          'default'  => 'no',
-       ],
-       'modena_quantity_free_shipping_treshold_sum' => [
-          'title'             => __('Quantity based free shipping treshold'),
-          'type'              => 'int',
-          'placeholder'       => '',
-          'description'       => 'Select amount of quantity of product that this shipping method is free.',
-          'default'           => 10,
-          'desc_tip'          => true,
-          'sanitize_callback' => array($this, 'sanitizeshippingMethodCost'),
-       ],
-       'modena_package_measurement_checks'          => [
-          'title'    => __('Package measurement checks are enabled.', 'modena'),
-          'type'     => 'checkbox',
-          'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.',
-          'default'  => 'no',
-       ],
-       'modena_package_maximum_weight'              => [
-          'title'             => __('Maximum weight of the shipping package'),
-          'type'              => 'float',
-          'placeholder'       => '',
-          'description'       => 'Select amount of quantity of product that this shipping method is free.',
-          'default'           => $this->max_weight_for_modena_shipping_method,
-          'desc_tip'          => true,
-          'sanitize_callback' => array($this, 'sanitizeshippingMethodCost'),
-       ],
-       'modena_no_measurement_package'              => [
-          'title'    => __('Hide shipping if product has no measurements.', 'modena'),
-          'type'     => 'checkbox',
-          'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.',
-          'default'  => 'no',
-       ],
-    ];
+    $this->form_fields = ['credentials_title_line'                                                                                                                  => ['type' => 'title', 'description' => 'Technical Support: +372 6604144 & info@modena.ee'], 'environment' => array('title' => __('Environment', 'modena'), 'type' => 'select', 'options' => array('sandbox' => __('Sandbox mode', 'modena'), 'live' => __('Live mode', 'modena'),), 'description' => __('<div id="environment_alert_desc"></div>', 'modena'), 'default' => 'sandbox', 'desc_tip' => __(
+       'Choose Sandbox mode to test payment using test API keys. Switch to live mode to accept payments with Modena using live API keys.', 'modena'),), 'client_id' => ['title' => __('Client ID', 'modena'), 'type' => 'text', 'desc_tip' => true,], 'client_secret' => ['title' => __('Client Secret', 'modena'), 'type' => 'text', 'desc_tip' => true,], 'title' => ['title' => __('Shipping Method Title', 'modena'), 'type' => 'text', 'default' => $this->get_title(), 'desc_tip' => true,], 'cost' => ['title' => __('Shipping Method Cost'), 'type' => 'float', 'placeholder' => '', 'description' => 'Shipping Method Cost', 'default' => $this->get_cost(), 'desc_tip' => true, 'sanitize_callback' => array($this, 'sanitize_costs'),], 'modena_free_shipping_treshold' => ['title' => __('Enable or disable free shipping treshold.', 'modena'), 'type' => 'checkbox', 'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.', 'default' => 'no',], 'modena_free_shipping_treshold_sum' => ['title' => __('Free shipping treshold'), 'type' => 'float', 'placeholder' => '', 'description' => 'Select amount that this shipping method is free.', 'default' => 50, 'desc_tip' => true, 'sanitize_callback' => array($this, 'sanitize_costs'),], 'modena_quantity_free_shipping_treshold' => ['title' => __('Enable or disable quantity free shipping.', 'modena'), 'type' => 'checkbox', 'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.', 'default' => 'no',], 'modena_quantity_free_shipping_treshold_sum' => ['title' => __('Quantity based free shipping treshold'), 'type' => 'int', 'placeholder' => '', 'description' => 'Select amount of quantity of product that this shipping method is free.', 'default' => 10, 'desc_tip' => true, 'sanitize_callback' => array($this, 'sanitize_costs'),], 'modena_package_measurement_checks' => ['title' => __('Package measurement checks are enabled.', 'modena'), 'type' => 'checkbox', 'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.', 'default' => 'no',], 'modena_package_maximum_weight' => ['title' => __('Maximum weight of the shipping package'), 'type' => 'float', 'placeholder' => '', 'description' => 'Select amount of quantity of product that this shipping method is free.', 'default' => $this->max_weight_for_modena_shipping_method, 'desc_tip' => true, 'sanitize_callback' => array($this, 'sanitize_costs'),], 'modena_no_measurement_package' => ['title' => __('Hide shipping if product has no measurements.', 'modena'), 'type' => 'checkbox', 'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.', 'default' => 'no',],];
   }
-
-  public function sanitizeshippingMethodCost($shippingMethodCost): float {
-    $sanitizedshippingMethodCost = floatval($shippingMethodCost);
-    if ($sanitizedshippingMethodCost < 0) {
-      $sanitizedshippingMethodCost = $shippingMethodCost;
-    }
-
-    return $sanitizedshippingMethodCost;
-  }
-
 }
