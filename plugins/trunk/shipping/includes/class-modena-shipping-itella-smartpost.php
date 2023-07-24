@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
   exit; // Exit if accessed directly
 }
 
-class Modena_Shipping_Itella_Smartpost extends Modena_Shipping_Method {
+class Modena_Shipping_Itella_Smartpost extends Modena_Shipping_Parcels {
 
   public function __construct($instance_id = 0) {
     parent::__construct($instance_id);

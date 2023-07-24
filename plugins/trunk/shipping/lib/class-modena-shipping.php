@@ -21,18 +21,9 @@ class Modena_Shipping {
   const ITELLA_BARCODE_URL = 'https://monte360.com/itella/index.php?action=createShipment';
   const ITELLA_LABEL_URL   = 'https://monte360.com/itella/index.php?action=getLable&barcode=';
   const ITELLA_SHIPPING    = 'itella_shipping';
-  const ITELLA_SHIPPING_ID    = 'modena-shipping-itella-terminals';
+  const ITELLA_SHIPPING_ID = 'modena-shipping-itella-terminals';
 
-  const DEFAULT_ARGS
-     = array(
-        'httpversion' => self::HTTP_VERSION,
-        'sslverify'   => false,
-        'redirection' => 0,
-        'headers'     => array(
-           'Accept' => 'application/json'
-        ),
-        'cookies'     => array(),
-     );
+  const DEFAULT_ARGS = array('httpversion' => self::HTTP_VERSION, 'sslverify' => false, 'redirection' => 0, 'headers' => array('Accept' => 'application/json'), 'cookies' => array(),);
 
   protected $clientId;
   protected $clientSecret;
@@ -76,16 +67,11 @@ class Modena_Shipping {
   public function send_shipping_status_request($applicationUrl, $scope) {
 
     $token = $this->get_modena_token($scope);
-    $headers = array(
-       'Content-Type'  => 'application/json',
-       'Authorization' => 'Bearer ' . $token
-    );
-    $response
-       = $this->send_Request($applicationUrl, [], $headers, 'GET');
+    $headers = array('Content-Type' => 'application/json', 'Authorization' => 'Bearer ' . $token);
+    $response = $this->send_Request($applicationUrl, [], $headers, 'GET');
     $retryCount = 0;
     while (!$response->getBodyValue('status') && $retryCount < self::MAX_RETRIES) {
-      $response
-         = $this->send_Request($applicationUrl, [], $headers, 'GET');
+      $response = $this->send_Request($applicationUrl, [], $headers, 'GET');
       $retryCount++;
       sleep(self::RETRY_TIMEOUT_IN_SECONDS);
     }
@@ -101,14 +87,8 @@ class Modena_Shipping {
    */
   private function get_modena_token($scope) {
 
-    $headers = array(
-       'Content-Type'  => 'application/x-www-form-urlencoded',
-       'Authorization' => 'Basic ' . base64_encode(sprintf('%s:%s', $this->clientId, $this->clientSecret))
-    );
-    $data = array(
-       'grant_type' => 'client_credentials',
-       'scope'      => $scope
-    );
+    $headers = array('Content-Type' => 'application/x-www-form-urlencoded', 'Authorization' => 'Basic ' . base64_encode(sprintf('%s:%s', $this->clientId, $this->clientSecret)));
+    $data = array('grant_type' => 'client_credentials', 'scope' => $scope);
     $response = $this->send_Request($this->tokenUrl, $data, $headers, 'POST');
 
     return $response->getBodyValue('access_token');
@@ -129,11 +109,7 @@ class Modena_Shipping {
     $defaultArgs['user-agent'] = __($this->pluginUserAgentData);
     $combinedHeaders = array_replace($defaultArgs['headers'], $headers);
     $args = array_replace(
-       $defaultArgs, array(
-       'body'    => $body,
-       'headers' => $combinedHeaders,
-       'method'  => $requestType
-    ));
+       $defaultArgs, array('body' => $body, 'headers' => $combinedHeaders, 'method' => $requestType));
     $response = wp_remote_request($requestUrl, $args);
     if (is_wp_error($response)) {
       throw new Exception($response->get_error_message());
@@ -184,7 +160,7 @@ class Modena_Shipping {
   }
 
   public function get_modena_parcel_terminal_list($modena_shipping_method) {
-    if($modena_shipping_method === self::ITELLA_SHIPPING_ID) {
+    if ($modena_shipping_method === self::ITELLA_SHIPPING_ID) {
       return $this->parse_modena_parcel_terminal_json()->item;
     } //todo to add new shipping methods later on
   }

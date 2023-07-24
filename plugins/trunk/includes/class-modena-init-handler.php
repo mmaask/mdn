@@ -276,7 +276,8 @@ class Modena_Init_Handler {
   }
 
   public function modena_shipping_init() {
-    require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-method.php');
-    require_once(MODENA_PLUGIN_PATH . 'shipping/class-modena-shipping-itella-smartpost.php');
+    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-method.php');
+    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-parcels.php');
+    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-itella-smartpost.php');
   }
 }
