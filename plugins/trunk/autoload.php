@@ -10,4 +10,4 @@ require_once __DIR__ . '/lib/model/ModenaOrderResponse.php';
 require_once __DIR__ . '/includes/class-modena-log-handler.php';
 require_once __DIR__ . '/includes/class-modena-onboarding-handler.php';
 require_once __DIR__ . '/includes/class-modena-load-checkout-assets.php';
-require_once __DIR__ . '/shipping/lib/class-modena-shipping.php';
+require_once __DIR__ . '/shipping/includes/class-modena-shipping.php';

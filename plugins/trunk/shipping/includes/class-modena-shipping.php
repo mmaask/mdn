@@ -52,7 +52,7 @@ class Modena_Shipping {
    * @return string
    * @throws Exception
    */
-  public function get_itella_shipping_api_status() {
+  public function get_modena_shipping_api_status() {
     return $this->send_shipping_status_request(self::MODENA_SHIPPING_APPLICATION_STATUS, self::ITELLA_SHIPPING);
   }
 

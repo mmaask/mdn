@@ -8,16 +8,43 @@ if (!defined('ABSPATH')) {
 
 abstract class Modena_Shipping_Parcels extends Modena_Shipping_Method {
 
-  protected abstract function get_modena_parcel_terminal_list();
+  public function get_modena_parcel_terminal_list() {
+    return $this->modena_shipping->get_modena_parcel_terminal_list($this->id);
+  }
 
-  public function process_modena_shipping_request($order_id) {
-    try {
-      $modena_shipping_response = $this->modena_shipping->get_modena_shipping_barcode_id($this->compile_data_for_modena_shipping_request($order_id));
-      $this->add_label_url_to_order_meta_data($modena_shipping_response, $order_id);
-    } catch (Exception $exception) {
-      $this->shipping_logger->error('Exception occurred when processing data: ' . $exception->getMessage());
-      $this->shipping_logger->error($exception->getTraceAsString());
+  public function render_modena_select_box_in_checkout($modena_shipping_method) {
+
+    if (empty($this->parcelMachineList)) {
+      $this->parcelMachineList = $this->get_modena_parcel_terminal_list($modena_shipping_method);
     }
+
+    ?>
+      <div class="modena-shipping-select-wrapper-<?php
+      echo $this->id ?>" style="margin-bottom: 15px">
+          <label for="mdn-shipping-select-box-itella"><?php
+            echo $this->get_select_box_placeholder_for_modena_shipping() ?></label>
+          <select name="userShippingSelection-<?php
+          echo $this->id ?>" id="mdn-shipping-select-box-itella" data-method-id="<?php
+          echo $this->id; ?>" style="width: 100%; height: 400px;">
+              <option disabled selected="selected"></option>
+            <?php
+            $cities = array();
+            foreach ($this->parcelMachineList as $terminal) {
+              $cities[$terminal->{'city'}][] = $terminal;
+            }
+
+            foreach ($cities as $city => $terminals) {
+              echo "<optgroup label='$city'>";
+              foreach ($terminals as $terminal) {
+                $terminalID = $terminal->{'place_id'};
+                echo "<option value='$terminalID' >" . $terminal->{'name'} . "</option>";
+              }
+              echo "</optgroup>";
+            }
+            ?>
+          </select>
+      </div>
+    <?php
   }
 
   public function add_shipping_to_checkout_details($totals, $order_id) {
@@ -70,41 +97,6 @@ abstract class Modena_Shipping_Parcels extends Modena_Shipping_Method {
     $this->modena_shipping->save_modena_shipping_label_PDF_in_User($this->get_selected_shipping_destination_barcode_id($order));
   }
 
-  public function render_modena_select_box_in_checkout($modena_shipping_method) {
-
-    if (empty($this->parcelMachineList)) {
-      $this->parcelMachineList = $this->get_modena_parcel_terminal_list($modena_shipping_method);
-    }
-
-    ?>
-    <div class="modena-shipping-select-wrapper-<?php
-    echo $this->id ?>" style="margin-bottom: 15px">
-      <label for="mdn-shipping-select-box-itella"><?php
-        echo $this->get_select_box_placeholder_for_modena_shipping() ?></label>
-      <select name="userShippingSelection-<?php
-      echo $this->id ?>" id="mdn-shipping-select-box-itella" data-method-id="<?php
-      echo $this->id; ?>" style="width: 100%; height: 400px;">
-        <option disabled selected="selected"></option>
-        <?php
-        $cities = array();
-        foreach ($this->parcelMachineList as $terminal) {
-          $cities[$terminal->{'city'}][] = $terminal;
-        }
-
-        foreach ($cities as $city => $terminals) {
-          echo "<optgroup label='$city'>";
-          foreach ($terminals as $terminal) {
-            $terminalID = $terminal->{'place_id'};
-            echo "<option value='$terminalID' >" . $terminal->{'name'} . "</option>";
-          }
-          echo "</optgroup>";
-        }
-        ?>
-      </select>
-    </div>
-    <?php
-  }
-
   public function render_shipping_destination_in_admin_order_view($order_id) {
     //error_log("Trying to run into admin orders");
 
@@ -116,38 +108,48 @@ abstract class Modena_Shipping_Parcels extends Modena_Shipping_Method {
     if ($this->parse_shipping_methods($this->id, $order_id)) {
 
       ?>
-      <tr class="selected-terminal">
-        <th>
-          <h3>
-            <?php
-            echo $this->title ?>
-          </h3>
-        </th>
-        <td>
-          <p>
-            <?php
-            echo $this->get_selected_shipping_destination(); ?>
+        <tr class="selected-terminal">
+            <th>
+                <h3>
+                  <?php
+                  echo $this->title ?>
+                </h3>
+            </th>
+            <td>
+                <p>
+                  <?php
+                  echo $this->get_selected_shipping_destination(); ?>
 
-          </p>
-          <button id="buttonForClicking" onClick="startUpdatingOrderParcel()" class="button grant-access"><?php
-            _e($this->get_placeholderPrintLabelInAdmin()) ?></button>
+                </p>
+                <button id="buttonForClicking" onClick="startUpdatingOrderParcel()" class="button grant-access"><?php
+                  _e($this->get_placeholderPrintLabelInAdmin()) ?></button>
 
-          <script>
-              document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
+                <script>
+                    document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
 
-              function startUpdatingOrderParcel() {
+                    function startUpdatingOrderParcel() {
 
 
-                <?php
-                //todo implement download correctly
-                //$this->updateParcelTerminalForOrder($order, $order_id);
-                ?>
-              }
-          </script>
-        </td>
-      </tr>
+                      <?php
+                      //todo implement download correctly
+                      //$this->updateParcelTerminalForOrder($order, $order_id);
+                      ?>
+                    }
+                </script>
+            </td>
+        </tr>
       <?php
     }
+  }
+
+  public function process_modena_shipping_request($order_id) {
+    //try {
+    //  $modena_shipping_response = $this->modena_shipping->get_modena_shipping_barcode_id($this->compile_data_for_modena_shipping_request($order_id));
+    //  $this->add_label_url_to_order_meta_data($modena_shipping_response, $order_id);
+    //} catch (Exception $exception) {
+    //  $this->shipping_logger->error('Exception occurred when processing data: ' . $exception->getMessage());
+    //  $this->shipping_logger->error($exception->getTraceAsString());
+    //}
   }
 
 
