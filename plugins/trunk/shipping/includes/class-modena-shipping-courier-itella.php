@@ -15,7 +15,6 @@ class Modena_Shipping_Courier_Itella extends Modena_Shipping_Courier {
     $this->modena_shipping_service               = 'Itella';
     $this->title                                 = __('Itella kuller');
     $this->method_title                          = __('Modena - Itella Courier');
-    $this->method_description                    = __('Itella Courier');
     $this->cost                                  = 11.99;
     $this->max_weight_for_modena_shipping_method = 35;
 

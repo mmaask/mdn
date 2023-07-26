@@ -28,12 +28,29 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     $this->init_form_fields();
     $this->init_settings();
 
-    $this->environment   = $this->get_option('environment');
-    $this->client_id     = $this->get_option('client_id');
-    $this->client_secret = $this->get_option('client_secret');
-    $this->is_test_mode  = $this->environment === 'sandbox';
-    $this->title         = $this->get_option('title');
-    $this->cost          = $this->get_option('cost');
+    $this->environment        = $this->get_option('environment');
+    $this->client_id          = $this->get_option('client_id');
+    $this->client_secret      = $this->get_option('client_secret');
+    $this->is_test_mode       = $this->environment === 'sandbox';
+    $this->title              = $this->get_option('title');
+    $this->cost               = $this->get_option('cost');
+    $this->method_description = __(
+       'Name in checkout: ' .
+       $this->title .
+       '<br />Price: ' .
+       $this->cost .
+       ' <br /> Is free shipping enabled? ' .
+       $this->get_option('modena_free_shipping_treshold') .
+       '. Free shipping sum: ' .
+       $this->get_option('modena_free_shipping_treshold_sum') .
+       '<br />Is free shipping by quantity enabled? ' .
+       $this->get_option('modena_quantity_free_shipping_treshold') .
+       '. Free shipping quantity: ' .
+       $this->get_option('modena_quantity_free_shipping_treshold_sum') .
+       '<br />Product dimension check? ' .
+       $this->get_option('modena_package_measurement_checks') .
+       '<br />Hide if product has no dimensions? ' .
+       $this->get_option('modena_no_measurement_package'));
 
     add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
 

@@ -13,7 +13,6 @@ class Modena_Shipping_Parcels_Omniva extends Modena_Shipping_Parcels {
     $this->modena_shipping_service               = 'Omniva';
     $this->title                                 = __('Omniva pakiautomaat');
     $this->method_title                          = __('Modena - Omniva Parcel Terminal');
-    $this->method_description                    = __('Omniva Parcel Terminals');
     $this->cost                                  = 4.99;
     $this->max_weight_for_modena_shipping_method = 35;
 
