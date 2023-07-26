@@ -7,6 +7,9 @@ if (!defined('ABSPATH')) {
 }
 
 abstract class Modena_Shipping_Courier extends Modena_Shipping_Method {
+  public function __construct($instance_id = 0) {
+    parent::__construct($instance_id);
+  }
 
   public function process_modena_shipping_request($order_id) {
     //try {

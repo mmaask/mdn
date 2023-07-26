@@ -37,7 +37,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
     add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
 
-
+    parent::__construct($instance_id);
   }
 
   public function get_order_total_weight($order) {
@@ -241,36 +241,23 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
   public function init_form_fields() {
     $this->form_fields = [
-       'credentials_title_line'        => ['type' => 'title', 'description' => 'Technical Support: +372 6604144 & info@modena.ee'],
-       'environment'                   => array(
-          'title'       => __('Environment', 'modena'),
-          'type'        => 'select',
-          'options'     => array('sandbox' => __('Sandbox mode', 'modena'), 'live' => __('Live mode', 'modena'),),
-          'description' => __('<div id="environment_alert_desc"></div>', 'modena'),
-          'default'     => 'sandbox',
-          'desc_tip'    => __(
-             'Choose Sandbox mode to test payment using test API keys. Switch to live mode to accept payments with Modena using live API keys.', 'modena'),),
-       'client_id'                     => ['title' => __('Client ID', 'modena'), 'type' => 'text', 'desc_tip' => true,],
-       'client_secret'                 => ['title' => __('Client Secret', 'modena'), 'type' => 'text', 'desc_tip' => true,],
-       'partner_api_id'                => ['title' => __($this->title . ' ID', 'modena'), 'type' => 'text', 'desc_tip' => true,],
-       'partner_api_secret'            => ['title' => __($this->title . ' Secret', 'modena'), 'type' => 'text', 'desc_tip' => true,],
-       'title'                         => ['title' => __('Shipping Method Title', 'modena'), 'type' => 'text', 'default' => $this->get_title(), 'desc_tip' => true,],
+       'title'                         => ['title' => __('Transpordivahendi nimetus makselehel', 'modena'), 'type' => 'text', 'default' => $this->title, 'desc_tip' => true,],
        'cost'                          => [
-          'title'             => __('Shipping Method Cost'),
+          'title'             => __('Transpordivahendi maksumus'),
           'type'              => 'price',
           'placeholder'       => '',
           'description'       => 'Shipping Method Cost',
-          'default'           => $this->get_cost(),
+          'default'           => $this->cost,
           'desc_tip'          => true,
           'sanitize_callback' => array($this, 'sanitize_costs'),],
        'modena_free_shipping_treshold' => [
-          'title'    => __('Enable or disable free shipping treshold.', 'modena'),
+          'title'    => __('Tasuta saatmise funktsionaalsus', 'modena'),
           'type'     => 'checkbox',
           'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.',
           'default'  => 'no',],
 
        'modena_free_shipping_treshold_sum'          => [
-          'title'             => __('Free shipping treshold'),
+          'title'             => __('Piirmäär tasuta saatmisele'),
           'type'              => 'price',
           'placeholder'       => '',
           'description'       => 'Select amount that this shipping method is free.',
@@ -278,12 +265,12 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
           'desc_tip'          => true,
           'sanitize_callback' => array($this, 'sanitize_costs'),],
        'modena_quantity_free_shipping_treshold'     => [
-          'title'    => __('Enable or disable quantity free shipping.', 'modena'),
+          'title'    => __('Ostukorvi koguse põhine tasuta saatmine', 'modena'),
           'type'     => 'checkbox',
           'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.',
           'default'  => 'no',],
        'modena_quantity_free_shipping_treshold_sum' => [
-          'title'             => __('Quantity based free shipping treshold'),
+          'title'             => __('Piirmäär ostukorvi toodete kogusele'),
           'type'              => 'price',
           'placeholder'       => '',
           'description'       => 'Select amount of quantity of product that this shipping method is free.',
@@ -291,12 +278,12 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
           'desc_tip'          => true,
           'sanitize_callback' => array($this, 'sanitize_costs'),],
        'modena_package_measurement_checks'          => [
-          'title'    => __('Package measurement checks are enabled.', 'modena'),
+          'title'    => __('Toote mõõtmete kontroll transpordivahendile', 'modena'),
           'type'     => 'checkbox',
           'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.',
           'default'  => 'no',],
        'modena_package_maximum_weight'              => [
-          'title'             => __('Maximum weight of the shipping package'),
+          'title'             => __('Ostukorvi maksimum kaal'),
           'type'              => 'float',
           'placeholder'       => '',
           'description'       => 'Select amount of quantity of product that this shipping method is free.',
@@ -304,9 +291,13 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
           'desc_tip'          => true,
           'sanitize_callback' => array($this, 'sanitize_costs'),],
        'modena_no_measurement_package'              => [
-          'title'    => __('Hide shipping if product has no measurements.', 'modena'),
+          'title'    => __('Peida transpordivahend mõõtmete puudumisel', 'modena'),
           'type'     => 'checkbox',
           'desc_tip' => 'Enable or disable the shipping method in checkout. Customers will not be able to see the shipping method if disabled.',
-          'default'  => 'no',],];
+          'default'  => 'no',],
+       'client_id'                                  => ['title' => __('Modena: API ID', 'modena'), 'type' => 'text', 'desc_tip' => true,],
+       'client_secret'                              => ['title' => __('Modena: API Secret', 'modena'), 'type' => 'text', 'desc_tip' => true,],
+       'partner_api_id'                             => ['title' => __($this->modena_shipping_service . ': API Key', 'modena'), 'type' => 'text', 'desc_tip' => true,],
+       'partner_api_secret'                         => ['title' => __($this->modena_shipping_service . ': API Secret', 'modena'), 'type' => 'text', 'desc_tip' => true,],];
   }
 }

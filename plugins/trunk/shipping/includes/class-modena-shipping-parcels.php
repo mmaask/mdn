@@ -7,6 +7,9 @@ if (!defined('ABSPATH')) {
 }
 
 abstract class Modena_Shipping_Parcels extends Modena_Shipping_Method {
+    public function __construct($instance_id = 0) {
+      parent::__construct($instance_id);
+    }
 
   public function get_modena_parcel_terminal_list() {
     return $this->modena_shipping->get_modena_parcel_terminal_list($this->id);
