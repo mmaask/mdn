@@ -30,7 +30,17 @@ function modena_init() {
       $modena_plugin = new Modena_Init_Handler();
     }
   }
+
+  static $modena_shipping;
+  if (!isset($modena_shipping)) {
+    if (!class_exists('Modena_Shipping')) {
+      require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping.php');
+      $modena_shipping = new Modena_Shipping();
+    }
+  }
+
   $modena_plugin->run();
+  $modena_shipping->init();
 }
 
 add_action('plugins_loaded', 'modena_init');

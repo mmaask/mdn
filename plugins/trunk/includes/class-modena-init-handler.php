@@ -16,13 +16,6 @@ class Modena_Init_Handler {
         'Modena_Click_Payment'    => 'click',
      ];
 
-  const SHIPPING_METHODS
-     = [
-        'Modena_Shipping_Parcels_Omniva'   => 'omniva',
-        'Modena_Shipping_Parcels_DPD'    => 'dpd',
-        'Modena_Shipping_Parcels_itella'   => 'itella',
-     ];
-
   public function run() {
 
     new Modena_Admin_Handler();
@@ -47,7 +40,6 @@ class Modena_Init_Handler {
   public function init() {
 
     $this->modena_gateways_init();
-    add_action('woocommerce_shipping_init', array($this, 'modena_shipping_init'));
     add_action(
        'woocommerce_single_product_summary', [
        $this,
@@ -76,25 +68,6 @@ class Modena_Init_Handler {
   function add_modena_payment_gateways($methods) {
 
     return array_merge($methods, array_keys(self::PAYMENT_GATEWAYS));
-  }
-
-  function modena_shipping_init() {
-
-    if (!class_exists('Modena_Shipping_Method')) {
-      require_once(MODENA_PLUGIN_PATH . '/shipping/includes/class-modena-shipping-method.php');
-      require_once(MODENA_PLUGIN_PATH . '/shipping/includes/class-modena-shipping-parcels.php');
-    }
-
-    foreach (self::SHIPPING_METHODS as $className => $fileName) {
-      if (!class_exists($className)) {
-        require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-parcels-' . $fileName . '.php');
-      }
-    }
-    add_filter('woocommerce_shipping_methods', array($this, 'add_modena_shipping_methods'));
-  }
-
-  function add_modena_shipping_methods($methods) {
-    return array_merge($methods, array_keys(self::SHIPPING_METHODS));
   }
 
   private function is_slice_enabled(): bool {

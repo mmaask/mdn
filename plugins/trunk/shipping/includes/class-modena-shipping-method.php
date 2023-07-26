@@ -22,8 +22,6 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
   public function __construct($instance_id = 0) {
 
-    require_once MODENA_PLUGIN_PATH . 'autoload.php';
-
     $this->instance_id = absint($instance_id);
     $this->supports    = array('shipping-zones', 'instance-settings', 'instance-settings-modal',);
 
@@ -39,10 +37,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
     add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
 
-    Modena_Load_Checkout_Assets::getInstance();
 
-    $this->modena_shipping = new Modena_Shipping($this->client_id, $this->client_secret, self::PLUGIN_VERSION, $this->is_test_mode);
-    $this->shipping_logger = new WC_Logger(array(new Modena_Log_Handler()));
   }
 
   public function get_order_total_weight($order) {
@@ -245,7 +240,6 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
 
   public function init_form_fields() {
-    parent::init_form_fields();
     $this->form_fields = [
        'credentials_title_line'        => ['type' => 'title', 'description' => 'Technical Support: +372 6604144 & info@modena.ee'],
        'environment'                   => array(
