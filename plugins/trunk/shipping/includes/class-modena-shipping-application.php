@@ -53,7 +53,9 @@ class Modena_Shipping_Handler {
    * @throws Exception
    */
   public function get_modena_shipping_api_status() {
-    return $this->send_shipping_status_request(self::MODENA_SHIPPING_APPLICATION_STATUS, self::ITELLA_SHIPPING);
+
+    return True;
+    //    return $this->send_shipping_status_request(self::MODENA_SHIPPING_APPLICATION_STATUS, self::ITELLA_SHIPPING);
   }
 
   /**
@@ -75,8 +77,8 @@ class Modena_Shipping_Handler {
       $retryCount++;
       sleep(self::RETRY_TIMEOUT_IN_SECONDS);
     }
-
-    return $response->getBodyValue('status');
+    error_log("finding out the request status...");
+      return $response->getBodyValue('status');
   }
 
   /**

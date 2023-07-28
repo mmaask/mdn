@@ -12,7 +12,8 @@ class Modena_Shipping {
   }
 
   public function is_woocommerce_active(): bool {
-    return in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) || (is_multisite() && in_array('woocommerce/woocommerce.php', array_keys(get_site_option('active_sitewide_plugins'))));
+    return in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) ||
+           (is_multisite() && in_array('woocommerce/woocommerce.php', array_keys(get_site_option('active_sitewide_plugins'))));
   }
 
   /**
@@ -26,6 +27,7 @@ class Modena_Shipping {
   public function run_shipping() {
     add_filter('woocommerce_shipping_methods', array($this, 'load_modena_shipping_methods'));
     add_action('woocommerce_shipping_init', array($this, 'init_WC_estonia'));
+    add_filter('woocommerce_get_settings_pages', array($this, 'add_settings_pages'));
   }
 
   /**
@@ -34,12 +36,13 @@ class Modena_Shipping {
    */
 
   public function load_modena_shipping_methods(array $methods): array {
-    $methods['modena-shipping-parcels-omniva'] = 'Modena_Shipping_Parcels_Omniva';
-    $methods['modena-shipping-parcels-dpd']    = 'Modena_Shipping_Parcels_DPD';
-    $methods['modena-shipping-parcels-itella'] = 'Modena_Shipping_Parcels_itella';
-    $methods['modena-shipping-courier-itella'] = 'Modena_Shipping_Courier_itella';
-    $methods['modena-shipping-courier-dpd']    = 'Modena_Shipping_Courier_DPD';
-    $methods['modena-shipping-courier-omniva'] = 'Modena_Shipping_Courier_Omniva';
+    $methods['modena-shipping-parcels-omniva']        = 'Modena_Shipping_Parcels_Omniva';
+    $methods['modena-shipping-parcels-dpd']           = 'Modena_Shipping_Parcels_DPD';
+    $methods['modena-shipping-parcels-itella']        = 'Modena_Shipping_Parcels_itella';
+    $methods['modena-shipping-parcels-omniva-office'] = 'Modena_Shipping_Parcels_Omniva_Office';
+    $methods['modena-shipping-courier-itella']        = 'Modena_Shipping_Courier_itella';
+    $methods['modena-shipping-courier-dpd']           = 'Modena_Shipping_Courier_DPD';
+    $methods['modena-shipping-courier-omniva']        = 'Modena_Shipping_Courier_Omniva';
 
     return $methods;
   }
@@ -65,6 +68,19 @@ class Modena_Shipping {
     require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-parcels-itella.php');
     require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-parcels-dpd.php');
     require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-parcels-omniva.php');
+    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-parcels-omniva-office.php');
 
+  }
+
+  /**
+   * @param $settings
+   * @return mixed
+   */
+  public function add_settings_pages($settings) {
+    require_once MODENA_PLUGIN_PATH . '/shipping/includes/class-modena-shipping-settings.php';
+
+    $settings[] = Modena_Shipping_Settings::create();
+
+    return $settings;
   }
 }
