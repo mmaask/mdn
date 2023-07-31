@@ -3,13 +3,18 @@ if (!defined('ABSPATH')) {
   exit; // Exit if accessed directly
 }
 
-class Modena_Shipping_Settings extends WC_Settings_Page {
+class Modena_Settings extends WC_Settings_Page {
 
   public function __construct() {
     $this->id    = 'modena_shipping_settings';
     $this->label = __('Modena', 'modena-for-woocommerce');
 
+    require_once MODENA_PLUGIN_PATH . 'autoload.php';
     parent::__construct();
+  }
+
+  public function get_option($name) {
+    return get_option($name);
   }
 
   public static function create() {
@@ -29,21 +34,41 @@ class Modena_Shipping_Settings extends WC_Settings_Page {
           'type'  => 'title',
           'id'    => 'modena_shipping_general'),
        array(
-          'title'   => __('Client ID', 'modena-for-woocommerce'),
-          'type'    => 'text',
-          'default' => '',
-          'id'      => 'modena_shipping_accessKey'),
+          'title'    => __('Environment', 'modena'),
+          'id'       => 'modena_environment',
+          'type'     => 'select',
+          'class'    => 'wc-enhanced-select',
+          'options'  => array(
+             'sandbox' => __('Sandbox mode', 'modena'),
+             'live'    => __('Live mode', 'modena')),
+          'desc'     => __('Get Modena ID and Secret key from <a target="_blank" href="https://partner.modena.ee">Modena Partner Portal</a>.', 'modena-for-woocommerce'),
+          'default'  => 'sandbox',
+          'desc_tip' => __('Choose Sandbox mode to test payment using test API keys. Switch to live mode to accept payments with Modena using live API keys.', 'modena')),
        array(
-          'title'   => __('Client Secret', 'modena-for-woocommerce'),
-          'type'    => 'text',
-          'desc'    => __('Get Modena ID and Secret key from <a target="_blank" href="https://partner.modena.ee">Modena Partner Portal</a>.', 'modena-for-woocommerce'),
-          'default' => '',
-          'id'      => 'modena_shipping_secretKey'),
+          'title'    => __('Sandbox Client ID', 'modena'),
+          'id'       => 'modena_sandbox_client_id',
+          'type'     => 'text',
+          'desc_tip' => true,),
+       array(
+          'title'    => __('Sandbox Client Secret', 'modena'),
+          'id'       => 'modena_sandbox_client_secret',
+          'type'     => 'text',
+          'desc_tip' => true,),
+       array(
+          'title'    => __('Live Client ID', 'modena'),
+          'id'       => 'modena_live_client_id',
+          'type'     => 'text',
+          'desc_tip' => true,),
+       array(
+          'title'    => __('Live Client Secret', 'modena'),
+          'id'       => 'modena_live_client_secret',
+          'type'     => 'text',
+          'desc_tip' => true,),
        array(
           'type' => 'sectionend',
           'id'   => 'modena_shipping_general'),
        array(
-          'title' => __("Payment Gateway Settings", 'modena-for-woocommerce'),
+          'title' => __("General Settings", 'modena-for-woocommerce'),
           'type'  => 'title',
           'id'    => 'modena_shipping_payment'),
        array(
@@ -53,13 +78,6 @@ class Modena_Shipping_Settings extends WC_Settings_Page {
           'default' => 'no',
           'id'      => 'modena_payments_enabled'),
        array(
-          'type' => 'sectionend',
-          'id'   => 'modena_shipping_general'),
-       array(
-          'title' => __("Shipping Settings", 'modena-for-woocommerce'),
-          'type'  => 'title',
-          'id'    => 'modena_shipping_sender_info'),
-       array(
           'title'   => __('Enable Modena shipping', 'modena-for-woocommerce'),
           'label'   => __('Enabled', 'modena-for-woocommerce'),
           'type'    => 'checkbox',
@@ -67,7 +85,7 @@ class Modena_Shipping_Settings extends WC_Settings_Page {
           'id'      => 'modena_shipping_enabled'),
        array(
           'type'    => 'select',
-          'title'   => __('Order status when label printed', 'modena-for-woocommerce'),
+          'title'   => __('Order status when shipping label printed', 'modena-for-woocommerce'),
           'class'   => 'wc-enhanced-select',
           'default' => isset($orderStatuses['wc-mon-label-printed']) ? 'wc-mon-label-printed' : 'no-change',
           'desc'    => __('What status should order be changed to in Woocommerce when label is printed?<br>
@@ -130,4 +148,6 @@ class Modena_Shipping_Settings extends WC_Settings_Page {
           'type' => 'sectionend',
           'id'   => 'modena_shipping_sender_info'),);
   }
+
+
 }

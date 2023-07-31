@@ -77,9 +77,9 @@ class Modena_Shipping {
    * @return mixed
    */
   public function add_settings_pages($settings) {
-    require_once MODENA_PLUGIN_PATH . '/shipping/includes/class-modena-shipping-settings.php';
+    require_once MODENA_PLUGIN_PATH . '/includes/class-modena-settings.php';
 
-    $settings[] = Modena_Shipping_Settings::create();
+    $settings[] = Modena_Settings::create();
 
     return $settings;
   }

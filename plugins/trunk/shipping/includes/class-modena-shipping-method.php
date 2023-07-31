@@ -30,9 +30,9 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
     $this->init_form_fields();
     $this->init_settings();
 
-    $this->environment        = $this->get_option('environment');
-    $this->client_id          = $this->get_option('client_id');
-    $this->client_secret      = $this->get_option('client_secret');
+    $this->environment        = get_option('modena_environment');
+    $this->client_id          = get_option('modena_' . $this->environment . '_client_id');
+    $this->client_secret      = get_option('modena_' . $this->environment . '_client_secret');
     $this->is_test_mode       = $this->environment === 'sandbox';
     $this->title              = $this->get_option('title');
     $this->cost               = $this->get_option('cost');
@@ -55,19 +55,24 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
           $this->get_option('modena_no_measurement_package') .
           '</b>');
 
-    add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
-
-    $this->modena_shipping = new Modena_Shipping_Handler($this->client_id, $this->client_secret, self::PLUGIN_VERSION, $this->is_test_mode);
-    $this->shipping_logger = new WC_Logger(array(new Modena_Log_Handler()));
-    $this->init_modena_hooks();
+    $this->init_hooks();
 
     parent::__construct($instance_id);
   }
 
-  public function init_modena_hooks() {
-
+  public function init_hooks() {
+    add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
+    add_filter('woocommerce_package_rates', array($this, 'hide_shipping_method_if_shipping_is_disabled'));
     add_action('woocommerce_checkout_update_order_review', array($this, 'is_cart_shippable_by_modena_weight'));
 
+  }
+
+  public function hide_shipping_method_if_shipping_is_disabled_in_settings($rates) {
+    if (get_option('modena_shipping_enabled') == 'no') {
+      unset($rates[$this->id]);
+    }
+
+    return $rates;
   }
 
   public function calculate_shipping($package = array()) {
