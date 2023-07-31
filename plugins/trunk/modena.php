@@ -5,7 +5,7 @@
  * Description: Modena can help you get with everything you need to start your online store checkout in Estonia. Let us know about you +372 6604144 or info@modena.ee
  * Author: Modena Estonia OÜ
  * URI: https://modena.ee/
- * Version: 3.1.0
+ * Version: 2.10.0
  *
  * @package Modena
  */

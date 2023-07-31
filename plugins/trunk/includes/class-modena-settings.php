@@ -10,6 +10,7 @@ class Modena_Settings extends WC_Settings_Page {
     $this->label = __('Modena', 'modena-for-woocommerce');
 
     require_once MODENA_PLUGIN_PATH . 'autoload.php';
+
     parent::__construct();
   }
 
@@ -47,21 +48,25 @@ class Modena_Settings extends WC_Settings_Page {
        array(
           'title'    => __('Sandbox Client ID', 'modena'),
           'id'       => 'modena_sandbox_client_id',
+          'default' => get_option('sandbox_client_id'),
           'type'     => 'text',
           'desc_tip' => true,),
        array(
           'title'    => __('Sandbox Client Secret', 'modena'),
           'id'       => 'modena_sandbox_client_secret',
+          'default' => get_option('sandbox_client_secret'),
           'type'     => 'text',
           'desc_tip' => true,),
        array(
           'title'    => __('Live Client ID', 'modena'),
           'id'       => 'modena_live_client_id',
+          'default' => get_option('live_client_id'),
           'type'     => 'text',
           'desc_tip' => true,),
        array(
           'title'    => __('Live Client Secret', 'modena'),
           'id'       => 'modena_live_client_secret',
+          'default' => get_option('live_client_secret'),
           'type'     => 'text',
           'desc_tip' => true,),
        array(
@@ -72,7 +77,7 @@ class Modena_Settings extends WC_Settings_Page {
           'type'  => 'title',
           'id'    => 'modena_shipping_payment'),
        array(
-          'title'   => __('Enable Modena payment gateways', 'modena-for-woocommerce'),
+          'title'   => __('Enable Modena payments', 'modena-for-woocommerce'),
           'label'   => __('Enabled', 'modena-for-woocommerce'),
           'type'    => 'checkbox',
           'default' => 'no',

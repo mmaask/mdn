@@ -1,11 +1,11 @@
 === Modena Payment Gateway ===
-Version: 2.9.3
+Version: 2.10.0
 Contributors: modenapayments
 Donate link: https://modena.ee/
 Tags: online payment, payment, payment gateway, payment_gateway, woocommerce, sales, hire-purchase, järelmaks, financing, credit intermediary, krediidivahendaja, modena
 Requires at least: 4.7
 Tested up to: 6.2.2
-Stable tag: 2.9.3
+Stable tag: 2.10.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html

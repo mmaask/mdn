@@ -62,7 +62,7 @@ abstract class Modena_Shipping_Method extends WC_Shipping_Method {
 
   public function init_hooks() {
     add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
-    add_filter('woocommerce_package_rates', array($this, 'hide_shipping_method_if_shipping_is_disabled'));
+    add_filter('woocommerce_package_rates', array($this, 'hide_shipping_method_if_shipping_is_disabled_in_settings'));
     add_action('woocommerce_checkout_update_order_review', array($this, 'is_cart_shippable_by_modena_weight'));
 
   }

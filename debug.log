@@ -1,566 +1,240 @@
-[31-Jul-2023 12:00:45 UTC] PHP Fatal error:  Uncaught Error: Class 'WC_Settings_Page' not found in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-settings.php:6
-Stack trace:
-#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/autoload.php(14): require_once()
-#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/gateways/class-modena-base.php(32): require_once('/Users/stenuues...')
-#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/gateways/class-modena-direct.php(15): Modena_Base_Payment->__construct()
-#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-payment-gateways.php(97): Modena_Direct_Payment->__construct()
-#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-payment-gateways.php(70): WC_Payment_Gateways->init()
-#5 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocom in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-settings.php on line 6
-[31-Jul-2023 12:01:28 UTC] PHP Fatal error:  Uncaught Error: Class 'Modena_Settings' not found in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-method.php:34
-Stack trace:
-#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-parcels.php(11): Modena_Shipping_Method->__construct(0)
-#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-parcels-omniva.php(19): Modena_Shipping_Parcels->__construct(0)
-#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping.php(199): Modena_Shipping_Parcels_Omniva->__construct()
-#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping.php(177): WC_Shipping->register_shipping_method('Modena_Shipping...')
-#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/cl in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-method.php on line 34
-[31-Jul-2023 12:01:46 UTC] PHP Fatal error:  Uncaught Error: Class 'WC_Settings_Page' not found in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-settings.php:6
-Stack trace:
-#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/autoload.php(14): require_once()
-#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/gateways/class-modena-base.php(32): require_once('/Users/stenuues...')
-#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/gateways/class-modena-direct.php(15): Modena_Base_Payment->__construct()
-#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-payment-gateways.php(97): Modena_Direct_Payment->__construct()
-#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-payment-gateways.php(70): WC_Payment_Gateways->init()
-#5 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocom in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-settings.php on line 6
-[31-Jul-2023 12:02:57 UTC] PHP Fatal error:  Uncaught Error: Class 'WC_Settings_Page' not found in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-settings.php:6
-Stack trace:
-#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-method.php(33): require_once()
-#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-parcels.php(11): Modena_Shipping_Method->__construct(0)
-#2 /Users/stenuuesoo/Local Sites/jeans-pions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping.php(199): Modena_Shipping_Parcels_Omniva->__construct()
-                                        #4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping.php(177): WC_Shipping->register_ in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/includes/class-modena-settings.php on line 6
-otions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-parcels-omniva.php(19): Modena_Shipping_Parcels->__construct(0)
-#3 /Users/stenuuesoo/Local Sites/jeans-pot[31-Jul-2023 12:04:46 UTC] PHP Fatal error:  Uncaught Error: Call to a member function get_option() on null in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-method.php:33
-Stack trace:
-#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-parcels.php(11): Modena_Shipping_Method->__construct(0)
-#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-parcels-omniva.php(19): Modena_Shipping_Parcels->__construct(0)
-#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping.php(199): Modena_Shipping_Parcels_Omniva->__construct()
-#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/class-wc-shipping.php(177): WC_Shipping->register_shipping_method('Modena_Shipping...')
-#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerc in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-method.php on line 33
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:10 UTC] sandbox
-[31-Jul-2023 12:05:10 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:10 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:29 UTC] sandbox
-[31-Jul-2023 12:05:29 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:29 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:29 UTC] sandbox
-[31-Jul-2023 12:05:29 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:29 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:29 UTC] sandbox
-[31-Jul-2023 12:05:29 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:29 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:29 UTC] sandbox
-[31-Jul-2023 12:05:29 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:29 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:29 UTC] sandbox
-[31-Jul-2023 12:05:29 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:29 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:29 UTC] sandbox
-[31-Jul-2023 12:05:29 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:29 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:29 UTC] sandbox
-[31-Jul-2023 12:05:29 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:29 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:36 UTC] sandbox
-[31-Jul-2023 12:05:36 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:36 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:36 UTC] sandbox
-[31-Jul-2023 12:05:36 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:36 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:36 UTC] sandbox
-[31-Jul-2023 12:05:36 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:36 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:36 UTC] sandbox
-[31-Jul-2023 12:05:36 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:36 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:36 UTC] sandbox
-[31-Jul-2023 12:05:36 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:36 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:36 UTC] sandbox
-[31-Jul-2023 12:05:36 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:36 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:36 UTC] sandbox
-[31-Jul-2023 12:05:36 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:36 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:37 UTC] sandbox
-[31-Jul-2023 12:05:37 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:37 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:37 UTC] sandbox
-[31-Jul-2023 12:05:37 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:37 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:37 UTC] sandbox
-[31-Jul-2023 12:05:37 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:37 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:37 UTC] sandbox
-[31-Jul-2023 12:05:37 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:37 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:37 UTC] sandbox
-[31-Jul-2023 12:05:37 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:37 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:37 UTC] sandbox
-[31-Jul-2023 12:05:37 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:37 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:37 UTC] sandbox
-[31-Jul-2023 12:05:37 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:37 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:38 UTC] sandbox
-[31-Jul-2023 12:05:38 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:38 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:44 UTC] live
-[31-Jul-2023 12:05:44 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:44 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:46 UTC] live
-[31-Jul-2023 12:05:46 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:46 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:46 UTC] live
-[31-Jul-2023 12:05:46 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:46 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:46 UTC] live
-[31-Jul-2023 12:05:46 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:46 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:46 UTC] live
-[31-Jul-2023 12:05:46 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:46 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:46 UTC] live
-[31-Jul-2023 12:05:46 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:46 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:46 UTC] live
-[31-Jul-2023 12:05:46 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:46 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:46 UTC] live
-[31-Jul-2023 12:05:46 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:46 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:47 UTC] live
-[31-Jul-2023 12:05:47 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:47 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:47 UTC] live
-[31-Jul-2023 12:05:47 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:47 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:47 UTC] live
-[31-Jul-2023 12:05:47 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:47 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:47 UTC] live
-[31-Jul-2023 12:05:47 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:47 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:47 UTC] live
-[31-Jul-2023 12:05:47 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:47 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:47 UTC] live
-[31-Jul-2023 12:05:47 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:47 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:05:47 UTC] live
-[31-Jul-2023 12:05:47 UTC] 29e5636d-live-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:05:47 UTC] 1b14e4d4-live-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:02 UTC] live
-[31-Jul-2023 12:06:02 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:02 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:08 UTC] live
-[31-Jul-2023 12:06:08 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:08 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:09 UTC] live
-[31-Jul-2023 12:06:09 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:09 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:09 UTC] live
-[31-Jul-2023 12:06:09 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:09 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:09 UTC] live
-[31-Jul-2023 12:06:09 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:09 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:09 UTC] live
-[31-Jul-2023 12:06:09 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:09 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:09 UTC] live
-[31-Jul-2023 12:06:09 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:09 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:09 UTC] live
-[31-Jul-2023 12:06:09 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:09 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:09 UTC] live
-[31-Jul-2023 12:06:09 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:09 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:10 UTC] live
-[31-Jul-2023 12:06:10 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:10 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:10 UTC] live
-[31-Jul-2023 12:06:10 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:10 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:10 UTC] live
-[31-Jul-2023 12:06:10 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:10 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:10 UTC] live
-[31-Jul-2023 12:06:10 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:10 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:10 UTC] live
-[31-Jul-2023 12:06:10 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:10 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:10 UTC] live
-[31-Jul-2023 12:06:10 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:10 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:10 UTC] live
-[31-Jul-2023 12:06:10 UTC] 29e5636d-dfgdfg-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:10 UTC] 1b14e4d4-djkkk-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:19 UTC] sandbox
-[31-Jul-2023 12:06:19 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:19 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:21 UTC] sandbox
-[31-Jul-2023 12:06:21 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:21 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:21 UTC] sandbox
-[31-Jul-2023 12:06:21 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:21 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:21 UTC] sandbox
-[31-Jul-2023 12:06:21 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:21 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:21 UTC] sandbox
-[31-Jul-2023 12:06:21 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:21 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:21 UTC] sandbox
-[31-Jul-2023 12:06:21 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:21 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:21 UTC] sandbox
-[31-Jul-2023 12:06:21 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:21 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:21 UTC] sandbox
-[31-Jul-2023 12:06:21 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:21 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:22 UTC] sandbox
-[31-Jul-2023 12:06:22 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:22 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:22 UTC] sandbox
-[31-Jul-2023 12:06:22 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:22 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:22 UTC] sandbox
-[31-Jul-2023 12:06:22 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:22 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:22 UTC] sandbox
-[31-Jul-2023 12:06:22 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:22 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:22 UTC] sandbox
-[31-Jul-2023 12:06:22 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:22 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:22 UTC] sandbox
-[31-Jul-2023 12:06:22 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:22 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:06:22 UTC] sandbox
-[31-Jul-2023 12:06:22 UTC] 29e5636d-53e4-4529-bd70-e56ed3c624d1
-[31-Jul-2023 12:06:22 UTC] 1b14e4d4-521f-4e39-be7d-ab12828bcf3b
-[31-Jul-2023 12:17:36 UTC] PHP Parse error:  syntax error, unexpected 'unset' (T_UNSET) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-method.php on line 78
-[31-Jul-2023 12:18:40 UTC] PHP Parse error:  syntax error, unexpected ';', expecting ')' in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/shipping/includes/class-modena-shipping-method.php on line 76
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:18:54 UTC] no
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-courier-dpd
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-parcels-omniva
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-parcels-itella
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-courier-itella
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-courier-omniva
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-parcels-dpd
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-parcels-omniva-office
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-parcels-omniva
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-parcels-dpd
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-parcels-itella
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-parcels-omniva-office
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-courier-itella
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-courier-dpd
-[31-Jul-2023 12:19:38 UTC] no
-[31-Jul-2023 12:19:38 UTC] modena-shipping-courier-omniva
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:19:53 UTC] yes
-[31-Jul-2023 12:24:14 UTC] PHP Fatal error:  Uncaught Error: Using $this when not in object context in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/modena.php:45
-Stack trace:
-#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php(308): modena_init('')
-#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php(332): WP_Hook->apply_filters(NULL, Array)
-#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/plugin.php(517): WP_Hook->do_action(Array)
-#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-settings.php(486): do_action('plugins_loaded')
-#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-config.php(113): require_once('/Users/stenuues...')
-#5 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-load.php(50): require_once('/Users/stenuues...')
-#6 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-admin/admin.php(34): require_once('/Users/stenuues...')
-#7 {main}
-  thrown in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/modena.php on line 45
-[31-Jul-2023 12:24:14 UTC] PHP Notice:  Function is_embed was called <strong>incorrectly</strong>. Conditional query tags do not work before the query is run. Before then, they always return false. Please see <a href="https://wordpress.org/documentation/article/debugging-in-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
-[31-Jul-2023 12:24:14 UTC] PHP Notice:  Function is_search was called <strong>incorrectly</strong>. Conditional query tags do not work before the query is run. Before then, they always return false. Please see <a href="https://wordpress.org/documentation/article/debugging-in-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
-[31-Jul-2023 12:24:14 UTC] PHP Fatal error:  Uncaught Error: Using $this when not in object context in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/modena.php:45
-Stack trace:
-#0 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php(308): modena_init('')
-#1 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php(332): WP_Hook->apply_filters(NULL, Array)
-#2 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/plugin.php(517): WP_Hook->do_action(Array)
-#3 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-settings.php(486): do_action('plugins_loaded')
-#4 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-config.php(113): require_once('/Users/stenuues...')
-#5 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-load.php(50): require_once('/Users/stenuues...')
-#6 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-blog-header.php(13): require_once('/Users/stenuues...')
-#7 /Users/stenuuesoo/Local Sites/jeans-potions/app/public/ in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/trunk/modena.php on line 45
-[31-Jul-2023 12:24:14 UTC] PHP Notice:  Function is_embed was called <strong>incorrectly</strong>. Conditional query tags do not work before the query is run. Before then, they always return false. Please see <a href="https://wordpress.org/documentation/article/debugging-in-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
-[31-Jul-2023 12:24:14 UTC] PHP Notice:  Function is_search was called <strong>incorrectly</strong>. Conditional query tags do not work before the query is run. Before then, they always return false. Please see <a href="https://wordpress.org/documentation/article/debugging-in-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 3.1.0.) in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/functions.php on line 5865
-[31-Jul-2023 12:24:27 UTC] PHP Notice:  Undefined offset: 1 in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/plugin.php on line 1016
-[31-Jul-2023 12:24:27 UTC] PHP Warning:  call_user_func_array() expects parameter 1 to be a valid callback, array must have exactly two members in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/class-wp-hook.php on line 308
-[31-Jul-2023 12:24:27 UTC] PHP Notice:  Undefined offset: 1 in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/plugin.php on line 1016
-[31-Jul-2023 12:24:27 UTC] PHP Fatal error:  Cannot declare class WC_Settings_General, because the name is already in use in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-content/plugins/woocommerce/includes/admin/settings/class-wc-settings-general.php on line 0
-[31-Jul-2023 12:24:27 UTC] PHP Notice:  Undefined offset: 1 in /Users/stenuuesoo/Local Sites/jeans-potions/app/public/wp-includes/plugin.php on line 1016
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:18:55 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:00 UTC] finding if is payments enabled: no
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:02 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:03 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:03 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:03 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:03 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:03 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
+[31-Jul-2023 14:19:10 UTC] finding if is payments enabled: yes
