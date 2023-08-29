@@ -33,10 +33,18 @@ function modena_init() {
 
   static $modena_shipping;
   if (!isset($modena_shipping)) {
-    if (!class_exists('Modena_Shipping')) {
-      require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping.php');
-      $modena_shipping = new Modena_Shipping();
+    if (!class_exists('ModenaShippingLoader')) {
+      require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-loader.php');
+      $modena_shipping = new ModenaShippingLoader();
     }
+  }
+
+  static $modena_settings;
+  if(!isset($modena_settings)) {
+      if(!class_exists('ModenaSettingsLoader')) {
+          require_once(MODENA_PLUGIN_PATH . 'includes/class-modena-settings-loader.php');
+          new ModenaSettingsLoader();
+      }
   }
 
   $modena_plugin->run();
@@ -52,6 +60,7 @@ function check_woocommerce_activation() {
 }
 
 add_action('admin_init', 'check_woocommerce_activation');
+
 function my_plugin_admin_notice() {
 
   ?>

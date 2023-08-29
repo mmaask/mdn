@@ -4,12 +4,9 @@ if (!defined('ABSPATH')) {
   exit; // Exit if accessed directly
 }
 
-class Modena_Shipping_Courier_Itella extends Modena_Shipping_Courier {
+class ModenaShippingItellaCourier extends ModenaShippingBase {
 
   public function __construct($instance_id = 0) {
-
-
-
     $this->id                                    = 'modena-shipping-courier-itella';
     $this->modena_shipping_type                  = 'courier';
     $this->modena_shipping_service               = 'Itella';

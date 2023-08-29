@@ -4,10 +4,9 @@ if (!defined('ABSPATH')) {
   exit; // Exit if accessed directly
 }
 
-class Modena_Shipping_Courier_DPD extends Modena_Shipping_Courier {
+class ModenaShippingDpdCourier extends ModenaShippingBase {
 
   public function __construct($instance_id = 0) {
-
     $this->id                                    = 'modena-shipping-courier-dpd';
     $this->modena_shipping_type                  = 'courier';
     $this->modena_shipping_service               = 'DPD';

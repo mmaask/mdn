@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
   exit; // Exit if accessed directly
 }
 
-class Modena_Settings extends WC_Settings_Page {
+class ModenaSettings extends WC_Settings_Page {
 
   public function __construct() {
     $this->id    = 'modena_shipping_settings';
@@ -26,7 +26,6 @@ class Modena_Settings extends WC_Settings_Page {
 
     $countries     = array('' => '-- Choose country --');
     $countries     = array_merge($countries, (new WC_Countries())->get_countries());
-    $orderStatuses = wc_get_order_statuses();
 
     return array(
 
@@ -88,19 +87,7 @@ class Modena_Settings extends WC_Settings_Page {
           'type'    => 'checkbox',
           'default' => 'no',
           'id'      => 'modena_shipping_enabled'),
-       array(
-          'type'    => 'select',
-          'title'   => __('Order status when shipping label printed', 'modena-for-woocommerce'),
-          'class'   => 'wc-enhanced-select',
-          'default' => isset($orderStatuses['wc-mon-label-printed']) ? 'wc-mon-label-printed' : 'no-change',
-          'desc'    => __('What status should order be changed to in Woocommerce when label is printed?<br>
-                    Status will only be changed when order\'s current status is "Processing".',
-                          'modena-for-woocommerce'),
-          'options' => array_merge(array(
-                                      'no-change' => __('-- Do not change status --', 'modena-for-woocommerce')),
-                                   $orderStatuses),
-          'id'      => 'modena_shipping_orderStatusWhenLabelPrinted'),
-       array(
+        array(
           'type' => 'sectionend',
           'id'   => 'modena_shipping_general'),
        array(

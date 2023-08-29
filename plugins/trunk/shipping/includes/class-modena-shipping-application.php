@@ -162,9 +162,11 @@ class Modena_Shipping_Handler {
   }
 
   public function get_modena_parcel_terminal_list($modena_shipping_method) {
-    if ($modena_shipping_method === self::ITELLA_SHIPPING_ID) {
-      return $this->parse_modena_parcel_terminal_json()->item;
-    } //todo to add new shipping methods later on
+    error_log("is error here? . " . $modena_shipping_method);
+    return $this->parse_modena_parcel_terminal_json()->item;
+//    if ($modena_shipping_method === self::ITELLA_SHIPPING_ID) {
+
+//    } //todo to add new shipping methods later on
   }
 
   public function get_modena_shipping_barcode_id($modena_shipping_request) {

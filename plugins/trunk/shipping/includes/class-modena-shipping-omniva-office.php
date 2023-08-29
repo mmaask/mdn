@@ -4,10 +4,9 @@ if (!defined('ABSPATH')) {
   exit; // Exit if accessed directly
 }
 
-class Modena_Shipping_Parcels_Omniva_Office extends Modena_Shipping_Parcels {
+class ModenaShippingOmnivaOffice extends ModenaShippingBase {
 
   public function __construct($instance_id = 0) {
-
     $this->id                                    = 'modena-shipping-parcels-omniva-office';
     $this->modena_shipping_type                  = 'parcels';
     $this->modena_shipping_service               = 'Omniva';

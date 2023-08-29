@@ -395,7 +395,7 @@ abstract class Modena_Base_Payment extends WC_Payment_Gateway {
       return $available_gateways;
     }
     if ($this->get_option('cart_sum_restriction_enabled') == 'yes' && isset($available_gateways[$this->id])) {
-      if ($this->get_option('cart_sum_restriction') <= $this->get_order_total()) {
+        if ($this->get_option('cart_sum_restriction') <= $this->get_order_total()) {
         unset($available_gateways[$this->id]);
       }
     }
