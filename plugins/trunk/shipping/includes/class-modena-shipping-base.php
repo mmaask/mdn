@@ -58,8 +58,10 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
 
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
         add_filter('woocommerce_package_rates', array($this, 'filterShippingRatesBySettings'));
-        add_action('woocommerce_package_rates', array($this, 'canShipByWeight'), 10, 2);
-        add_action('woocommerce_package_rates', array($this, 'canShipByMeasurement'), 10, 3);
+        add_action('woocommerce_package_rates', array($this, 'canShipByWeight'), 10,2);
+
+
+        add_action('woocommerce_package_rates', array($this, 'canShipByMeasurement'), 10, 2);
         error_log("Finished adding actions and filters.");
 
         Modena_Load_Checkout_Assets::getInstance();
@@ -190,76 +192,84 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         }
     }
 
-    public function getOrderTotalWeight($order)
-    {
-        // Log that the function has been called
+    public function getOrderTotalWeight($package) {
+        // Initialize total weight to 0
+        $totalWeight = 0;
         error_log("getOrderTotalWeight function called.");
 
-        $totalWeight = 0;
-
-        // Check if $order is an object and is an instance of WC_Order
-        if (is_object($order) && $order instanceof WC_Order) {
-
-            foreach ($order->get_items() as $item) {
-                if ($item instanceof WC_Order_Item_Product) {
-                    // Log item details
-                    error_log("Processing item with ID: " . $item->get_product_id());
-
-                    $quantity = $item->get_quantity();
-                    $product = $item->get_product();
-                    $productWeight = $product->get_weight();
-
-                    // Log individual item's weight and quantity
-                    error_log("Item weight: " . $productWeight);
-                    error_log("Item quantity: " . $quantity);
-
-                    $totalWeight += $productWeight * $quantity;
-                }
-            }
-
-            // Log the calculated total weight
-            error_log("Order total weight: " . $totalWeight);
-
-        } else {
-            // Log an error to indicate the wrong type
-            error_log("getOrderTotalWeight received an invalid parameter type. Expected WC_Order object.");
+        // Check if package is empty
+        if(empty($package['contents'])) {
+            error_log("Package contents are empty.");
+            return $totalWeight;
         }
+
+        // Loop through each cart item
+        foreach ($package['contents'] as $item) {
+            $product = $item['data'];
+            $quantity = $item['quantity'];
+
+            // Debugging: Log product and quantity details
+            error_log("Processing item with ID: " . $product->get_id());
+            error_log("Item quantity: " . $quantity);
+
+            // Get weight of a single product
+            $productWeight = $product->get_weight();
+
+            // Debugging: Log product weight
+            error_log("Item weight: " . $productWeight);
+
+            // Add to total weight
+            $totalWeight += ($productWeight * $quantity);
+        }
+
+        // Debugging: Log total weight
+        error_log("Order total weight: " . $totalWeight);
 
         return $totalWeight;
     }
 
-    public function canShipByWeight($rates, $order)
+    public function canShipByWeight($rates, $package) {
+        // Debugging: Log entry into function
+        error_log("canShipByWeight called");
+
+        // Check for invalid or empty arguments
+        if (!$rates || !$package) {
+            error_log("Rates or package are missing. Exiting canShipByWeight.");
+            return $rates; // Return the original rates if parameters are not provided
+        }
+
+        // Get max weight from shipping method settings
+        $maxWeight = $this->get_option('max_weight_for_modena_shipping_method', 35); // default value is 35
+        // Debugging: Log maximum allowed weight
+        error_log("Max weight from settings: " . $maxWeight);
+
+        // Get total weight of the cart
+        $totalWeight = $this->getOrderTotalWeight($package);
+
+        // Debugging: Log total cart weight
+        error_log("Total cart weight: " . $totalWeight);
+
+        // Check if total weight exceeds max weight
+        if ($totalWeight > $maxWeight) {
+            // Debugging: Log removal action
+            error_log("Total weight exceeds max weight. Removing this shipping method: " . $this->id);
+
+            // Remove this shipping method
+            unset($rates[$this->id]);
+        } else {
+            error_log("Total weight does not exceed max weight. Shipping method." . $this->id);
+        }
+
+        return $rates;  // Return modified rates
+    }
+
+    // todo
+
+    public function canShipByMeasurement($rates, $package)
     {
         if(!is_checkout()) {
             exit;
         }
-        // Log that the function has been called
-        error_log("canShipByWeight function called.");
-
-        // Get the total weight of the order
-        $totalWeight = $this->getOrderTotalWeight($order);
-
-        // Log the total weight
-        error_log("Total weight of the order: " . $totalWeight);
-
-        // Log the maximum allowed weight for Modena shipping
-        error_log("Max weight for Modena shipping method: " . $this->get_option('max_weight_for_modena_shipping_method'));
-
-        // Check the eligibility for shipping based on weight
-        if ($totalWeight <= $this->get_option('max_weight_for_modena_shipping_method')) {
-            error_log("Eligible for Modena shipping.");
-            return true;
-        } else {
-            // If not eligible, remove this shipping method from available rates
-            unset($rates[$this->id]);
-            error_log("Not eligible for Modena shipping. Removing its rates.");
-            return false;
-        }
-    }
-
-
-    public function canShipByMeasurement($rates, $order, $package)
-    {
         // Log that the function has been called
         error_log("canShipByMeasurement function called.");
 
