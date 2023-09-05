@@ -54,18 +54,14 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         $this->client_id = get_option('modena_' . $this->environment . '_client_id');
         $this->client_secret = get_option('modena_' . $this->environment . '_client_secret');
         $this->is_test_mode = $this->environment === 'sandbox';
+        error_log("About to add actions and filters.");
 
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
-        add_filter('woocommerce_package_rates', array($this, 'hide_shipping_method_if_shipping_is_disabled_in_settings'));
-        add_action('woocommerce_checkout_update_order_review', array($this, 'is_cart_shippable_by_modena_weight'));
+        add_filter('woocommerce_package_rates', array($this, 'filterShippingRatesBySettings'));
+        add_action('woocommerce_package_rates', array($this, 'canShipByWeight'), 10, 2);
+        add_action('woocommerce_package_rates', array($this, 'canShipByMeasurement'), 10, 3);
+        error_log("Finished adding actions and filters.");
 
-        add_action('woocommerce_review_order_before_payment', array($this, 'render_modena_select_box_in_checkout'));
-        add_action('woocommerce_get_order_item_totals', array($this, 'addParcelTerminalToCheckoutDetails'));
-        add_filter('woocommerce_order_actions', array($this, 'add_print_label_custom_order_action'));
-        add_action('woocommerce_order_action_print_modena_shipping_label', array($this, 'process_print_label_custom_order_action'));
-        add_filter('bulk_actions-edit-shop_order', array($this, 'addBulkPrintLabelCustomOrderAction'));
-        add_filter('handle_bulk_actions-edit-shop_order', array($this, 'handleBulkPrintLabelCustomOrderAction'), 10, 3);
-        add_action('admin_notices', array($this, 'bulkActionAdminNotice'));
         Modena_Load_Checkout_Assets::getInstance();
 
         parent::__construct($instance_id);
@@ -127,6 +123,7 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
     {
         parent::process_admin_options();
 
+        error_log("Processing admin settings - saving manually for " . $this->id);
         // Save settings manually
         update_option($this->get_option_key(), $this->settings);
 
@@ -139,174 +136,199 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         error_log('Instance ID: ' . $this->instance_id);
     }
 
-    public function hide_shipping_method_if_shipping_is_disabled_in_settings($rates)
+    public function filterShippingRatesBySettings($rates)
     {
-        if (get_option('modena_shipping_enabled') == 'no') {
+        error_log("filterShippingRatesBySettings called for " . $this->id);
+
+        if (get_option('modena_shipping_enabled') === 'no') {
             unset($rates[$this->id]);
+            error_log("Modena shipping is disabled. Removing its rates. OPTION SETTING IS: " . get_option('modena_shipping_enabled'));
+        } else {
+            error_log("Modena shipping is enabled. OPTION SETTING IS: " . get_option('modena_shipping_enabled'));
         }
+
+        error_log("Found shipping rates: " . print_r($rates, true));
+
         return $rates;
     }
+
     public function calculate_shipping($package = array())
     {
+        // Log that the function has been called
+        error_log("calculate_shipping function called for " . $this->id);
+
         global $woocommerce;
-        $cart_total = $woocommerce->cart->get_cart_contents_total();
+
+        // Log the cart total
+        $cartTotal = $woocommerce->cart->get_cart_contents_total();
+        error_log("Cart total is: " . $cartTotal);
+
+        // Log the cart item count
+        $cartItemCount = $this->getCartItemCount();
+        error_log("Cart item count is: " . $cartItemCount);
+
+        // Log the shipping options being checked
+        error_log("Free shipping threshold enabled? " . $this->get_option('modena_free_shipping_treshold'));
+        error_log("Free shipping by quantity threshold enabled? " . $this->get_option('modena_quantity_free_shipping_treshold'));
+
         if ($this->get_option('modena_free_shipping_treshold') === 'yes' || $this->get_option('modena_quantity_free_shipping_treshold') === 'yes') {
-            if ($this->get_option('modena_free_shipping_treshold_sum') <= $cart_total || $this->get_option('modena_quantity_free_shipping_tresholdsum') < $this->get_quantity_of_products_per_modena_cart()) {
+            // Log the specific threshold values
+            error_log("Free shipping threshold sum: " . $this->get_option('modena_free_shipping_treshold_sum'));
+            error_log("Free shipping by quantity threshold sum: " . $this->get_option('modena_quantity_free_shipping_tresholdsum'));
+
+            if ($this->get_option('modena_free_shipping_treshold_sum') <= $cartTotal || $this->get_option('modena_quantity_free_shipping_tresholdsum') < $cartItemCount) {
                 $rate = array('id' => $this->id, 'label' => $this->title, 'cost' => 0,);
                 $this->add_rate($rate);
+                // Log that free shipping rate was added
+                error_log("Free shipping rate added.");
             }
         } else {
             $rate = array('id' => $this->id, 'label' => $this->title, 'cost' => $this->cost,);
             $this->add_rate($rate);
+            // Log that the standard shipping rate was added
+            error_log("Standard shipping rate added with cost: " . $this->cost);
         }
     }
 
-    public function get_order_total_weight($order)
+    public function getOrderTotalWeight($order)
     {
-        $total_weight = 0;
+        // Log that the function has been called
+        error_log("getOrderTotalWeight function called.");
 
-        foreach ($order->get_items() as $item) {
-            if ($item instanceof WC_Order_Item_Product) {
-                $quantity = $item->get_quantity();
-                $product = $item->get_product();
-                $product_weight = $product->get_weight();
-                $total_weight += $product_weight * $quantity;
+        $totalWeight = 0;
+
+        // Check if $order is an object and is an instance of WC_Order
+        if (is_object($order) && $order instanceof WC_Order) {
+
+            foreach ($order->get_items() as $item) {
+                if ($item instanceof WC_Order_Item_Product) {
+                    // Log item details
+                    error_log("Processing item with ID: " . $item->get_product_id());
+
+                    $quantity = $item->get_quantity();
+                    $product = $item->get_product();
+                    $productWeight = $product->get_weight();
+
+                    // Log individual item's weight and quantity
+                    error_log("Item weight: " . $productWeight);
+                    error_log("Item quantity: " . $quantity);
+
+                    $totalWeight += $productWeight * $quantity;
+                }
             }
-        }
-        error_log("Total weight: " . $total_weight);
 
-        return $total_weight;
+            // Log the calculated total weight
+            error_log("Order total weight: " . $totalWeight);
+
+        } else {
+            // Log an error to indicate the wrong type
+            error_log("getOrderTotalWeight received an invalid parameter type. Expected WC_Order object.");
+        }
+
+        return $totalWeight;
     }
 
-    public function is_cart_shippable_by_modena_weight($order)
+    public function canShipByWeight($rates, $order)
     {
+        if(!is_checkout()) {
+            exit;
+        }
+        // Log that the function has been called
+        error_log("canShipByWeight function called.");
 
-        $wc_cart_weight = $this->get_order_total_weight($order);
+        // Get the total weight of the order
+        $totalWeight = $this->getOrderTotalWeight($order);
 
-        if ($wc_cart_weight <= $this->get_option('max_weight_for_modena_shipping_method')) {
-            error_log("found that we can ship this...");
+        // Log the total weight
+        error_log("Total weight of the order: " . $totalWeight);
 
+        // Log the maximum allowed weight for Modena shipping
+        error_log("Max weight for Modena shipping method: " . $this->get_option('max_weight_for_modena_shipping_method'));
+
+        // Check the eligibility for shipping based on weight
+        if ($totalWeight <= $this->get_option('max_weight_for_modena_shipping_method')) {
+            error_log("Eligible for Modena shipping.");
             return true;
+        } else {
+            // If not eligible, remove this shipping method from available rates
+            unset($rates[$this->id]);
+            error_log("Not eligible for Modena shipping. Removing its rates.");
+            return false;
         }
     }
 
-    public function deactivate_modena_shipping_if_cart_larger_than_spec($rates, $order)
+
+    public function canShipByMeasurement($rates, $order, $package)
     {
+        // Log that the function has been called
+        error_log("canShipByMeasurement function called.");
+
         if (!$this->get_option('modena_package_measurement_checks')) {
-            if ($this->is_cart_shippable_by_modena_weight($order)) {
-                unset($rates[$this->id]);
+            foreach ($package['contents'] as $values) {
+                $_product = $values['data'];
+                $wooCommerceOrderProductDimensions = $_product->get_dimensions(false);
+
+                // Log the dimensions of each product in the order
+                error_log("Product dimensions: " . json_encode($wooCommerceOrderProductDimensions));
+
+                if (empty($wooCommerceOrderProductDimensions['length']) || empty($wooCommerceOrderProductDimensions['width']) || empty($wooCommerceOrderProductDimensions['height'])) {
+                    // Log that the product did not meet the measurement checks
+                    error_log("Product does not meet measurement requirements. Removing shipping method.");
+
+                    unset($rates[$this->id]);
+                    return false;
+                }
             }
         }
+        // Log that all products met the measurement checks
+        error_log("All products meet measurement requirements.");
 
         return $rates;
     }
 
-    public function do_products_have_modena_dimensions($package)
-    {
 
-        foreach ($package['contents'] as $values) {
-            $_product = $values['data'];
-            $wooCommerceOrderProductDimensions = $_product->get_dimensions(false);
-
-            if (empty($wooCommerceOrderProductDimensions['length']) || empty($wooCommerceOrderProductDimensions['width']) || empty($wooCommerceOrderProductDimensions['height'])) {
-                return false;
-            }
-        }
-    }
-
-    public function deactivate_modena_shipping_no_measurements($rates, $package)
-    {
-        if ($this->get_option('modena_package_measurement_checks') || $this->get_option('modena_package_measurement_checks')) {
-            if (!$this->do_products_have_modena_dimensions($package)) {
-                unset($rates[$this->id]);
-            }
-        }
-
-        return $rates;
-    }
-
-    public function get_quantity_of_products_per_modena_cart()
+    public function getCartItemCount()
     {
         global $woocommerce;
 
-        return $woocommerce->cart->get_cart_contents_count();
+        $count = $woocommerce->cart->get_cart_contents_count();
+
+        // Log the current cart item count
+        error_log("Current cart item count: " . $count);
+
+        return $count;
     }
 
-    public function get_cart_total($order)
+
+    public function getOrderStatus($order)
     {
-        return $order->get_total();
-    }
+        $status = $order->get_status();
 
+        // Log the current order status
+        error_log("Current order status: " . $status);
 
-    public function compile_data_for_modena_shipping_request($order_id)
-    {
-        $order = wc_get_order($order_id);
+        if ($status == 'pending') {
+            // Log that the order is pending
+            error_log("Order is pending.");
 
-        if (empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
-            error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut' . $order->get_meta('_selected_parcel_terminal_id_mdn'));
-        }
-
-        $result = $this->get_order_total_weight($order);
-        $weight = $result['total_weight'];
-        $packageContent = $result['packageContent'];
-
-        return array(
-            'orderReference' => $order->get_order_number(),
-            'packageContent' => $packageContent,
-            'weight' => $weight,
-            'recipient_name' => $order->get_billing_first_name() . " class-modena-shipping-base.php" . $order->get_billing_last_name(),
-            'recipient_phone' => $order->get_billing_phone(),
-            'recipientEmail' => $order->get_billing_email(),
-            '$wcOrderParcelTerminalID' => $order->get_meta('_selected_parcel_terminal_id_mdn'),);
-    }
-
-    public function parse_shipping_methods($shippingMethodID, $order_id)
-    {
-        $order = wc_get_order($order_id);
-        $shipping_methods = $order->get_shipping_methods();
-
-        if (empty($shipping_methods)) {
-            //error_log("Metadata not saved since order no shipping method: ");
-            return False;
-        }
-
-        $first_shipping_method = reset($shipping_methods);
-        $orderShippingMethodID = $first_shipping_method->get_method_id();
-
-        //error_log("Comparing methods... " . $shippingMethodID . " with:  " . $orderShippingMethodID);
-
-        if (empty($orderShippingMethodID)) {
-            //error_log("Metadata not saved since order no shipping method with id: " . $orderShippingMethodID);
-            return False;
-        }
-
-        if ($orderShippingMethodID == $shippingMethodID) {
-            //error_log("win, because methods are same named. saned.");
             return True;
         } else {
-            //error_log("Metadata not saved: " . $shippingMethodID);
+            // Log that the order is not pending
+            error_log("Order is not pending.");
+
             return False;
         }
     }
+}
 
-    public function is_order_pending($order)
-    {
-        if ($order->get_status() == 'pending') {
-            return True;
-        } else {
-            return False;
-        }
-    }
+class Modena_Shipping_Service_Calls
+{
 
-
-
-    public function render_modena_select_box_in_checkout()
+    public function displayParcelSelectBox()
     {
         if ($this->modena_shipping_type != 'parcels') {
             return;
         }
-
-// Check if the current shipping method is not the selected one.
 
         $chosen_methods = WC()->session->get('chosen_shipping_methods');
         $chosen_shipping = $chosen_methods[0]; // Get the first chosen shipping method
@@ -314,7 +336,6 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         if ($this->id != $chosen_shipping) {
             return;
         }
-
 
         $this->parcelMachineList = $this->modena_shipping->get_modena_parcel_terminal_list($this->id);
 
@@ -347,23 +368,33 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         <?php
     }
 
-    public function add_shipping_to_checkout_details($totals, $order_id)
+    public function parseShippingMethods($shippingMethodId, $order_id)
     {
         $order = wc_get_order($order_id);
-        if (!$this->has_order_got_package_point_meta_data($order))
-            return $totals;
-        if ($this->parse_shipping_methods($this->id, $order_id)) {
-            $parcel_terminal = $this->get_selected_shipping_destination($order);
+        $shipping_methods = $order->get_shipping_methods();
 
-            foreach ($totals as $key => $total) {
-                if ($key === 'shipping') {
-                    $totals['shipping']['value'] = $totals['shipping']['value'] . " (" . $parcel_terminal . ")";
-                }
-            }
-
+        if (empty($shipping_methods)) {
+            //error_log("Metadata not saved since order no shipping method: ");
+            return False;
         }
 
-        return $totals;
+        $first_shipping_method = reset($shipping_methods);
+        $orderShippingMethodID = $first_shipping_method->get_method_id();
+
+        //error_log("Comparing methods... " . $shippingMethodID . " with:  " . $orderShippingMethodID);
+
+        if (empty($orderShippingMethodID)) {
+            //error_log("Metadata not saved since order no shipping method with id: " . $orderShippingMethodID);
+            return False;
+        }
+
+        if ($orderShippingMethodID == $shippingMethodId) {
+            //error_log("win, because methods are same named. saned.");
+            return True;
+        } else {
+            //error_log("Metadata not saved: " . $shippingMethodID);
+            return False;
+        }
     }
 
     public function has_order_got_package_point_meta_data($order)
@@ -377,6 +408,164 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         }
     }
 
+    //public function appendParcelInfoToShippingTotal($totals, $order_id)
+    //{
+    //    $order = wc_get_order($order_id);
+    //    if (!$this->hasOrderPackagePointMetaData($order)) {
+    //        return $totals;
+    //    }
+    //    if ($this->parseShippingMethods($this->id, $order_id)) {
+    //        $parcelTerminal = $this->getSelectedShippingDestination($order);
+//
+    //        foreach ($totals as $key => $total) {
+    //            if ($key === 'shipping') {
+    //                $totals['shipping']['value'] .= " (" . $parcelTerminal . ")";
+    //            }
+    //        }
+    //    }
+//
+    //    return $totals;
+    //}
+
+
+    /*
+
+    public function render_shipping_destination_in_admin_order_view($order_id)
+    {
+
+        $order = wc_get_order($order_id);
+
+        if ($this->is_order_pending($order))
+            return;
+
+        if ($this->parse_shipping_methods($this->id, $order_id)) {
+
+            ?>
+            <tr class="selected-terminal">
+                <th>
+                    <h3>
+                        <?php
+                        echo $this->title ?>
+                    </h3>
+                </th>
+                <td>
+                    <p>
+                        <?php
+                        echo $this->get_selected_shipping_destination(); ?>
+
+                    </p>
+                    <button id="buttonForClicking" onClick="startUpdatingOrderParcel()"
+                            class="button grant-access"><?php
+                        _e($this->get_placeholderPrintLabelInAdmin()) ?></button>
+
+                    <script>
+                        document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
+
+                        function startUpdatingOrderParcel() {
+
+
+                            <?php
+                            //todo implement download correctly
+                            //$this->updateParcelTerminalForOrder($order, $order_id);
+                            ?>
+                        }
+                    </script>
+                </td>
+            </tr>
+            <?php
+        }
+    }
+*/
+
+    public function get_placeholderPrintLabelInAdmin()
+    {
+        return __('Download ' . $this->get_title() . ' Parcel Label');
+    }
+
+    public function get_printLabelPlaceholderInBulkActions()
+    {
+        return __('Download ' . $this->get_title() . ' Parcel Labels');
+    }
+
+    public function get_adjustParcelTerminalInAdminPlaceholder()
+    {
+        return __('Update: ');
+    }
+
+    public function get_select_box_placeholder_for_modena_shipping()
+    {
+        return __('Select parcel terminal ');
+    }
+
+    public function get_createOrderParcelMetaDataPlaceholderText()
+    {
+        return __('Parcel terminal is selected for the order: ');
+    }
+
+    public function get_updateParcelTerminalNewTerminalNote()
+    {
+        return __('New parcel terminal has been selected for the order: ');
+    }
+
+    public function get_selected_shipping_destination_barcode_id($order)
+    {
+        return $this->$order->get_meta('_selected_modena_shipping_destination_barcode_id');
+    }
+
+    public function get_selected_shipping_destination($order)
+    {
+        return $this->$order->get_meta('_selected_modena_shipping_destination_id');
+    }
+
+    public function get_selected_shipping_label_url($order)
+    {
+        return $this->$order->get_meta('_selected_modena_shipping_label_url');
+    }
+
+    public function compile_data_for_modena_shipping_request($order_id)
+    {
+        $order = wc_get_order($order_id);
+
+        if (empty($order->get_meta('_selected_parcel_terminal_id_mdn'))) {
+            error_log('Veateade - Tellimusel puudub salvestatud pakipunkti ID, et alustada POST päringut' . $order->get_meta('_selected_parcel_terminal_id_mdn'));
+        }
+
+        $result = $this->getOrderTotalWeight($order);
+        $weight = $result['total_weight'];
+        $packageContent = $result['packageContent'];
+
+        return array(
+            'orderReference' => $order->get_order_number(),
+            'packageContent' => $packageContent,
+            'weight' => $weight,
+            'recipient_name' => $order->get_billing_first_name() . " class-modena-shipping-base.php" . $order->get_billing_last_name(),
+            'recipient_phone' => $order->get_billing_phone(),
+            'recipientEmail' => $order->get_billing_email(),
+            '$wcOrderParcelTerminalID' => $order->get_meta('_selected_parcel_terminal_id_mdn'),);
+    }
+
+
+    //    public abstract function process_modena_shipping_request($order_id);
+
+    public function process_modena_shipping_status()
+    {
+
+        $modena_shipping_status = False;
+
+        try {
+            $modena_shipping_status = $this->modena_shipping->get_modena_shipping_api_status();
+
+            error_log("modena shipping method status: " . $modena_shipping_status);
+        } catch (Exception $exception) {
+            $this->shipping_logger->error('Exception occurred when authing to modena: ' . $exception->getMessage());
+            $this->shipping_logger->error($exception->getTraceAsString());
+        }
+        if ($modena_shipping_status = 1) {
+            error_log("modena shipping method status: True....");
+
+            return True;
+        }
+    }
 
     public function add_label_url_to_order_meta_data($label_url, $order_id)
     {
@@ -430,122 +619,6 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
             printf('<div id="message" class="updated fade">' .
                 _n('%s order processed.', '%s orders processed.', $processed_count, 'modena') .
                 '</div>', $processed_count);
-        }
-    }
-
-    public function render_shipping_destination_in_admin_order_view($order_id)
-    {
-
-        $order = wc_get_order($order_id);
-
-        if ($this->is_order_pending($order))
-            return;
-
-        if ($this->parse_shipping_methods($this->id, $order_id)) {
-
-            ?>
-            <tr class="selected-terminal">
-                <th>
-                    <h3>
-                        <?php
-                        echo $this->title ?>
-                    </h3>
-                </th>
-                <td>
-                    <p>
-                        <?php
-                        echo $this->get_selected_shipping_destination(); ?>
-
-                    </p>
-                    <button id="buttonForClicking" onClick="startUpdatingOrderParcel()"
-                            class="button grant-access"><?php
-                        _e($this->get_placeholderPrintLabelInAdmin()) ?></button>
-
-                    <script>
-                        document.getElementById("buttonForClicking").addEventListener("click", startUpdatingOrderParcel);
-
-                        function startUpdatingOrderParcel() {
-
-
-                            <?php
-                            //todo implement download correctly
-                            //$this->updateParcelTerminalForOrder($order, $order_id);
-                            ?>
-                        }
-                    </script>
-                </td>
-            </tr>
-            <?php
-        }
-    }
-
-
-    public function get_placeholderPrintLabelInAdmin()
-    {
-        return __('Download ' . $this->get_title() . ' Parcel Label');
-    }
-
-    public function get_printLabelPlaceholderInBulkActions()
-    {
-        return __('Download ' . $this->get_title() . ' Parcel Labels');
-    }
-
-    public function get_adjustParcelTerminalInAdminPlaceholder()
-    {
-        return __('Update: ');
-    }
-
-    public function get_select_box_placeholder_for_modena_shipping()
-    {
-        return __('Select parcel terminal ');
-    }
-
-    public function get_createOrderParcelMetaDataPlaceholderText()
-    {
-        return __('Parcel terminal is selected for the order: ');
-    }
-
-    public function get_updateParcelTerminalNewTerminalNote()
-    {
-        return __('New parcel terminal has been selected for the order: ');
-    }
-
-    public function get_selected_shipping_destination_barcode_id($order)
-    {
-        return $this->$order->get_meta('_selected_modena_shipping_destination_barcode_id');
-    }
-
-    public function get_selected_shipping_destination($order)
-    {
-        return $this->$order->get_meta('_selected_modena_shipping_destination_id');
-    }
-
-    public function get_selected_shipping_label_url($order)
-    {
-        return $this->$order->get_meta('_selected_modena_shipping_label_url');
-    }
-}
-
-class Modena_Shipping_Service_Calls {
-    //    public abstract function process_modena_shipping_request($order_id);
-
-    public function process_modena_shipping_status()
-    {
-
-        $modena_shipping_status = False;
-
-        try {
-            $modena_shipping_status = $this->modena_shipping->get_modena_shipping_api_status();
-
-            error_log("modena shipping method status: " . $modena_shipping_status);
-        } catch (Exception $exception) {
-            $this->shipping_logger->error('Exception occurred when authing to modena: ' . $exception->getMessage());
-            $this->shipping_logger->error($exception->getTraceAsString());
-        }
-        if ($modena_shipping_status = 1) {
-            error_log("modena shipping method status: True....");
-
-            return True;
         }
     }
 }

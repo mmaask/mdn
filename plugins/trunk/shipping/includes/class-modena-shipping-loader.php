@@ -36,13 +36,13 @@ class ModenaShippingLoader {
    */
 
   public function load_modena_shipping_methods(array $methods): array {
-    $methods['modena-shipping-parcels-omniva']        = 'ModenaShippingOmnivaParcels';
-    $methods['modena-shipping-parcels-dpd']           = 'ModenaShippingDpdParcels';
+    #$methods['modena-shipping-parcels-omniva']        = 'ModenaShippingOmnivaParcels';
+    #$methods['modena-shipping-parcels-dpd']           = 'ModenaShippingDpdParcels';
     $methods['modena-shipping-parcels-itella']        = 'ModenaShippingItellaParcels';
-    $methods['modena-shipping-parcels-omniva-office'] = 'ModenaShippingOmnivaOffice';
-    $methods['modena-shipping-courier-itella']        = 'ModenaShippingItellaCourier';
-    $methods['modena-shipping-courier-dpd']           = 'ModenaShippingDpdCourier';
-    $methods['modena-shipping-courier-omniva']        = 'ModenaShippingOmnivaCourier';
+    #$methods['modena-shipping-parcels-omniva-office'] = 'ModenaShippingOmnivaOffice';
+    #$methods['modena-shipping-courier-itella']        = 'ModenaShippingItellaCourier';
+    #$methods['modena-shipping-courier-dpd']           = 'ModenaShippingDpdCourier';
+    #$methods['modena-shipping-courier-omniva']        = 'ModenaShippingOmnivaCourier';
 
     return $methods;
   }
@@ -50,15 +50,13 @@ class ModenaShippingLoader {
   public function modenaShippingLoader() {
 
     require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-base.php');
-    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-itella-courier.php');
-    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-dpd-courier.php');
-    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-omniva-courier.php');
+    #require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-itella-courier.php');
+    #require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-dpd-courier.php');
+    #require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-omniva-courier.php');
     require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-itella-parcels.php');
-    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-parcels-dpd.php');
-    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-omniva-parcels.php');
-    require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-omniva-office.php');
+    #require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-parcels-dpd.php');
+    #require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-omniva-parcels.php');
+    #require_once(MODENA_PLUGIN_PATH . 'shipping/includes/class-modena-shipping-omniva-office.php');
 
   }
-
-
 }
