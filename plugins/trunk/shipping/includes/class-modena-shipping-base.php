@@ -149,7 +149,7 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
             error_log("Modena shipping is enabled. OPTION SETTING IS: " . get_option('modena_shipping_enabled'));
         }
 
-        error_log("Found shipping rates: " . print_r($rates, true));
+        error_log("Found shipping rates of mdn: " . print_r($rates[$this->id], true));
 
         return $rates;
     }
@@ -267,9 +267,7 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
 
     public function canShipByMeasurement($rates, $package)
     {
-        if(!is_checkout()) {
-            exit;
-        }
+
         // Log that the function has been called
         error_log("canShipByMeasurement function called.");
 
