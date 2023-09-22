@@ -20,7 +20,6 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
     protected $modena_shipping_service;
     protected $modena_shipping;
     protected $shipping_logger;
-    protected $modena_domain;
 
     public function __construct($instance_id = 0)
     {
@@ -55,14 +54,20 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         $this->client_secret = get_option('modena_' . $this->environment . '_client_secret');
         $this->is_test_mode = $this->environment === 'sandbox';
 
-        #error_log("About to add actions and filters.");
+        error_log("---------------------");
+        error_log("---------------------");
+        error_log("---------------------");
+        $this->printDebugLog();
+
 
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
+        add_filter('woocommerce_package_rates', array($this, 'modenaTokenSigning'));
         add_filter('woocommerce_package_rates', array($this, 'filterShippingRatesBySettings'));
-        add_action('woocommerce_package_rates', array($this, 'canShipByWeight'), 10,2);
+        add_action('woocommerce_package_rates', array($this, 'canShipByWeight'), 10, 2);
         add_action('woocommerce_package_rates', array($this, 'canShipByMeasurement'), 10, 2);
-        add_filter('woocommerce_cart_shipping_method_full_label', array($this,'injectLocationSelectBox'), 10, 2);
+        add_filter('woocommerce_cart_shipping_method_full_label', array($this, 'injectLocationSelectBox'), 10, 2);
 
+        $this->modena_shipping_handler = new Modena_Shipping_Handler($this->client_id, $this->client_secret, self::PLUGIN_VERSION, $this->is_test_mode);
 
         #error_log("Finished adding actions and filters.");
 
@@ -70,8 +75,6 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
 
         parent::__construct($instance_id);
     }
-
-
 
     public function init_form_fields()
     {
@@ -81,7 +84,7 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
                 'title' => __('Transpordivahendi maksumus'),
                 'type' => 'number',
                 'placeholder' => '',
-                'default' => $this->cost,//'sanitize_callback' => array($this, 'sanitize_costs'),
+                'default' => 4.99,//'sanitize_callback' => array($this, 'sanitize_costs'),
             ],
             'modena_free_shipping_treshold' => [
                 'title' => __('Tasuta saatmise funktsionaalsus', 'modena'),
@@ -119,12 +122,6 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
                 'type' => 'checkbox',
                 'description' => 'Toote kaalukontroll ostukorvile.',
                 'default' => 'yes',],
-            'modena_package_maximum_weight' => [
-                'title' => __('Ostukorvi maksimum kaal'),
-                'type' => 'number',
-                'placeholder' => '',
-                'default' => $this->max_weight_for_modena_shipping_method,//'sanitize_callback' => array($this, 'sanitize_costs'),
-            ],
             'modena_no_measurement_package' => [
                 'title' => __('Peida transpordivahend mõõtmete puudumisel', 'modena'),
                 'type' => 'checkbox',
@@ -148,6 +145,41 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         error_log('Option Values: ' . print_r($option_values, true));
         error_log('Instance ID: ' . $this->instance_id);
     }
+
+    public function modenaTokenSigning($rates) {
+        if (!$this->modena_shipping_handler->send_shipping_status_request($this->id)) {
+            unset($rates[$this->id]);
+        }
+        return $rates;
+    }
+
+    public function printDebugLog()
+    {
+        // Log basic properties
+        error_log("ID: " . $this->id);
+        error_log("Shipping Type: " . $this->modena_shipping_type);
+        error_log("Shipping Service: " . $this->modena_shipping_service);
+        error_log("Title: " . $this->title);
+        error_log("Method Title: " . $this->method_title);
+        error_log("Cost: " . $this->cost);
+        error_log("Max Weight: " . $this->max_weight_for_modena_shipping_method);
+
+        // Log environment options
+        error_log("Environment: " . $this->environment);
+        error_log("Client ID: " . $this->client_id);
+        error_log("Client Secret: " . $this->client_secret);
+
+        error_log("---------------------");
+
+        // Log form fields (assuming form_fields is an associative array)
+        if (is_array($this->form_fields)) {
+            foreach ($this->form_fields as $key => $value) {
+                error_log(get_option($key) . ", " . $key);
+            }
+        }
+        error_log("---------------------");
+    }
+
 
     public function filterShippingRatesBySettings($rates)
     {
@@ -203,13 +235,14 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         }
     }
 
-    public function getOrderTotalWeight($package) {
+    public function getOrderTotalWeight($package)
+    {
         // Initialize total weight to 0
         $totalWeight = 0;
         error_log("getOrderTotalWeight function called.");
 
         // Check if package is empty
-        if(empty($package['contents'])) {
+        if (empty($package['contents'])) {
             error_log("Package contents are empty.");
             return $totalWeight;
         }
@@ -239,9 +272,10 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         return $totalWeight;
     }
 
-    public function canShipByWeight($rates, $package) {
+    public function canShipByWeight($rates, $package)
+    {
         // Debugging: Log entry into function
-        error_log("canShipByWeight called");
+        error_log("canShipByWeight called: modena_package_weight_checks: " . get_option('modena_package_weight_checks'));
 
         if (get_option('modena_package_weight_checks') == "yes") {
             error_log("modena_package_weight_checks is active");
@@ -252,7 +286,7 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
             }
 
             // Get max weight from shipping method settings
-            $maxWeight = $this->get_option('max_weight_for_modena_shipping_method', 35); // default value is 35
+            $maxWeight = get_option('max_weight_for_modena_shipping_method'); // default value is 35
             // Debugging: Log maximum allowed weight
             error_log("Max weight from settings: " . $maxWeight);
 
@@ -321,23 +355,24 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
         return $count;
     }
 
-    public function injectLocationSelectBox($label, $method) {
-        // Replace 'your_custom_shipping_method' with the ID of your shipping method
-        if ('modena-shipping-parcels-itella' === $method->method_id) {
+    public function injectLocationSelectBox($label, $method)
+    {
+        if ($method->id === $this->id && $this->modena_shipping_type === 'parcels') {
             ob_start();
-            // Assuming the displayParcelSelectBox method is part of the current class or globally accessible.
             $this->displayParcelSelectBox();
             $parcel_select_box = ob_get_clean();
 
             // Append the parcel select box to the label
             $label .= $parcel_select_box;
         }
-
         return $label;
     }
 
     public function displayParcelSelectBox()
     {
+
+        $unique_id = $this->id . '-' . uniqid();
+
         $chosen_methods = WC()->session->get('chosen_shipping_methods');
         $chosen_shipping = $chosen_methods[0]; // Get the first chosen shipping method
 
@@ -345,40 +380,34 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
             return;
         }
 
-        #$this->parcelMachineList = $this->modena_shipping->get_modena_parcel_terminal_list($this->id);
+        $this->parcelMachineList = $this->modena_shipping_handler->get_modena_parcel_terminal_list($this->id);
 
         ?>
-        <div class="modena-shipping-select-wrapper-<?php
-        echo $this->id ?>" style="margin-bottom: 15px">
-            <label for="mdn-shipping-select-box-<?php echo $this->id; ?>"><?php
-                echo $this->get_select_box_placeholder_for_modena_shipping() ?></label>
-            <select name="userShippingSelection-<?php
-            echo $this->id ?>" id="mdn-shipping-select-box-<?php echo $this->id; ?>" data-method-id="<?php
-            echo $this->id; ?>" style="width: 100%;">
-                <option disabled selected="selected"></option>
-                <?php
-                $cities = array();
-                foreach ($this->parcelMachineList as $terminal) {
-                    $cities[$terminal->{'city'}][] = $terminal;
-                }
+        <div class="modena-shipping-select-wrapper-<?php echo $unique_id; ?>" style="margin-bottom: 15px">
+            <label for="mdn-shipping-select-box-<?php echo $unique_id; ?>"></label>
+            <select class="select2-enabled-mdn" name="userShippingSelection-<?php echo $unique_id; ?>"
+                    id="mdn-shipping-select-box-<?php echo $unique_id; ?>" data-method-id="<?php echo $this->id; ?>"
+                     style="width: 100%;">
+        </div>
+        <option disabled selected="selected"></option>
+        <?php
+        $cities = array();
+        foreach ($this->parcelMachineList as $terminal) {
+            $cities[$terminal->{'city'}][] = $terminal;
+        }
 
-                foreach ($cities as $city => $terminals) {
-                    echo "<optgroup label='$city'>";
-                    foreach ($terminals as $terminal) {
-                        $terminalID = $terminal->{'place_id'};
-                        echo "<option value='$terminalID' >" . $terminal->{'name'} . "</option>";
-                    }
-                    echo "</optgroup>";
-                }
-                ?>
-            </select>
+        foreach ($cities as $city => $terminals) {
+            echo "<optgroup label='$city'>";
+            foreach ($terminals as $terminal) {
+                $terminalID = $terminal->{'place_id'};
+                echo "<option value='$terminalID' >" . $terminal->{'name'} . "</option>";
+            }
+            echo "</optgroup>";
+        }
+        ?>
+        </select>
         </div>
         <?php
-    }
-
-    public function get_select_box_placeholder_for_modena_shipping()
-    {
-        return __('Select parcel terminal ');
     }
 
 
@@ -405,7 +434,6 @@ abstract class ModenaShippingBase extends WC_Shipping_Method
 
 class Modena_Shipping_Service_Calls
 {
-
 
 
     public function parseShippingMethods($shippingMethodId, $order_id)
@@ -531,7 +559,6 @@ class Modena_Shipping_Service_Calls
     {
         return __('Update: ');
     }
-
 
 
     public function get_createOrderParcelMetaDataPlaceholderText()

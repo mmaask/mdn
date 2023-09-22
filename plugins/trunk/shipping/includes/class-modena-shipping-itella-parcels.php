@@ -46,10 +46,9 @@ class ModenaShippingItellaParcels extends ModenaShippingBase {
     $this->modena_shipping_service               = 'Itella';
     $this->title                                 = __('Itella Smartpost');
     $this->method_title                          = __('Modena - Itella Smartpost');
-    $this->cost                                  = 0.99;
+    $this->cost = 4.99;
     $this->max_weight_for_modena_shipping_method = 35;
 
-    error_log($this->cost . ", " . $this->id);
 
     parent::__construct($instance_id);
   }
@@ -199,4 +198,6 @@ class ModenaShippingItellaParcels extends ModenaShippingBase {
         error_log("Package size is Oversize");
         return 'Oversize';
     }
+
+
 }

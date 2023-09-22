@@ -46,39 +46,12 @@ class Modena_Shipping_Handler {
 
   }
 
-  /**
-   * @param string $applicationId
-   *
-   * @return string
-   * @throws Exception
-   */
-  public function get_modena_shipping_api_status() {
-
-    return True;
-    //    return $this->send_shipping_status_request(self::MODENA_SHIPPING_APPLICATION_STATUS, self::ITELLA_SHIPPING);
-  }
-
-  /**
-   * @param string $applicationUrl
-   * @param string $applicationId
-   * @param string $scope
-   *
-   * @return string
-   * @throws Exception
-   */
-  public function send_shipping_status_request($applicationUrl, $scope) {
-
-    $token = $this->get_modena_token($scope);
-    $headers = array('Content-Type' => 'application/json', 'Authorization' => 'Bearer ' . $token);
-    $response = $this->send_Request($applicationUrl, [], $headers, 'GET');
-    $retryCount = 0;
-    while (!$response->getBodyValue('status') && $retryCount < self::MAX_RETRIES) {
-      $response = $this->send_Request($applicationUrl, [], $headers, 'GET');
-      $retryCount++;
-      sleep(self::RETRY_TIMEOUT_IN_SECONDS);
-    }
-    error_log("finding out the request status...");
-      return $response->getBodyValue('status');
+  public function send_shipping_status_request($method_id) {
+      if($method_id === "modena-shipping-parcels-itella") {
+          return True;
+      } else {
+          return False;
+      }
   }
 
   /**
